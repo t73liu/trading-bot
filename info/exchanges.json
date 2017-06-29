@@ -1,0 +1,49 @@
+[
+  {
+    "name": "quadrigacx",
+    "supportedCurrencies": [
+      "BTC|CAD",
+      "BTC|USD",
+      "ETH|BTC",
+      "ETH|CAD"
+    ],
+    "buyFee": {
+      "cost": 0.005,
+      "type": "percentage"
+    },
+    "sellFee": {
+      "cost": 0.005,
+      "type": "percentage"
+    },
+    "cashoutFee": {
+      "cost": 0.005,
+      "type": "percentage"
+    },
+    "transferFee": {
+      "cost": 0.005,
+      "type": "percentage"
+    }
+  },
+  {
+    "name": "coinbase",
+    "supportedCurrencies": [
+      "ETH|BTC"
+    ],
+    "buyFee": {
+      "cost": 0.04,
+      "type": "percentage"
+    },
+    "sellFee": {
+      "cost": 0.04,
+      "type": "percentage"
+    },
+    "cashoutFee": {
+      "cost": 0.04,
+      "type": "percentage"
+    },
+    "transferFee": {
+      "cost": 0.04,
+      "type": "percentage"
+    }
+  }
+]

@@ -2,7 +2,6 @@ package io.github.t73liu.model;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class Exchange {
@@ -11,6 +10,8 @@ public class Exchange {
     private Fee buyFee;
     private Fee cashoutFee;
     private Fee transferFee;
+    private RateLimit rateLimit;
+    // make immutable pair and pairs are alphabetical order, inverse prices depending on order
     private Set<Pair<String, String>> supportedCurrencies;
 
     public String getName() {
@@ -51,6 +52,14 @@ public class Exchange {
 
     public void setTransferFee(Fee transferFee) {
         this.transferFee = transferFee;
+    }
+
+    public RateLimit getRateLimit() {
+        return rateLimit;
+    }
+
+    public void setRateLimit(RateLimit rateLimit) {
+        this.rateLimit = rateLimit;
     }
 
     public Set<Pair<String, String>> getSupportedCurrencies() {
