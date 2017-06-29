@@ -14,14 +14,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @Component
-@Path("/quadriga")
+@Path("/poloniex")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class QuadrigaResource {
+public class PoloniexResource {
     @GET
     public Response test() {
         ClientConfig cc = new ClientConfig().register(new JacksonFeature());
         Client client = ClientBuilder.newClient(cc);
-        return Response.ok(client.target("https://api.quadrigacx.com/v2/ticker?book=btc_usd").request().get().getEntity()).build();
+        return Response.ok(client.target("https://poloniex.com/public?command=returnCurrencies").request().get().getEntity()).build();
     }
 }

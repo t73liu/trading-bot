@@ -3,9 +3,9 @@ package io.github.t73liu.model;
 public class Order {
     private String currentCoin;
     private String targetCoin;
-    private Double fxRate;
-    private Fee transactionFee;
-    private Fee cashoutFee;
+    private Double quantity;
+    private Double exchangeRate;
+    private Exchange exchange;
 
     public String getCurrentCoin() {
         return currentCoin;
@@ -23,27 +23,27 @@ public class Order {
         this.targetCoin = targetCoin;
     }
 
-    public Double getFxRate() {
-        return fxRate;
+    public Double getQuantity() {
+        return quantity;
     }
 
-    public void setFxRate(Double fxRate) {
-        this.fxRate = fxRate;
+    public void setQuantity(Double quantity) {
+        this.quantity = quantity;
     }
 
-    public Fee getTransactionFee() {
-        return transactionFee;
+    public Double getExchangeRate() {
+        return exchangeRate;
     }
 
-    public void setTransactionFee(Fee transactionFee) {
-        this.transactionFee = transactionFee;
+    public void setExchangeRate(Double exchangeRate) {
+        this.exchangeRate = exchangeRate;
     }
 
-    public Fee getCashoutFee() {
-        return cashoutFee;
+    public Exchange getExchange() {
+        return exchange;
     }
 
-    public void setCashoutFee(Fee cashoutFee) {
-        this.cashoutFee = cashoutFee;
+    public void setExchange(Exchange exchange) {
+        this.exchange = exchange;
     }
 }
