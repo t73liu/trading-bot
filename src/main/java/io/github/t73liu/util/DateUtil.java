@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 public class DateUtil {
     public static final DateTimeFormatter LOCALDATE_ISO_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
     public static final DateTimeFormatter LOCALDATE_SHORT_FORMATTER = DateTimeFormatter.ofPattern("uuuuMMdd");
+    public static final DateTimeFormatter LOCALDATETIME_ISO_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     public static final String TIMEZONE = "America/New_York";
 
     public static LocalDateTime convertUnixTimestamp(long timestampInSeconds) {
