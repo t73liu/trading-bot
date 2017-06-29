@@ -1,5 +1,8 @@
 package io.github.t73liu.rest;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.springframework.stereotype.Component;
@@ -18,9 +21,21 @@ import java.util.Map;
 @Path("/coinbase")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@Api("CoinbaseResource")
 public class CoinbaseResource {
     @GET
+    @Path("/test")
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Currency Information", responseContainer = "List", response = Map.class))
     public Response test() {
+        ClientConfig cc = new ClientConfig().register(new JacksonFeature());
+        Client client = ClientBuilder.newClient(cc);
+        return Response.ok(client.target("https://api.coinbase.com/v2/exchange-rates?currency=USD").request().get().readEntity(Map.class)).build();
+    }
+
+    @GET
+    @Path("/another")
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Currency Information", responseContainer = "List", response = Map.class))
+    public Response another() {
         ClientConfig cc = new ClientConfig().register(new JacksonFeature());
         Client client = ClientBuilder.newClient(cc);
         return Response.ok(client.target("https://api.coinbase.com/v2/exchange-rates?currency=USD").request().get().readEntity(Map.class)).build();

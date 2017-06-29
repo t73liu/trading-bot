@@ -17,7 +17,7 @@ public class LocalDateParamProvider implements ParamConverterProvider {
     private ParamConverter<LocalDate> localDateParamConverter;
 
     @PostConstruct
-    private void init() {
+    private void initializeLocalDateConverter() {
         this.localDateParamConverter = new ParamConverter<LocalDate>() {
             @Override
             public LocalDate fromString(String dateStr) {
