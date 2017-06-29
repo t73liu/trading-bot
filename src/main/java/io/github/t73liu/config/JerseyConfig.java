@@ -1,7 +1,7 @@
 package io.github.t73liu.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.t73liu.util.ObjectMapperFactory;
+import io.github.t73liu.provider.LocalDateParamProvider;
+import io.github.t73liu.provider.ObjectMapperContextResolver;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,8 +10,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
 import javax.ws.rs.Path;
-import javax.ws.rs.ext.ContextResolver;
-import javax.ws.rs.ext.Provider;
 
 @Configuration
 public class JerseyConfig extends ResourceConfig {
@@ -35,19 +33,6 @@ public class JerseyConfig extends ResourceConfig {
 
     private void registerProviders() {
         register(ObjectMapperContextResolver.class);
-    }
-
-    @Provider
-    public static class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {
-        private final ObjectMapper mapper;
-
-        public ObjectMapperContextResolver() {
-            mapper = ObjectMapperFactory.getNewInstance();
-        }
-
-        @Override
-        public ObjectMapper getContext(Class<?> type) {
-            return mapper;
-        }
+        register(LocalDateParamProvider.class);
     }
 }

@@ -4,7 +4,6 @@ import org.junit.Test;
 
 public class EarningsCalculatorTest {
     @Test
-    public void calculateProfit() throws Exception {
+    public void testCalculateProfit() throws Exception {
     }
-
 }
