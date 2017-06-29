@@ -1,9 +1,13 @@
 server:
   port: 9229
 
-app:
-  version: 1.0.0
-
 spring:
   jersey:
     application-path: api/crypto/v1
+
+app:
+  version: 1.0.0
+
+schedules:
+  report:
+    cron: 0 15 16 * * *

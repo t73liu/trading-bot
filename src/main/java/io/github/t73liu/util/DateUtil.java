@@ -1,20 +1,28 @@
 package io.github.t73liu.util;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 public class DateUtil {
     public static final DateTimeFormatter LOCALDATE_ISO_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
     public static final DateTimeFormatter LOCALDATE_SHORT_FORMATTER = DateTimeFormatter.ofPattern("uuuuMMdd");
+    public static final String TIMEZONE = "America/New_York";
 
-    // TODO implement
-    public static LocalDate convertUnixTimestamp(String unixTime) {
-        return LocalDate.of(2017, 6, 27);
+    public static LocalDateTime convertUnixTimestamp(long timestampInSeconds) {
+        return Instant.ofEpochSecond(timestampInSeconds)
+                .atZone(ZoneId.of(TIMEZONE))
+                .toLocalDateTime();
+    }
+
+    public static LocalDateTime convertUnixTimestamp(String timestampInSeconds) {
+        return convertUnixTimestamp(Long.parseLong(timestampInSeconds));
     }
 
     public static LocalDate getCurrentLocalDate() {
-        return LocalDate.now(ZoneId.of("America/New_York"));
+        return LocalDate.now(ZoneId.of(TIMEZONE));
     }
 
     public static LocalDate parseLocalDateISO(String dateStr) {

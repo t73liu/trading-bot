@@ -1,5 +1,6 @@
 package io.github.t73liu.rest;
 
+import io.github.t73liu.model.ExceptionWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -22,6 +23,7 @@ import java.util.Map;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Api("PoloniexResource")
+@ApiResponses(@ApiResponse(code = 500, message = "Internal Server Error", response = ExceptionWrapper.class))
 public class PoloniexResource {
     @GET
     @Path("/test")

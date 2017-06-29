@@ -25,9 +25,9 @@ import javax.ws.rs.Path;
 
 @Configuration
 public class JerseyConfig extends ResourceConfig {
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final Logger LOGGER = LoggerFactory.getLogger(JerseyConfig.class);
 
-    @Value("${app.version:/}")
+    @Value("${app.version:1.0.0-SNAPSHOT}")
     private String appVersion;
 
     @Value("${spring.jersey.application-path:/}")
@@ -54,7 +54,7 @@ public class JerseyConfig extends ResourceConfig {
         // General Providers
         register(JacksonFeature.class);
         register(JacksonJaxbJsonProvider.class);
-        // TODO implement CORS?
+        // FIXME implement CORS?
 //        register(CORSFilter.class);
 
         // Internal Custom Providers
@@ -68,7 +68,7 @@ public class JerseyConfig extends ResourceConfig {
     }
 
     private void configureProperties() {
-        property(ServerProperties.BV_SEND_ERROR_IN_RESPONSE, true);
+        property(ServerProperties.BV_SEND_ERROR_IN_RESPONSE, Boolean.TRUE);
     }
 
     @PostConstruct

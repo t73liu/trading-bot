@@ -27,7 +27,7 @@ public class LocalDateParamProvider implements ParamConverterProvider {
                     }
                     return dateStr.length() == 10 ? DateUtil.parseLocalDateISO(dateStr) : DateUtil.parseLocalDateShort(dateStr);
                 } catch (Exception ex) {
-                    throw new IllegalArgumentException("Please provide date string with the following format yyyyMMdd or yyyy-MM-dd");
+                    throw new IllegalArgumentException("Please provide date string with the following format yyyyMMdd or yyyy-MM-dd", ex);
                 }
             }
 
