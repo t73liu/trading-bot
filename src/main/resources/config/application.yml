@@ -11,3 +11,15 @@ app:
 schedules:
   report:
     cron: 0 15 16 * * *
+
+coinbase:
+  api-key: replace-with-api-key
+  secret: replace-with-secret
+
+poloniex:
+  api-key: replace-with-api-key
+  secret: replace-with-secret
+
+quadrigacx:
+  api-key: replace-with-api-key
+  secret: replace-with-secret

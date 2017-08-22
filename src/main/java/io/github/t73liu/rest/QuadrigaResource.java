@@ -44,12 +44,12 @@ public class QuadrigaResource {
         List<Order> output = new ArrayList<>();
         LocalDateTime triggerTime = DateUtil.convertUnixTimestamp(response.get("timestamp").toString());
         ((List<List<String>>) response.get("bids")).forEach(priceQuantityList -> {
-            Order order = createOrder(priceQuantityList, "BID/SELL");
+            Order order = createOrder(priceQuantityList, "BID/BUY");
             order.setIssueTime(triggerTime);
             output.add(order);
         });
         ((List<List<String>>) response.get("asks")).forEach(priceQuantityList -> {
-            Order order = createOrder(priceQuantityList, "ASK/BUY");
+            Order order = createOrder(priceQuantityList, "ASK/SELL");
             order.setIssueTime(triggerTime);
             output.add(order);
         });
