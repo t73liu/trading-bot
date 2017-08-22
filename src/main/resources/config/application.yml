@@ -13,13 +13,16 @@ schedules:
     cron: 0 15 16 * * *
 
 coinbase:
-  api-key: replace-with-api-key
-  secret: replace-with-secret
+  apiKey: replace-with-api-key
+  baseUrl: replace-with-url
+  secretKey: replace-with-secret
 
 poloniex:
-  api-key: replace-with-api-key
-  secret: replace-with-secret
+  apiKey: replace-with-api-key
+  baseUrl: replace-with-url
+  secretKey: replace-with-secret
 
 quadrigacx:
-  api-key: replace-with-api-key
-  secret: replace-with-secret
+  apiKey: replace-with-api-key
+  baseUrl: replace-with-url
+  secretKey: replace-with-secret
