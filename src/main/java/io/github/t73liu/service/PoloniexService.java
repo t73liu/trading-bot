@@ -4,7 +4,9 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -22,6 +24,17 @@ import java.util.Optional;
 @Service
 @ConfigurationProperties(prefix = "poloniex")
 public class PoloniexService extends ExchangeService {
+    public Map getTickers() throws Exception {
+        List<NameValuePair> queryParams = new ArrayList<>();
+        queryParams.add(new BasicNameValuePair("command", "returnTicker"));
+        HttpGet get = generateGet(queryParams);
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+             CloseableHttpResponse response = httpClient.execute(get)) {
+            return mapper.readValue(response.getEntity().getContent(), Map.class);
+        }
+    }
+
     public Map getBalance() throws Exception {
         List<NameValuePair> queryParams = new ArrayList<>();
         queryParams.add(new BasicNameValuePair("command", "returnBalances"));
@@ -48,17 +61,18 @@ public class PoloniexService extends ExchangeService {
     }
 
     private HttpPost generatePost(List<NameValuePair> queryParams) throws Exception {
-        Mac shaMac = Mac.getInstance("HmacSHA512");
-        SecretKeySpec keySpec = new SecretKeySpec(getSecretKey().getBytes(StandardCharsets.UTF_8), "HmacSHA512");
-        shaMac.init(keySpec);
         Optional<String> queryParamStr = queryParams.stream()
                 .map(Object::toString)
                 .reduce((queryOne, queryTwo) -> queryOne + "&" + queryTwo);
         if (!queryParamStr.isPresent()) {
             throw new IllegalArgumentException("Unable to generate query params for Poloniex API: " + queryParams);
         }
-        String sign = Hex.encodeHexString(shaMac.doFinal(queryParamStr.get().getBytes(StandardCharsets.UTF_8)));
 
+        // Generating special headers
+        Mac shaMac = Mac.getInstance("HmacSHA512");
+        SecretKeySpec keySpec = new SecretKeySpec(getSecretKey().getBytes(StandardCharsets.UTF_8), "HmacSHA512");
+        shaMac.init(keySpec);
+        String sign = Hex.encodeHexString(shaMac.doFinal(queryParamStr.get().getBytes(StandardCharsets.UTF_8)));
         HttpPost post = new HttpPost(getTradingUrl());
         post.addHeader("Key", getApiKey());
         post.addHeader("Sign", sign);
@@ -67,7 +81,15 @@ public class PoloniexService extends ExchangeService {
         return post;
     }
 
+    private HttpGet generateGet(List<NameValuePair> queryParams) throws Exception {
+        return new HttpGet(new URIBuilder(getPublicUrl()).addParameters(queryParams).build());
+    }
+
     private String getTradingUrl() {
         return getBaseUrl() + "/tradingApi";
+    }
+
+    private String getPublicUrl() {
+        return getBaseUrl() + "/public";
     }
 }

@@ -31,6 +31,13 @@ public class PoloniexResource {
     }
 
     @GET
+    @Path("/tickers")
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Tickers in Poloniex", response = Map.class))
+    public Response getTicker() throws Exception {
+        return Response.ok(service.getTickers()).build();
+    }
+
+    @GET
     @Path("/balance")
     @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Balance in Poloniex", response = Map.class))
     public Response getBalance() throws Exception {
