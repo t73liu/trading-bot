@@ -32,8 +32,15 @@ public class PoloniexResource {
 
     @GET
     @Path("/balance")
-    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Poloniex Balance", response = Map.class))
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Balance in Poloniex", response = Map.class))
     public Response getBalance() throws Exception {
         return Response.ok(service.getBalance()).build();
+    }
+
+    @GET
+    @Path("/orders/open")
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Open Orders in Poloniex", response = Map.class))
+    public Response getOpenOrders() throws Exception {
+        return Response.ok(service.getOpenOrders()).build();
     }
 }

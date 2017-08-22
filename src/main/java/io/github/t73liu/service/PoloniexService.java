@@ -1,6 +1,5 @@
 package io.github.t73liu.service;
 
-import io.github.t73liu.util.ObjectMapperFactory;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -18,37 +17,53 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @ConfigurationProperties(prefix = "poloniex")
 public class PoloniexService extends ExchangeService {
     public Map getBalance() throws Exception {
-        String nonce = String.valueOf(System.currentTimeMillis());
-        String command = "returnBalances";
-        HttpPost post = generatePost(command, nonce);
+        List<NameValuePair> queryParams = new ArrayList<>();
+        queryParams.add(new BasicNameValuePair("command", "returnBalances"));
+        queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
+        HttpPost post = generatePost(queryParams);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
-            return ObjectMapperFactory.getNewInstance().readValue(response.getEntity().getContent(), Map.class);
+            return mapper.readValue(response.getEntity().getContent(), Map.class);
         }
     }
 
-    private HttpPost generatePost(String command, String nonce) throws Exception {
+    public Map getOpenOrders() throws Exception {
+        List<NameValuePair> queryParams = new ArrayList<>();
+        queryParams.add(new BasicNameValuePair("command", "returnOpenOrders"));
+        queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
+        queryParams.add(new BasicNameValuePair("currencyPair", "all"));
+        HttpPost post = generatePost(queryParams);
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+             CloseableHttpResponse response = httpClient.execute(post)) {
+            return mapper.readValue(response.getEntity().getContent(), Map.class);
+        }
+    }
+
+    private HttpPost generatePost(List<NameValuePair> queryParams) throws Exception {
         Mac shaMac = Mac.getInstance("HmacSHA512");
         SecretKeySpec keySpec = new SecretKeySpec(getSecretKey().getBytes(StandardCharsets.UTF_8), "HmacSHA512");
         shaMac.init(keySpec);
-        String queryParams = "command=" + command + "&nonce=" + nonce;
-        final byte[] macData = shaMac.doFinal(queryParams.getBytes(StandardCharsets.UTF_8));
-        String sign = Hex.encodeHexString(macData);
+        Optional<String> queryParamStr = queryParams.stream()
+                .map(Object::toString)
+                .reduce((queryOne, queryTwo) -> queryOne + "&" + queryTwo);
+        if (!queryParamStr.isPresent()) {
+            throw new IllegalArgumentException("Unable to generate query params for Poloniex API: " + queryParams);
+        }
+        String sign = Hex.encodeHexString(shaMac.doFinal(queryParamStr.get().getBytes(StandardCharsets.UTF_8)));
 
         HttpPost post = new HttpPost(getTradingUrl());
         post.addHeader("Key", getApiKey());
         post.addHeader("Sign", sign);
 
-        List<NameValuePair> params = new ArrayList<>();
-        params.add(new BasicNameValuePair("command", command));
-        params.add(new BasicNameValuePair("nonce", nonce));
-        post.setEntity(new UrlEncodedFormEntity(params));
+        post.setEntity(new UrlEncodedFormEntity(queryParams));
         return post;
     }
 
