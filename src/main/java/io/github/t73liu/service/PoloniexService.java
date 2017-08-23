@@ -86,10 +86,10 @@ public class PoloniexService extends ExchangeService {
     }
 
     private String getTradingUrl() {
-        return getBaseUrl() + "/tradingApi";
+        return getBaseUrl() + "tradingApi";
     }
 
     private String getPublicUrl() {
-        return getBaseUrl() + "/public";
+        return getBaseUrl() + "public";
     }
 }

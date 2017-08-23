@@ -1,5 +1,16 @@
 server:
   port: 9229
+  compression:
+    enabled: true
+    mime-types: application/json
+
+logging:
+  config: config/logback.xml
+  file: log/app.log
+  level:
+    root: INFO
+    org.springframework.web: DEBUG
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
 
 spring:
   jersey:
@@ -12,17 +23,22 @@ schedules:
   report:
     cron: 0 15 16 * * *
 
+bittrex:
+  apiKey: replace-with-api-key
+  baseUrl: https://bittrex.com/api/v1.1/
+  secretKey: replace-with-secret
+
 coinbase:
   apiKey: replace-with-api-key
-  baseUrl: replace-with-url
+  baseUrl: https://api.coinbase.com/v2/
   secretKey: replace-with-secret
 
 poloniex:
   apiKey: replace-with-api-key
-  baseUrl: replace-with-url
+  baseUrl: https://poloniex.com/
   secretKey: replace-with-secret
 
 quadrigacx:
   apiKey: replace-with-api-key
-  baseUrl: replace-with-url
+  baseUrl: https://api.quadrigacx.com/v2/
   secretKey: replace-with-secret

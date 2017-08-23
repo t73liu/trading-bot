@@ -19,12 +19,12 @@ import javax.ws.rs.core.Response;
 import java.util.Map;
 
 @Component
-@Path("/kraken")
+@Path("/bittrex")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api("KrakenResource")
+@Api("BittrexResource")
 @ApiResponses(@ApiResponse(code = 500, message = "Internal Server Error", response = ExceptionWrapper.class))
-public class KrakenResource {
+public class BittrexResource {
     @GET
     @Path("/test")
     @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Currency Information", responseContainer = "List", response = Map.class))
