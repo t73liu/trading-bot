@@ -1,6 +1,7 @@
 package io.github.t73liu.config;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import io.github.t73liu.provider.GeneralExceptionMapper;
 import io.github.t73liu.provider.LocalDateParamProvider;
 import io.github.t73liu.provider.ObjectMapperContextResolver;
 import io.swagger.jaxrs.config.BeanConfig;
@@ -60,6 +61,7 @@ public class JerseyConfig extends ResourceConfig {
         // Internal Custom Providers
         register(ObjectMapperContextResolver.class);
         register(LocalDateParamProvider.class);
+        register(GeneralExceptionMapper.class);
 
         // Swagger Providers
         register(ApiListingResource.class);

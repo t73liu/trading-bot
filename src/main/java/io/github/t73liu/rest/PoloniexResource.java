@@ -1,17 +1,17 @@
 package io.github.t73liu.rest;
 
 import io.github.t73liu.model.ExceptionWrapper;
+import io.github.t73liu.model.PoloniexPair;
 import io.github.t73liu.service.PoloniexService;
+import io.github.t73liu.service.PoloniexTicker;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Map;
@@ -24,17 +24,20 @@ import java.util.Map;
 @ApiResponses(@ApiResponse(code = 500, message = "Internal Server Error", response = ExceptionWrapper.class))
 public class PoloniexResource {
     private final PoloniexService service;
+    private final PoloniexTicker ticker;
 
     @Autowired
-    public PoloniexResource(PoloniexService service) {
+    public PoloniexResource(PoloniexService service, PoloniexTicker ticker) {
         this.service = service;
+        this.ticker = ticker;
     }
 
     @GET
     @Path("/tickers")
-    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Tickers in Poloniex", response = Map.class))
-    public Response getTicker() throws Exception {
-        return Response.ok(service.getTickers()).build();
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Ticker of Specified Pair in Poloniex", response = Map.class))
+    public Response getTicker(@QueryParam("tradingPair") @NotNull PoloniexPair tradingPair) throws Exception {
+        // FIXME not catching null 400 bad request
+        return Response.ok(ticker.getTickerValue(tradingPair)).build();
     }
 
     @GET
