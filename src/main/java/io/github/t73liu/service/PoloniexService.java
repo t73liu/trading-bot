@@ -10,6 +10,8 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,8 @@ import java.util.Optional;
 @Service
 @ConfigurationProperties(prefix = "poloniex")
 public class PoloniexService extends ExchangeService {
+    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
     public Map getTickers() throws Exception {
         List<NameValuePair> queryParams = new ArrayList<>();
         queryParams.add(new BasicNameValuePair("command", "returnTicker"));

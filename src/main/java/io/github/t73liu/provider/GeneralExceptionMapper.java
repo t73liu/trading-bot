@@ -12,7 +12,7 @@ import javax.ws.rs.ext.Provider;
 
 @Provider
 public class GeneralExceptionMapper implements ExceptionMapper<Exception> {
-    private final Logger LOGGER = LoggerFactory.getLogger(GeneralExceptionMapper.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Override
     public Response toResponse(Exception exception) {

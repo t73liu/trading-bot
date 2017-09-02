@@ -19,7 +19,7 @@ import static io.github.t73liu.model.PoloniexPair.ETH_ETC;
 
 @Service
 public class PoloniexTicker {
-    private final Logger LOGGER = LoggerFactory.getLogger(PoloniexTicker.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     private WampClient client;
 
