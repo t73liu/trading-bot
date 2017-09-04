@@ -23,12 +23,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.github.t73liu.model.PoloniexPair.*;
+
 @Service
 @ConfigurationProperties(prefix = "poloniex")
 public class PoloniexService extends ExchangeService {
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     // TODO remove hardcode
-    private static final double fee = 0.0025;
+    private static final double TAKER_FEE = 0.0025;
+    private static final double MAKER_FEE = 0.0015;
 
     public Map getTickers() throws Exception {
         List<NameValuePair> queryParams = new ArrayList<>();
@@ -68,11 +71,13 @@ public class PoloniexService extends ExchangeService {
 
     public boolean checkArbitrage() throws Exception {
         Map<String, Map<String, String>> tickers = getTickers();
-        Double btc = Double.valueOf(tickers.get("USDT_BTC").get("lowestAsk"));
-        Double eth = Double.valueOf(tickers.get("USDT_ETH").get("lowestAsk"));
-        Double eth2btc = Double.valueOf(tickers.get("BTC_ETH").get("lowestAsk"));
-        LOGGER.info("exchange: {}, actual: {}", eth / btc, eth2btc);
-        return ((eth2btc / (eth / btc)) - 1) > fee * 3;
+        Double btc = Double.valueOf(tickers.get(USDT_BTC.name()).get("lowestAsk"));
+        Double eth = Double.valueOf(tickers.get(USDT_ZEC.name()).get("lowestAsk"));
+        Double eth2btc = Double.valueOf(tickers.get(BTC_ZEC.name()).get("lowestAsk"));
+        double revenue = Math.abs((eth2btc / (eth / btc)) - 1);
+        double cost = TAKER_FEE * 3;
+        LOGGER.info("exchange: {}, actual: {}, revenue: {}, cost:{}", eth / btc, eth2btc, revenue, cost);
+        return revenue > cost;
     }
 
     private HttpPost generatePost(List<NameValuePair> queryParams) throws Exception {
