@@ -2,6 +2,7 @@ package io.github.t73liu.rest;
 
 import io.github.t73liu.model.ExceptionWrapper;
 import io.github.t73liu.model.PoloniexPair;
+import io.github.t73liu.service.MailingService;
 import io.github.t73liu.service.PoloniexService;
 import io.github.t73liu.service.PoloniexTicker;
 import io.swagger.annotations.Api;
@@ -10,6 +11,7 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -27,6 +29,9 @@ public class PoloniexResource {
     private final PoloniexTicker ticker;
 
     @Autowired
+    private MailingService mailer;
+
+    @Autowired
     public PoloniexResource(PoloniexService service, PoloniexTicker ticker) {
         this.service = service;
         this.ticker = ticker;
@@ -35,9 +40,9 @@ public class PoloniexResource {
     @GET
     @Path("/tickers")
     @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Ticker of Specified Pair in Poloniex", response = Map.class))
-    public Response getTicker(@QueryParam("tradingPair") @NotNull PoloniexPair tradingPair) throws Exception {
-        // FIXME not catching null 400 bad request
-        return Response.ok(ticker.getTickerValue(tradingPair)).build();
+    public Response getTicker(@QueryParam("pair") @Valid @NotNull PoloniexPair pair) throws Exception {
+        mailer.sendMail("test", "again");
+        return Response.ok(ticker.getTickerValue(pair)).build();
     }
 
     @GET

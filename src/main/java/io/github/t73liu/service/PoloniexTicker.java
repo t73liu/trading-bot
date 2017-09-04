@@ -55,6 +55,7 @@ public class PoloniexTicker {
         // currencyPair, last, lowestAsk, highestBid, percentChange, baseVolume, quoteVolume, isFrozen, 24hrHigh, 24hrLow
         ArrayNode array = subData.arguments();
         String currency = array.get(0).asText();
+        LOGGER.info("Updating {} with ticker: {}", currency, array);
         if (ETH_ETC.name().equals(currency)) {
             PoloniexPair pair = PoloniexPair.valueOf(currency);
             // TODO hardcoded ticker size and map, need to make a ticker pojo
@@ -69,7 +70,6 @@ public class PoloniexTicker {
             ticker.put("24hrHigh", array.get(8).asDouble());
             ticker.put("24hrLow", array.get(9).asDouble());
             tickerMap.put(pair, ticker);
-            LOGGER.info("Updating {} with ticker: {}", ETH_ETC, ticker);
         }
     }
 }

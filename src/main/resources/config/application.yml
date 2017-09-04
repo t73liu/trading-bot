@@ -15,6 +15,17 @@ logging:
 spring:
   jersey:
     application-path: api/crypto/v1
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+      mail.smtp.ssl.enable: false
+    username: replace-with-email-username
+    password: replace-with-email-password
+    test-connection: true
 
 app:
   version: 1.0.0
@@ -22,6 +33,10 @@ app:
 schedules:
   report:
     cron: 0 15 16 * * *
+
+MailingService:
+  recipients:
+    - replace-with-emails
 
 bittrex:
   apiKey: replace-with-api-key

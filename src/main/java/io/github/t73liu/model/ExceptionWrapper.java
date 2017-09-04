@@ -4,10 +4,10 @@ import javax.ws.rs.core.Response.Status;
 import java.util.Optional;
 
 public class ExceptionWrapper {
-    private final int statusCode;
-    private final String statusPhrase;
-    private final String message;
-    private final String cause;
+    private int statusCode;
+    private String statusPhrase;
+    private String message;
+    private String cause;
 
     public ExceptionWrapper(Status status, Exception exception) {
         this.statusCode = status.getStatusCode();
@@ -21,16 +21,32 @@ public class ExceptionWrapper {
         return statusCode;
     }
 
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
+    }
+
     public String getStatusPhrase() {
         return statusPhrase;
+    }
+
+    public void setStatusPhrase(String statusPhrase) {
+        this.statusPhrase = statusPhrase;
     }
 
     public String getMessage() {
         return message;
     }
 
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     public String getCause() {
         return cause;
+    }
+
+    public void setCause(String cause) {
+        this.cause = cause;
     }
 
     @Override
