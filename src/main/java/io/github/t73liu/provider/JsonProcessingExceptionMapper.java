@@ -19,7 +19,7 @@ public class JsonProcessingExceptionMapper implements ExceptionMapper<JsonProces
     public Response toResponse(JsonProcessingException exception) {
         Status status = Status.BAD_REQUEST;
         ExceptionWrapper exceptionWrapper = new ExceptionWrapper(status, exception);
-        LOGGER.error("Resource Thrown JsonProcessingException. {}", exceptionWrapper);
+        LOGGER.error("Resource Thrown JsonProcessingException. {}", exceptionWrapper, exception);
         return Response.status(status).type(MediaType.APPLICATION_JSON).entity(exceptionWrapper).build();
     }
 }

@@ -27,6 +27,8 @@ import java.util.Optional;
 @ConfigurationProperties(prefix = "poloniex")
 public class PoloniexService extends ExchangeService {
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    // TODO remove hardcode
+    private static final double fee = 0.0025;
 
     public Map getTickers() throws Exception {
         List<NameValuePair> queryParams = new ArrayList<>();
@@ -62,6 +64,15 @@ public class PoloniexService extends ExchangeService {
              CloseableHttpResponse response = httpClient.execute(post)) {
             return mapper.readValue(response.getEntity().getContent(), Map.class);
         }
+    }
+
+    public boolean checkArbitrage() throws Exception {
+        Map<String, Map<String, String>> tickers = getTickers();
+        Double btc = Double.valueOf(tickers.get("USDT_BTC").get("lowestAsk"));
+        Double eth = Double.valueOf(tickers.get("USDT_ETH").get("lowestAsk"));
+        Double eth2btc = Double.valueOf(tickers.get("BTC_ETH").get("lowestAsk"));
+        LOGGER.info("exchange: {}, actual: {}", eth / btc, eth2btc);
+        return ((eth2btc / (eth / btc)) - 1) > fee * 3;
     }
 
     private HttpPost generatePost(List<NameValuePair> queryParams) throws Exception {

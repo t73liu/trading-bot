@@ -20,7 +20,7 @@ public class ValidationExceptionMapper implements ExceptionMapper<ConstraintViol
         Status status = Status.BAD_REQUEST;
         ExceptionWrapper exceptionWrapper = new ExceptionWrapper(status, exception);
         exceptionWrapper.setCause(exception.getConstraintViolations().toString());
-        LOGGER.error("Resource Thrown ConstraintViolationException. {}", exceptionWrapper);
+        LOGGER.error("Resource Thrown ConstraintViolationException. {}", exceptionWrapper, exception);
         return Response.status(status).type(MediaType.APPLICATION_JSON).entity(exceptionWrapper).build();
     }
 }

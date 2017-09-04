@@ -18,7 +18,7 @@ public class GeneralExceptionMapper implements ExceptionMapper<Exception> {
     public Response toResponse(Exception exception) {
         Status status = Status.INTERNAL_SERVER_ERROR;
         ExceptionWrapper exceptionWrapper = new ExceptionWrapper(status, exception);
-        LOGGER.error("Resource Thrown General Exception. {}", exceptionWrapper);
+        LOGGER.error("Resource Thrown General Exception. {}", exceptionWrapper, exception);
         return Response.status(status).type(MediaType.APPLICATION_JSON).entity(exceptionWrapper).build();
     }
 }
