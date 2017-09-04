@@ -43,11 +43,6 @@ bittrex:
   baseUrl: https://bittrex.com/api/v1.1/
   secretKey: replace-with-secret
 
-coinbase:
-  apiKey: replace-with-api-key
-  baseUrl: https://api.coinbase.com/v2/
-  secretKey: replace-with-secret
-
 poloniex:
   apiKey: replace-with-api-key
   baseUrl: https://poloniex.com/

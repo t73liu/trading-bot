@@ -6,4 +6,6 @@ import org.springframework.stereotype.Service;
 @Service
 @ConfigurationProperties(prefix = "quadrigacx")
 public class QuadrigaService extends ExchangeService {
+    private static final double FIAT_FEE = 0.005;
+    private static final double CRYPTO_FEE = 0.002;
 }

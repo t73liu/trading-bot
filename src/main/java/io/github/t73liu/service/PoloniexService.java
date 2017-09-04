@@ -17,13 +17,13 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static io.github.t73liu.model.PoloniexPair.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Service
 @ConfigurationProperties(prefix = "poloniex")
@@ -41,6 +41,8 @@ public class PoloniexService extends ExchangeService {
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
             return mapper.readValue(response.getEntity().getContent(), Map.class);
+        } finally {
+            get.releaseConnection();
         }
     }
 
@@ -53,6 +55,8 @@ public class PoloniexService extends ExchangeService {
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
             return mapper.readValue(response.getEntity().getContent(), Map.class);
+        } finally {
+            post.releaseConnection();
         }
     }
 
@@ -66,10 +70,13 @@ public class PoloniexService extends ExchangeService {
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
             return mapper.readValue(response.getEntity().getContent(), Map.class);
+        } finally {
+            post.releaseConnection();
         }
     }
 
     public boolean checkArbitrage() throws Exception {
+        // Need to check volume of lowest ask and volume of coins in question, low liquidity safer?
         Map<String, Map<String, String>> tickers = getTickers();
         Double btc = Double.valueOf(tickers.get(USDT_BTC.name()).get("lowestAsk"));
         Double eth = Double.valueOf(tickers.get(USDT_ZEC.name()).get("lowestAsk"));
@@ -90,9 +97,9 @@ public class PoloniexService extends ExchangeService {
 
         // Generating special headers
         Mac shaMac = Mac.getInstance("HmacSHA512");
-        SecretKeySpec keySpec = new SecretKeySpec(getSecretKey().getBytes(StandardCharsets.UTF_8), "HmacSHA512");
+        SecretKeySpec keySpec = new SecretKeySpec(getSecretKey().getBytes(UTF_8), "HmacSHA512");
         shaMac.init(keySpec);
-        String sign = Hex.encodeHexString(shaMac.doFinal(queryParamStr.get().getBytes(StandardCharsets.UTF_8)));
+        String sign = Hex.encodeHexString(shaMac.doFinal(queryParamStr.get().getBytes(UTF_8)));
         HttpPost post = new HttpPost(getTradingUrl());
         post.addHeader("Key", getApiKey());
         post.addHeader("Sign", sign);
