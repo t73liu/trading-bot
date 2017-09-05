@@ -1,5 +1,6 @@
 package io.github.t73liu.service;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -17,12 +18,11 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.github.t73liu.model.PoloniexPair.*;
+import static io.github.t73liu.model.currency.PoloniexPair.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Service
@@ -34,7 +34,7 @@ public class PoloniexService extends ExchangeService {
     private static final double MAKER_FEE = 0.0015;
 
     public Map getTickers() throws Exception {
-        List<NameValuePair> queryParams = new ArrayList<>();
+        List<NameValuePair> queryParams = new ObjectArrayList<>(2);
         queryParams.add(new BasicNameValuePair("command", "returnTicker"));
         HttpGet get = generateGet(queryParams);
 
@@ -47,7 +47,7 @@ public class PoloniexService extends ExchangeService {
     }
 
     public Map getBalance() throws Exception {
-        List<NameValuePair> queryParams = new ArrayList<>();
+        List<NameValuePair> queryParams = new ObjectArrayList<>(2);
         queryParams.add(new BasicNameValuePair("command", "returnBalances"));
         queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
         HttpPost post = generatePost(queryParams);
@@ -61,7 +61,7 @@ public class PoloniexService extends ExchangeService {
     }
 
     public Map getOpenOrders() throws Exception {
-        List<NameValuePair> queryParams = new ArrayList<>();
+        List<NameValuePair> queryParams = new ObjectArrayList<>(3);
         queryParams.add(new BasicNameValuePair("command", "returnOpenOrders"));
         queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
         queryParams.add(new BasicNameValuePair("currencyPair", "all"));
@@ -78,9 +78,9 @@ public class PoloniexService extends ExchangeService {
     public boolean checkArbitrage() throws Exception {
         // Need to check volume of lowest ask and volume of coins in question, low liquidity safer?
         Map<String, Map<String, String>> tickers = getTickers();
-        Double btc = Double.valueOf(tickers.get(USDT_BTC.name()).get("lowestAsk"));
-        Double eth = Double.valueOf(tickers.get(USDT_ZEC.name()).get("lowestAsk"));
-        Double eth2btc = Double.valueOf(tickers.get(BTC_ZEC.name()).get("lowestAsk"));
+        Double btc = Double.valueOf(tickers.get(USDT_BTC.getPairName()).get("lowestAsk"));
+        Double eth = Double.valueOf(tickers.get(USDT_ZEC.getPairName()).get("lowestAsk"));
+        Double eth2btc = Double.valueOf(tickers.get(BTC_ZEC.getPairName()).get("lowestAsk"));
         double revenue = Math.abs((eth2btc / (eth / btc)) - 1);
         double cost = TAKER_FEE * 3;
         LOGGER.info("exchange: {}, actual: {}, revenue: {}, cost:{}", eth / btc, eth2btc, revenue, cost);

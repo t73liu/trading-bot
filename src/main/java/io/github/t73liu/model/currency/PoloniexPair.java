@@ -1,4 +1,4 @@
-package io.github.t73liu.model;
+package io.github.t73liu.model.currency;
 
 public enum PoloniexPair {
     BTC_AMP,
@@ -95,5 +95,9 @@ public enum PoloniexPair {
     XMR_LTC,
     XMR_MAID,
     XMR_NXT,
-    XMR_ZEC
+    XMR_ZEC;
+
+    public String getPairName() {
+        return name();
+    }
 }

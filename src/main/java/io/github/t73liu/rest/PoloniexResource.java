@@ -1,7 +1,7 @@
 package io.github.t73liu.rest;
 
 import io.github.t73liu.model.ExceptionWrapper;
-import io.github.t73liu.model.PoloniexPair;
+import io.github.t73liu.model.currency.PoloniexPair;
 import io.github.t73liu.service.PoloniexService;
 import io.github.t73liu.service.PoloniexTicker;
 import io.swagger.annotations.Api;

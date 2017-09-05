@@ -1,7 +1,7 @@
 package io.github.t73liu.service;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import io.github.t73liu.model.PoloniexPair;
+import io.github.t73liu.model.currency.PoloniexPair;
 import io.github.t73liu.util.WampClientFactory;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -15,7 +15,7 @@ import ws.wamp.jawampa.WampClient.ConnectedState;
 import javax.annotation.PostConstruct;
 import java.util.Map;
 
-import static io.github.t73liu.model.PoloniexPair.ETH_ETC;
+import static io.github.t73liu.model.currency.PoloniexPair.ETH_ETC;
 
 @Service
 public class PoloniexTicker {
@@ -56,7 +56,7 @@ public class PoloniexTicker {
         ArrayNode array = subData.arguments();
         String currency = array.get(0).asText();
         LOGGER.info("Updating {} with ticker: {}", currency, array);
-        if (ETH_ETC.name().equals(currency)) {
+        if (ETH_ETC.getPairName().equals(currency)) {
             PoloniexPair pair = PoloniexPair.valueOf(currency);
             // TODO hardcoded ticker size and map, need to make a ticker pojo
             Map<String, Double> ticker = new Object2DoubleOpenHashMap<>(9);

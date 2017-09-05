@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class CoinMarketCapTicker {
+public class BittrexTicker {
     private ObjectMapper mapper;
 
     @PostConstruct
