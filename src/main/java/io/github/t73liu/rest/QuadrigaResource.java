@@ -2,7 +2,6 @@ package io.github.t73liu.rest;
 
 import io.github.t73liu.model.ExceptionWrapper;
 import io.github.t73liu.service.QuadrigaService;
-import io.github.t73liu.service.QuadrigaTicker;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -25,12 +24,10 @@ import java.util.Map;
 @ApiResponses(@ApiResponse(code = 500, message = "Internal Server Error", response = ExceptionWrapper.class))
 public class QuadrigaResource {
     private final QuadrigaService service;
-    private final QuadrigaTicker ticker;
 
     @Autowired
-    public QuadrigaResource(QuadrigaService service, QuadrigaTicker ticker) {
+    public QuadrigaResource(QuadrigaService service) {
         this.service = service;
-        this.ticker = ticker;
     }
 
     @GET

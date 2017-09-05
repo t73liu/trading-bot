@@ -3,7 +3,6 @@ package io.github.t73liu.rest;
 import io.github.t73liu.model.ExceptionWrapper;
 import io.github.t73liu.model.currency.PoloniexPair;
 import io.github.t73liu.service.PoloniexService;
-import io.github.t73liu.service.PoloniexTicker;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -25,12 +24,10 @@ import java.util.Map;
 @ApiResponses(@ApiResponse(code = 500, message = "Internal Server Error", response = ExceptionWrapper.class))
 public class PoloniexResource {
     private final PoloniexService service;
-    private final PoloniexTicker ticker;
 
     @Autowired
-    public PoloniexResource(PoloniexService service, PoloniexTicker ticker) {
+    public PoloniexResource(PoloniexService service) {
         this.service = service;
-        this.ticker = ticker;
     }
 
     @GET
@@ -44,7 +41,7 @@ public class PoloniexResource {
     @Path("/tickers")
     @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Ticker of Specified Pair in Poloniex", response = Map.class))
     public Response getTicker(@QueryParam("pair") @Valid @NotNull PoloniexPair pair) throws Exception {
-        return Response.ok(ticker.getTickerValue(pair)).build();
+        return Response.ok(service.getTickerValue(pair)).build();
     }
 
     @GET
