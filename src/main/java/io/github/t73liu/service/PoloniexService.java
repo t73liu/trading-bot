@@ -1,5 +1,7 @@
 package io.github.t73liu.service;
 
+import io.github.t73liu.model.currency.PoloniexPair;
+import io.github.t73liu.util.DateUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.http.NameValuePair;
@@ -18,6 +20,8 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,12 +33,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @ConfigurationProperties(prefix = "poloniex")
 public class PoloniexService extends ExchangeService {
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-    // TODO remove hardcode
     private static final double TAKER_FEE = 0.0025;
     private static final double MAKER_FEE = 0.0015;
 
+    // PUBLIC API
     public Map getTickers() throws Exception {
-        List<NameValuePair> queryParams = new ObjectArrayList<>(2);
+        List<NameValuePair> queryParams = new ObjectArrayList<>(1);
         queryParams.add(new BasicNameValuePair("command", "returnTicker"));
         HttpGet get = generateGet(queryParams);
 
@@ -46,35 +50,69 @@ public class PoloniexService extends ExchangeService {
         }
     }
 
-    public Map getBalance() throws Exception {
-        List<NameValuePair> queryParams = new ObjectArrayList<>(2);
-        queryParams.add(new BasicNameValuePair("command", "returnBalances"));
-        queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
-        HttpPost post = generatePost(queryParams);
-
-        try (CloseableHttpClient httpClient = HttpClients.createDefault();
-             CloseableHttpResponse response = httpClient.execute(post)) {
-            return mapper.readValue(response.getEntity().getContent(), Map.class);
-        } finally {
-            post.releaseConnection();
-        }
-    }
-
-    public Map getOpenOrders() throws Exception {
+    public Map getOrderBook(PoloniexPair pair) throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(3);
-        queryParams.add(new BasicNameValuePair("command", "returnOpenOrders"));
-        queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
-        queryParams.add(new BasicNameValuePair("currencyPair", "all"));
-        HttpPost post = generatePost(queryParams);
+        queryParams.add(new BasicNameValuePair("command", "returnOrderBook"));
+        queryParams.add(new BasicNameValuePair("depth", "10"));
+        // Set currencyPair to all to see 95 pairs
+        queryParams.add(new BasicNameValuePair("currencyPair", pair.getPairName()));
+        HttpGet get = generateGet(queryParams);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
-             CloseableHttpResponse response = httpClient.execute(post)) {
+             CloseableHttpResponse response = httpClient.execute(get)) {
             return mapper.readValue(response.getEntity().getContent(), Map.class);
         } finally {
-            post.releaseConnection();
+            get.releaseConnection();
         }
     }
 
+    public List<Map<String, Double>> getChartData(PoloniexPair pair, LocalDateTime startDateTime, LocalDateTime endDateTime) throws Exception {
+        List<NameValuePair> queryParams = new ObjectArrayList<>(3);
+        queryParams.add(new BasicNameValuePair("command", "returnChartData"));
+        // Candlestick period in seconds 300,900,1800,7200,14400,86400
+        queryParams.add(new BasicNameValuePair("period", "300"));
+        queryParams.add(new BasicNameValuePair("currencyPair", pair.getPairName()));
+        // UNIX timestamp format of specified time range (i.e. last hour)
+        queryParams.add(new BasicNameValuePair("start", String.valueOf(DateUtil.convertToUnixTimestamp(startDateTime))));
+        queryParams.add(new BasicNameValuePair("end", String.valueOf(DateUtil.convertToUnixTimestamp(endDateTime))));
+        HttpGet get = generateGet(queryParams);
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+             CloseableHttpResponse response = httpClient.execute(get)) {
+            return mapper.readValue(response.getEntity().getContent(), mapper.getTypeFactory().constructCollectionType(List.class, Map.class));
+        } finally {
+            get.releaseConnection();
+        }
+    }
+
+    public Map getCurrencies() throws Exception {
+        List<NameValuePair> queryParams = new ObjectArrayList<>(1);
+        queryParams.add(new BasicNameValuePair("command", "returnCurrencies"));
+        HttpGet get = generateGet(queryParams);
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+             CloseableHttpResponse response = httpClient.execute(get)) {
+            return mapper.readValue(response.getEntity().getContent(), Map.class);
+        } finally {
+            get.releaseConnection();
+        }
+    }
+
+    public Map getLoanOrders(String currency) throws Exception {
+        List<NameValuePair> queryParams = new ObjectArrayList<>(2);
+        queryParams.add(new BasicNameValuePair("command", "returnLoanOrders"));
+        queryParams.add(new BasicNameValuePair("currency", currency));
+        HttpGet get = generateGet(queryParams);
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+             CloseableHttpResponse response = httpClient.execute(get)) {
+            return mapper.readValue(response.getEntity().getContent(), Map.class);
+        } finally {
+            get.releaseConnection();
+        }
+    }
+
+    // TODO implement actual arbitrage checker
     public boolean checkArbitrage() throws Exception {
         // Need to check volume of lowest ask and volume of coins in question, low liquidity safer?
         Map<String, Map<String, String>> tickers = getTickers();
@@ -87,6 +125,97 @@ public class PoloniexService extends ExchangeService {
         return revenue > cost;
     }
 
+    // PRIVATE API
+    public Map getCompleteBalances() throws Exception {
+        List<NameValuePair> queryParams = new ObjectArrayList<>(2);
+        queryParams.add(new BasicNameValuePair("command", "returnCompleteBalances"));
+        queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
+        // Setting account type to all will include margin and lending accounts
+//        queryParams.add(new BasicNameValuePair("account", "all"));
+        HttpPost post = generatePost(queryParams);
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+             CloseableHttpResponse response = httpClient.execute(post)) {
+            return mapper.readValue(response.getEntity().getContent(), Map.class);
+        } finally {
+            post.releaseConnection();
+        }
+    }
+
+    public Map getDepositAddresses() throws Exception {
+        List<NameValuePair> queryParams = new ObjectArrayList<>(2);
+        queryParams.add(new BasicNameValuePair("command", "returnDepositAddresses"));
+        queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
+        HttpPost post = generatePost(queryParams);
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+             CloseableHttpResponse response = httpClient.execute(post)) {
+            return mapper.readValue(response.getEntity().getContent(), Map.class);
+        } finally {
+            post.releaseConnection();
+        }
+    }
+
+    public Object getOpenOrders(PoloniexPair pair) throws Exception {
+        List<NameValuePair> queryParams = new ObjectArrayList<>(3);
+        queryParams.add(new BasicNameValuePair("command", "returnOpenOrders"));
+        queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
+        queryParams.add(pair == null ? new BasicNameValuePair("currencyPair", "all") : new BasicNameValuePair("currencyPair", pair.getPairName()));
+        HttpPost post = generatePost(queryParams);
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+             CloseableHttpResponse response = httpClient.execute(post)) {
+            return mapper.readValue(response.getEntity().getContent(), Object.class);
+        } finally {
+            post.releaseConnection();
+        }
+    }
+
+    public Object getTradeHistory(PoloniexPair pair, LocalDateTime startDateTime, LocalDateTime endDateTime) throws Exception {
+        List<NameValuePair> queryParams = new ObjectArrayList<>(5);
+        queryParams.add(new BasicNameValuePair("command", "returnTradeHistory"));
+        queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
+        queryParams.add(pair == null ? new BasicNameValuePair("currencyPair", "all") : new BasicNameValuePair("currencyPair", pair.getPairName()));
+        queryParams.add(new BasicNameValuePair("start", String.valueOf(DateUtil.convertToUnixTimestamp(startDateTime))));
+        queryParams.add(new BasicNameValuePair("end", String.valueOf(DateUtil.convertToUnixTimestamp(endDateTime))));
+        HttpPost post = generatePost(queryParams);
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+             CloseableHttpResponse response = httpClient.execute(post)) {
+            return mapper.readValue(response.getEntity().getContent(), Object.class);
+        } finally {
+            post.releaseConnection();
+        }
+    }
+
+    public Object placeOrder(@NotNull PoloniexPair pair, double rate, double amount, String orderType, String fulfillmentType) throws Exception {
+        List<NameValuePair> queryParams = new ObjectArrayList<>(3);
+        queryParams.add(new BasicNameValuePair("command", "buy".equalsIgnoreCase(orderType) ? "buy" : "sell"));
+        queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
+        queryParams.add(new BasicNameValuePair("currencyPair", pair.getPairName()));
+        queryParams.add(new BasicNameValuePair("rate", String.valueOf(rate)));
+        queryParams.add(new BasicNameValuePair("amount", String.valueOf(amount)));
+        if ("fillOrKill".equalsIgnoreCase(fulfillmentType)) {
+            // order will either fill in its entirety or be completely aborted
+            queryParams.add(new BasicNameValuePair("fillOrKill", "1"));
+        } else if ("immediateOrCancel".equalsIgnoreCase(fulfillmentType)) {
+            // order can be partially or completely filled, but any portion of the order that cannot be filled immediately will be canceled rather than left on the order book
+            queryParams.add(new BasicNameValuePair("immediateOrCancel", "1"));
+        } else {
+            // order will only be placed if no portion of it fills immediately; this guarantees you will never pay the taker fee on any part of the order that fills
+            queryParams.add(new BasicNameValuePair("postOnly", "1"));
+        }
+        HttpPost post = generatePost(queryParams);
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+             CloseableHttpResponse response = httpClient.execute(post)) {
+            return mapper.readValue(response.getEntity().getContent(), Object.class);
+        } finally {
+            post.releaseConnection();
+        }
+    }
+
+    // HELPER
     private HttpPost generatePost(List<NameValuePair> queryParams) throws Exception {
         Optional<String> queryParamStr = queryParams.stream()
                 .map(Object::toString)

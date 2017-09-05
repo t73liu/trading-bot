@@ -12,14 +12,18 @@ public class DateUtil {
     public static final DateTimeFormatter LOCALDATETIME_ISO_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     public static final String TIMEZONE = "America/New_York";
 
-    public static LocalDateTime convertUnixTimestamp(long timestampInSeconds) {
+    public static LocalDateTime convertFromUnixTimestamp(long timestampInSeconds) {
         return Instant.ofEpochSecond(timestampInSeconds)
                 .atZone(ZoneId.of(TIMEZONE))
                 .toLocalDateTime();
     }
 
-    public static LocalDateTime convertUnixTimestamp(String timestampInSeconds) {
-        return convertUnixTimestamp(Long.parseLong(timestampInSeconds));
+    public static LocalDateTime convertFromUnixTimestamp(String timestampInSeconds) {
+        return convertFromUnixTimestamp(Long.parseLong(timestampInSeconds));
+    }
+
+    public static long convertToUnixTimestamp(LocalDateTime time) {
+        return time.atZone(ZoneId.of(TIMEZONE)).toEpochSecond();
     }
 
     public static LocalDate getCurrentLocalDate() {

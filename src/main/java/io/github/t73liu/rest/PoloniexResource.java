@@ -48,16 +48,25 @@ public class PoloniexResource {
     }
 
     @GET
-    @Path("/balance")
-    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Balance in Poloniex", response = Map.class))
-    public Response getBalance() throws Exception {
-        return Response.ok(service.getBalance()).build();
+    @Path("/balances")
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Balances in Poloniex", response = Map.class))
+    public Response getBalances() throws Exception {
+        return Response.ok(service.getCompleteBalances()).build();
     }
 
     @GET
     @Path("/orders/open")
     @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Open Orders in Poloniex", response = Map.class))
-    public Response getOpenOrders() throws Exception {
-        return Response.ok(service.getOpenOrders()).build();
+    public Response getOpenOrders(@QueryParam("pair") PoloniexPair pair) throws Exception {
+        return Response.ok(service.getOpenOrders(pair)).build();
+    }
+
+    @GET
+    @Path("/orders/buy")
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Open Orders in Poloniex", response = Map.class))
+    public Response placeBuy(@QueryParam("pair") @Valid @NotNull PoloniexPair pair,
+                             @QueryParam("orderType") @DefaultValue("buy") String orderType,
+                             @QueryParam("fulfillmentType") @DefaultValue("immediateOrCancel") String fulfillmentType) throws Exception {
+        return Response.ok(service.placeOrder(pair, 0, 0, orderType, fulfillmentType)).build();
     }
 }
