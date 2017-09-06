@@ -12,6 +12,14 @@ public class DateUtil {
     public static final DateTimeFormatter LOCALDATETIME_ISO_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     public static final String TIMEZONE = "America/New_York";
 
+    public static LocalDate getCurrentLocalDate() {
+        return LocalDate.now(ZoneId.of(TIMEZONE));
+    }
+
+    public static LocalDateTime getCurrentLocalDateTime() {
+        return LocalDateTime.now(ZoneId.of(TIMEZONE));
+    }
+
     public static LocalDateTime convertFromUnixTimestamp(long timestampInSeconds) {
         return Instant.ofEpochSecond(timestampInSeconds)
                 .atZone(ZoneId.of(TIMEZONE))
@@ -24,10 +32,6 @@ public class DateUtil {
 
     public static long convertToUnixTimestamp(LocalDateTime time) {
         return time.atZone(ZoneId.of(TIMEZONE)).toEpochSecond();
-    }
-
-    public static LocalDate getCurrentLocalDate() {
-        return LocalDate.now(ZoneId.of(TIMEZONE));
     }
 
     public static LocalDate parseLocalDateISO(String dateStr) {
@@ -44,9 +48,5 @@ public class DateUtil {
 
     public static String formatLocalDateShort(LocalDate localDate) {
         return localDate.format(LOCALDATE_SHORT_FORMATTER);
-    }
-
-    public static LocalDateTime getCurrentLocalDateTime() {
-        return LocalDateTime.now(ZoneId.of(TIMEZONE));
     }
 }

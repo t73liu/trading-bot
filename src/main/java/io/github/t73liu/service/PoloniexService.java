@@ -47,7 +47,7 @@ public class PoloniexService extends ExchangeService {
     }
 
     // PUBLIC API
-    public Map getTickers() throws Exception {
+    public Map<String, Map<String, String>> getTickers() throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(1);
         queryParams.add(new BasicNameValuePair("command", "returnTicker"));
         HttpGet get = generateGet(queryParams);
