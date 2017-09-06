@@ -45,4 +45,8 @@ public class DateUtil {
     public static String formatLocalDateShort(LocalDate localDate) {
         return localDate.format(LOCALDATE_SHORT_FORMATTER);
     }
+
+    public static LocalDateTime getCurrentLocalDateTime() {
+        return LocalDateTime.now(ZoneId.of(TIMEZONE));
+    }
 }

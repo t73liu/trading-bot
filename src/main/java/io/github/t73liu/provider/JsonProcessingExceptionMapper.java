@@ -13,7 +13,7 @@ import javax.ws.rs.ext.Provider;
 
 @Provider
 public class JsonProcessingExceptionMapper implements ExceptionMapper<JsonProcessingException> {
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonProcessingExceptionMapper.class);
 
     @Override
     public Response toResponse(JsonProcessingException exception) {

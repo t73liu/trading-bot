@@ -1,5 +1,6 @@
 package io.github.t73liu.rest;
 
+import io.github.t73liu.model.Candlestick;
 import io.github.t73liu.model.ExceptionWrapper;
 import io.github.t73liu.model.currency.PoloniexPair;
 import io.github.t73liu.service.PoloniexService;
@@ -14,7 +15,13 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static io.github.t73liu.model.CandlestickIntervals.THIRTY_MIN;
+import static io.github.t73liu.util.DateUtil.getCurrentLocalDateTime;
 
 @Component
 @Path("/poloniex")
@@ -35,6 +42,16 @@ public class PoloniexResource {
     @ApiResponses(@ApiResponse(code = 200, message = "Checks if there is arbitrage opportunity", response = Boolean.class))
     public Response checkArbitrage() throws Exception {
         return Response.ok(service.checkArbitrage()).build();
+    }
+
+    @GET
+    @Path("/candles")
+    @ApiResponses(@ApiResponse(code = 200, message = "Checks if there is candlestick opportunity", responseContainer = "List", response = Candlestick.class))
+    public Response checkCandles() throws Exception {
+        LocalDateTime endLocalDateTime = getCurrentLocalDateTime();
+        LocalDateTime startLocalDateTime = endLocalDateTime.minusHours(6);
+        List<Map<String, Double>> output = service.getChartData(PoloniexPair.USDT_XRP, startLocalDateTime, endLocalDateTime, THIRTY_MIN);
+        return Response.ok(output.stream().map(map -> new Candlestick(map.get("open"), map.get("close"), map.get("high"), map.get("low"))).collect(Collectors.toList())).build();
     }
 
     @GET

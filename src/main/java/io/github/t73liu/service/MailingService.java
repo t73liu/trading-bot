@@ -14,7 +14,7 @@ import java.util.List;
 @Service
 @ConfigurationProperties(prefix = "MailingService")
 public class MailingService {
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(MailingService.class);
 
     private final JavaMailSenderImpl mailer;
 

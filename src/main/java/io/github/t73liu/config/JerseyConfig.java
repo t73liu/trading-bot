@@ -24,7 +24,7 @@ import javax.ws.rs.Path;
 
 @Configuration
 public class JerseyConfig extends ResourceConfig {
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(JerseyConfig.class);
 
     @Value("${app.version:1.0.0-SNAPSHOT}")
     private String appVersion;

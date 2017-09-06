@@ -7,6 +7,18 @@ Supports trading on the following exchanges:
 - [Poloniex](https://poloniex.com/support/api/)
 - [QuadrigaCX](https://www.quadrigacx.com/api_info)
 
+Supports various Candlestick patterns:
+- Hammer
+- Engulfing
+- Dark Cloud
+- Morning Star
+- Evening Star
+- Harami
+- Three Black Crows
+- Three Advancing White Soldiers
+- Tasuki
+- Doji
+
 ## Setup
 
 1. Clone the repository.
@@ -14,7 +26,8 @@ Supports trading on the following exchanges:
    - Api-Keys and Secret-Keys (Do not commit!)
    - Email Credentials (Gmail requires turning off secure apps)
    - Email Recepients
-3. Run TradingApplication
+3. Tweak Candlestick Ratios and Backtesting
+4. Run TradingApplication
 
 ## License
 

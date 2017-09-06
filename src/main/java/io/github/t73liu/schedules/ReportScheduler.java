@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ReportScheduler {
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReportScheduler.class);
 
     @Scheduled(cron = "${schedules.report.cron:0 0 16 * * *}", zone = DateUtil.TIMEZONE)
     public void createDailyReport() {

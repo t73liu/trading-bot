@@ -1,5 +1,6 @@
 package io.github.t73liu.service;
 
+import io.github.t73liu.model.CandlestickIntervals;
 import io.github.t73liu.model.currency.PoloniexPair;
 import io.github.t73liu.util.DateUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -35,8 +36,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class PoloniexService extends ExchangeService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PoloniexService.class);
     // TODO set fees from getFees method
-    private static final double TAKER_FEE = 0.0025;
-    private static final double MAKER_FEE = 0.0015;
+    public static final double TAKER_FEE = 0.0025;
+    public static final double MAKER_FEE = 0.0015;
 
     private final PoloniexTicker ticker;
 
@@ -80,11 +81,11 @@ public class PoloniexService extends ExchangeService {
         }
     }
 
-    public List<Map<String, Double>> getChartData(PoloniexPair pair, LocalDateTime startDateTime, LocalDateTime endDateTime) throws Exception {
+    public List<Map<String, Double>> getChartData(PoloniexPair pair, LocalDateTime startDateTime, LocalDateTime endDateTime, CandlestickIntervals period) throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(3);
         queryParams.add(new BasicNameValuePair("command", "returnChartData"));
         // Candlestick period in seconds 300,900,1800,7200,14400,86400
-        queryParams.add(new BasicNameValuePair("period", "300"));
+        queryParams.add(new BasicNameValuePair("period", String.valueOf(period.getInterval())));
         queryParams.add(new BasicNameValuePair("currencyPair", pair.getPairName()));
         // UNIX timestamp format of specified time range (i.e. last hour)
         queryParams.add(new BasicNameValuePair("start", String.valueOf(DateUtil.convertToUnixTimestamp(startDateTime))));
@@ -139,7 +140,7 @@ public class PoloniexService extends ExchangeService {
         return revenue > cost;
     }
 
-    // PRIVATE API
+    // PRIVATE API - NOTE: LIMIT SIX CALLS PER SECOND
     public Map getCompleteBalances() throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(2);
         queryParams.add(new BasicNameValuePair("command", "returnCompleteBalances"));
@@ -249,6 +250,7 @@ public class PoloniexService extends ExchangeService {
         List<NameValuePair> queryParams = new ObjectArrayList<>(3);
         queryParams.add(new BasicNameValuePair("command", "moveOrder"));
         queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
+        queryParams.add(new BasicNameValuePair("orderNumber", orderNumber));
         queryParams.add(new BasicNameValuePair("rate", String.valueOf(rate)));
         if (amount != null) {
             queryParams.add(new BasicNameValuePair("amount", amount.toString()));
@@ -271,7 +273,7 @@ public class PoloniexService extends ExchangeService {
         }
     }
 
-    private Map withdrawCurrency(String currency, double amount, String depositAddress, String paymentId) throws Exception {
+    private Map withdrawCurrency(String currency, double amount, String depositAddress) throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(3);
         queryParams.add(new BasicNameValuePair("command", "withdraw"));
         queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));

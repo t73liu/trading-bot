@@ -1,6 +1,7 @@
 package io.github.t73liu.rest;
 
 import io.github.t73liu.model.ExceptionWrapper;
+import io.github.t73liu.model.currency.QuadrigaPair;
 import io.github.t73liu.service.QuadrigaService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;
@@ -8,10 +9,9 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Map;
@@ -31,9 +31,9 @@ public class QuadrigaResource {
     }
 
     @GET
-    @Path("/tickers")
-    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Currency Information", responseContainer = "List", response = Map.class))
-    public Response getTickers() {
-        return Response.ok().build();
+    @Path("/ticker/{pair}")
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Currency Information", response = Map.class))
+    public Response getTickers(@PathParam("pair") @Valid @NotNull QuadrigaPair pair) {
+        return Response.ok(service.getTicker(pair)).build();
     }
 }
