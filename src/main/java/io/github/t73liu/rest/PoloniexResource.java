@@ -15,6 +15,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +82,6 @@ public class PoloniexResource {
     public Response placeBuy(@QueryParam("pair") @Valid @NotNull PoloniexPair pair,
                              @QueryParam("orderType") @DefaultValue("buy") String orderType,
                              @QueryParam("fulfillmentType") @DefaultValue("immediateOrCancel") String fulfillmentType) throws Exception {
-        return Response.ok(service.placeOrder(pair, 0, 0, orderType, fulfillmentType)).build();
+        return Response.ok(service.placeOrder(pair, BigDecimal.valueOf(0), BigDecimal.valueOf(0), orderType, fulfillmentType)).build();
     }
 }

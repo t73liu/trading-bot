@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -203,7 +204,7 @@ public class PoloniexService extends ExchangeService {
         }
     }
 
-    public Object placeOrder(@NotNull PoloniexPair pair, double rate, double amount, String orderType, String fulfillmentType) throws Exception {
+    public Object placeOrder(@NotNull PoloniexPair pair, BigDecimal rate, BigDecimal amount, String orderType, String fulfillmentType) throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(6);
         queryParams.add(new BasicNameValuePair("command", "buy".equalsIgnoreCase(orderType) ? "buy" : "sell"));
         queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));

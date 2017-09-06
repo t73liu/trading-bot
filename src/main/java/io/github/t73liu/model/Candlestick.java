@@ -40,4 +40,15 @@ public class Candlestick {
     public void setType(CandlestickType type) {
         this.type = type;
     }
+
+    @Override
+    public String toString() {
+        return "Candlestick{" +
+                "open=" + open +
+                ", close=" + close +
+                ", high=" + high +
+                ", low=" + low +
+                ", type=" + type +
+                '}';
+    }
 }
