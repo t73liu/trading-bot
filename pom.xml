@@ -136,6 +136,13 @@
             <artifactId>javax.mail-api</artifactId>
             <version>1.6.0</version>
         </dependency>
+
+        <!-- Analysis -->
+        <dependency>
+            <groupId>eu.verdelhan</groupId>
+            <artifactId>ta4j</artifactId>
+            <version>0.9</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -146,5 +153,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
