@@ -29,13 +29,13 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static io.github.t73liu.model.currency.PoloniexPair.*;
-import static io.github.t73liu.util.ObjectMapperFactory.getList;
+import static io.github.t73liu.util.ObjectMapperFactory.OBJECT_READER;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Service
@@ -61,7 +61,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
-            return mapper.readValue(response.getEntity().getContent(), Map.class);
+            return OBJECT_READER.readValue(response.getEntity().getContent());
         } finally {
             get.releaseConnection();
         }
@@ -82,7 +82,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
-            return mapper.readValue(response.getEntity().getContent(), Map.class);
+            return OBJECT_READER.readValue(response.getEntity().getContent());
         } finally {
             get.releaseConnection();
         }
@@ -93,12 +93,12 @@ public class PoloniexService extends ExchangeService {
     }
 
     public List<Tick> getCandlestick(PoloniexPair pair, LocalDateTime startDateTime, LocalDateTime endDateTime, CandlestickIntervals period) throws Exception {
-        return getExchangeCandle(pair, startDateTime, endDateTime, period).stream()
+        return Arrays.stream(getExchangeCandle(pair, startDateTime, endDateTime, period))
                 .map(PoloniexService::mapExchangeCandleToTick)
                 .collect(Collectors.toList());
     }
 
-    private List<PoloniexCandle> getExchangeCandle(PoloniexPair pair, LocalDateTime startDateTime, LocalDateTime endDateTime, CandlestickIntervals period) throws Exception {
+    private PoloniexCandle[] getExchangeCandle(PoloniexPair pair, LocalDateTime startDateTime, LocalDateTime endDateTime, CandlestickIntervals period) throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(3);
         queryParams.add(new BasicNameValuePair("command", "returnChartData"));
         // Candlestick period in seconds 300,900,1800,7200,14400,86400
@@ -111,7 +111,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
-            return mapper.readValue(response.getEntity().getContent(), getList(mapper, PoloniexCandle.class));
+            return OBJECT_READER.forType(PoloniexCandle[].class).readValue(response.getEntity().getContent());
         } finally {
             get.releaseConnection();
         }
@@ -124,7 +124,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
-            return mapper.readValue(response.getEntity().getContent(), Map.class);
+            return OBJECT_READER.readValue(response.getEntity().getContent());
         } finally {
             get.releaseConnection();
         }
@@ -138,7 +138,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
-            return mapper.readValue(response.getEntity().getContent(), Map.class);
+            return OBJECT_READER.readValue(response.getEntity().getContent());
         } finally {
             get.releaseConnection();
         }
@@ -168,7 +168,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
-            return mapper.readValue(response.getEntity().getContent(), Map.class);
+            return OBJECT_READER.readValue(response.getEntity().getContent());
         } finally {
             post.releaseConnection();
         }
@@ -182,13 +182,13 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
-            return mapper.readValue(response.getEntity().getContent(), Map.class);
+            return OBJECT_READER.readValue(response.getEntity().getContent());
         } finally {
             post.releaseConnection();
         }
     }
 
-    public Object getOpenOrders(PoloniexPair pair) throws Exception {
+    public Map getOpenOrders(PoloniexPair pair) throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(3);
         queryParams.add(new BasicNameValuePair("command", "returnOpenOrders"));
         queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
@@ -197,13 +197,13 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
-            return mapper.readValue(response.getEntity().getContent(), Object.class);
+            return OBJECT_READER.readValue(response.getEntity().getContent());
         } finally {
             post.releaseConnection();
         }
     }
 
-    public Object getTradeHistory(PoloniexPair pair, LocalDateTime startDateTime, LocalDateTime endDateTime) throws Exception {
+    public Map getTradeHistory(PoloniexPair pair, LocalDateTime startDateTime, LocalDateTime endDateTime) throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(5);
         queryParams.add(new BasicNameValuePair("command", "returnTradeHistory"));
         queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
@@ -214,13 +214,13 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
-            return mapper.readValue(response.getEntity().getContent(), Object.class);
+            return OBJECT_READER.readValue(response.getEntity().getContent());
         } finally {
             post.releaseConnection();
         }
     }
 
-    public Object placeOrder(@NotNull PoloniexPair pair, BigDecimal rate, BigDecimal amount, String orderType, String fulfillmentType) throws Exception {
+    public Map placeOrder(@NotNull PoloniexPair pair, BigDecimal rate, BigDecimal amount, String orderType, String fulfillmentType) throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(6);
         queryParams.add(new BasicNameValuePair("command", "buy".equalsIgnoreCase(orderType) ? "buy" : "sell"));
         queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
@@ -241,7 +241,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
-            return mapper.readValue(response.getEntity().getContent(), Object.class);
+            return OBJECT_READER.readValue(response.getEntity().getContent());
         } finally {
             post.releaseConnection();
         }
@@ -257,7 +257,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
-            return mapper.readValue(response.getEntity().getContent(), Map.class);
+            return OBJECT_READER.readValue(response.getEntity().getContent());
         } finally {
             post.releaseConnection();
         }
@@ -284,7 +284,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
-            return mapper.readValue(response.getEntity().getContent(), Map.class);
+            return OBJECT_READER.readValue(response.getEntity().getContent());
         } finally {
             post.releaseConnection();
         }
@@ -304,7 +304,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
-            return mapper.readValue(response.getEntity().getContent(), Map.class);
+            return OBJECT_READER.readValue(response.getEntity().getContent());
         } finally {
             post.releaseConnection();
         }
@@ -319,7 +319,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
-            return mapper.readValue(response.getEntity().getContent(), Map.class);
+            return OBJECT_READER.readValue(response.getEntity().getContent());
         } finally {
             post.releaseConnection();
         }
@@ -327,18 +327,16 @@ public class PoloniexService extends ExchangeService {
 
     // HELPER
     private HttpPost generatePost(List<NameValuePair> queryParams) throws Exception {
-        Optional<String> queryParamStr = queryParams.stream()
+        String queryParamStr = queryParams.stream()
                 .map(Object::toString)
-                .reduce((queryOne, queryTwo) -> queryOne + "&" + queryTwo);
-        if (!queryParamStr.isPresent()) {
-            throw new IllegalArgumentException("Unable to generate query params for Poloniex API: " + queryParams);
-        }
+                .reduce((queryOne, queryTwo) -> queryOne + "&" + queryTwo)
+                .orElse("");
 
         // Generating special headers
         Mac shaMac = Mac.getInstance("HmacSHA512");
         SecretKeySpec keySpec = new SecretKeySpec(getSecretKey().getBytes(UTF_8), "HmacSHA512");
         shaMac.init(keySpec);
-        String sign = Hex.encodeHexString(shaMac.doFinal(queryParamStr.get().getBytes(UTF_8)));
+        String sign = Hex.encodeHexString(shaMac.doFinal(queryParamStr.getBytes(UTF_8)));
         HttpPost post = new HttpPost(getTradingUrl());
         post.addHeader("Key", getApiKey());
         post.addHeader("Sign", sign);
