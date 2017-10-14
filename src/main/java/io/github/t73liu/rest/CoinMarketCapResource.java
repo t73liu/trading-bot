@@ -1,7 +1,7 @@
 package io.github.t73liu.rest;
 
+import io.github.t73liu.exchanges.CoinMarketCapTicker;
 import io.github.t73liu.model.ExceptionWrapper;
-import io.github.t73liu.service.CoinMarketCapTicker;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;

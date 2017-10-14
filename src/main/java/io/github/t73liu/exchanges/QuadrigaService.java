@@ -1,4 +1,4 @@
-package io.github.t73liu.service;
+package io.github.t73liu.exchanges;
 
 import io.github.t73liu.model.currency.QuadrigaPair;
 import org.slf4j.Logger;

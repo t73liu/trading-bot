@@ -1,4 +1,4 @@
-package io.github.t73liu.service;
+package io.github.t73liu.exchanges;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.t73liu.util.ObjectMapperFactory;
