@@ -1,10 +1,10 @@
 package io.github.t73liu.scheduler;
 
+import eu.verdelhan.ta4j.Tick;
 import io.github.t73liu.exchange.bittrex.BittrexService;
 import io.github.t73liu.exchange.poloniex.PoloniexService;
 import io.github.t73liu.exchange.quadriga.QuadrigaService;
 import io.github.t73liu.model.Balance;
-import io.github.t73liu.model.Candlestick;
 import io.github.t73liu.model.CandlestickIntervals;
 import io.github.t73liu.model.CandlestickType;
 import io.github.t73liu.report.MailingService;
@@ -72,23 +72,22 @@ public class ReportScheduler {
 
         LocalDateTime endLocalDateTime = getCurrentLocalDateTime();
         LocalDateTime startLocalDateTime = endLocalDateTime.minusHours(1);
-        List<Map<String, Double>> output = poloniexService.getChartData(USDT_XRP, startLocalDateTime, endLocalDateTime, CandlestickIntervals.FIFTEEN_MIN);
-        List<Candlestick> sticks = output.stream().map(map -> new Candlestick(map.get("open"), map.get("close"), map.get("high"), map.get("low"))).collect(Collectors.toList());
+        List<Tick> sticks = poloniexService.getCandlestick(USDT_XRP, startLocalDateTime, endLocalDateTime, CandlestickIntervals.FIFTEEN_MIN);
         sticks = CandlestickProcessor.processCandlesticks(sticks);
         LOGGER.info("Desire: {}, Resulting candlesticks: {}", target, sticks);
 
         // DON'T ENABLE ORDER PLACEMENTS TILL READY FOR LAUNCH
-        if (!sticks.isEmpty()) {
-            CandlestickType result = sticks.get(sticks.size() - 1).getType();
-            if (target == result && target == BUY) {
-                LOGGER.info("ACTION: {}, rate: {}, amount: {}", result, buyRate, availableUSDT);
-//                poloniexService.placeOrder(USDT_XRP, buyRate, availableUSDT, "buy", "postOnly");
-                lastBuyRate = buyRate.multiply(BigDecimal.valueOf(1.05));
-            } else if (target == result && sellRate.compareTo(lastBuyRate) > 0) {
-                LOGGER.info("ACTION: {}, rate: {}, amount: {}", result, sellRate, availableXRP);
-//                poloniexService.placeOrder(USDT_XRP, sellRate, availableXRP, "sell", "postOnly");
-            }
-        }
+//        if (!sticks.isEmpty()) {
+//            CandlestickType result = sticks.get(sticks.size() - 1).getType();
+//            if (target == result && target == BUY) {
+//                LOGGER.info("ACTION: {}, rate: {}, amount: {}", result, buyRate, availableUSDT);
+////                poloniexService.placeOrder(USDT_XRP, buyRate, availableUSDT, "buy", "postOnly");
+//                lastBuyRate = buyRate.multiply(BigDecimal.valueOf(1.05));
+//            } else if (target == result && sellRate.compareTo(lastBuyRate) > 0) {
+//                LOGGER.info("ACTION: {}, rate: {}, amount: {}", result, sellRate, availableXRP);
+////                poloniexService.placeOrder(USDT_XRP, sellRate, availableXRP, "sell", "postOnly");
+//            }
+//        }
     }
 
     //    @Scheduled(fixedDelay = 7200000, zone = DateUtil.TIMEZONE)

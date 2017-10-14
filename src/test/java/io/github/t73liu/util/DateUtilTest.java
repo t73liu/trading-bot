@@ -10,17 +10,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class DateUtilTest {
     @Test
     public void testLongUnixTimestampToLocalDate() {
-        assertEquals(LocalDateTime.of(2017, 6, 28, 23, 22, 19), DateUtil.convertFromUnixTimestamp(1498706539));
+        assertEquals(LocalDateTime.of(2017, 6, 28, 23, 22, 19), DateUtil.unixTimeStampToLocalDateTime(1498706539));
     }
 
     @Test
     public void testStringUnixTimestampToLocalDate() {
-        assertEquals(LocalDateTime.of(2017, 6, 28, 23, 22, 19), DateUtil.convertFromUnixTimestamp("1498706539"));
+        assertEquals(LocalDateTime.of(2017, 6, 28, 23, 22, 19), DateUtil.unixTimeStampToLocalDateTime("1498706539"));
     }
 
     @Test
     public void testLocalDateTimeToUnixTimestamp() {
-        assertEquals(1504577942, DateUtil.convertToUnixTimestamp(LocalDateTime.of(2017, 9, 4, 22, 19, 2)));
+        assertEquals(1504577942, DateUtil.localDateTimeToUnixTimestamp(LocalDateTime.of(2017, 9, 4, 22, 19, 2)));
     }
 
     @Test
