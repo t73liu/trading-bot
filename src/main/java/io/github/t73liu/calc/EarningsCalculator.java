@@ -1,12 +1,15 @@
 package io.github.t73liu.calc;
 
-import io.github.t73liu.model.Order;
-import org.apache.commons.math3.util.FastMath;
+import eu.verdelhan.ta4j.*;
+import eu.verdelhan.ta4j.analysis.criteria.TotalProfitCriterion;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EarningsCalculator {
-    public Double calculateProfit(Order buy, Order sale) {
-        return FastMath.min(buy.getQuantity(), sale.getQuantity()) * (sale.getPrice() - buy.getPrice());
+    private static final AnalysisCriterion PROFIT_CRITERION = new TotalProfitCriterion();
+
+    public static double calculateProfit(TimeSeries series, Strategy strategy, double takerFee) {
+        TradingRecord tradingRecord = new TimeSeriesManager(series).run(strategy);
+        return PROFIT_CRITERION.calculate(series, tradingRecord) - tradingRecord.getTradeCount() * takerFee;
     }
 }

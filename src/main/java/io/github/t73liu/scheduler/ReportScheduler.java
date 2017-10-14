@@ -6,9 +6,7 @@ import io.github.t73liu.exchange.poloniex.PoloniexService;
 import io.github.t73liu.exchange.quadriga.QuadrigaService;
 import io.github.t73liu.model.Balance;
 import io.github.t73liu.model.CandlestickIntervals;
-import io.github.t73liu.model.CandlestickType;
 import io.github.t73liu.report.MailingService;
-import io.github.t73liu.strategy.candlestick.CandlestickProcessor;
 import io.github.t73liu.util.DateUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.slf4j.Logger;
@@ -25,8 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static io.github.t73liu.model.CandlestickType.BUY;
-import static io.github.t73liu.model.CandlestickType.SELL;
 import static io.github.t73liu.model.currency.PoloniexPair.USDT_XRP;
 import static io.github.t73liu.util.DateUtil.getCurrentLocalDateTime;
 
@@ -66,28 +62,13 @@ public class ReportScheduler {
         BigDecimal availableUSDT = new BigDecimal(allBalances.get("USDT").get("available")).setScale(8, RoundingMode.HALF_UP);
         BigDecimal availableXRP = new BigDecimal(allBalances.get("XRP").get("available")).setScale(8, RoundingMode.HALF_UP);
 
-        CandlestickType target = availableUSDT.compareTo(availableXRP) > 0 ? BUY : SELL;
         BigDecimal sellRate = new BigDecimal(poloniexService.getTickers().get("USDT_XRP").get("highestBid")).setScale(8, RoundingMode.HALF_UP);
         BigDecimal buyRate = new BigDecimal(poloniexService.getTickers().get("USDT_XRP").get("lowestAsk")).setScale(8, RoundingMode.HALF_UP);
 
         LocalDateTime endLocalDateTime = getCurrentLocalDateTime();
         LocalDateTime startLocalDateTime = endLocalDateTime.minusHours(1);
         List<Tick> sticks = poloniexService.getCandlestick(USDT_XRP, startLocalDateTime, endLocalDateTime, CandlestickIntervals.FIFTEEN_MIN);
-        sticks = CandlestickProcessor.processCandlesticks(sticks);
-        LOGGER.info("Desire: {}, Resulting candlesticks: {}", target, sticks);
-
-        // DON'T ENABLE ORDER PLACEMENTS TILL READY FOR LAUNCH
-//        if (!sticks.isEmpty()) {
-//            CandlestickType result = sticks.get(sticks.size() - 1).getType();
-//            if (target == result && target == BUY) {
-//                LOGGER.info("ACTION: {}, rate: {}, amount: {}", result, buyRate, availableUSDT);
-////                poloniexService.placeOrder(USDT_XRP, buyRate, availableUSDT, "buy", "postOnly");
-//                lastBuyRate = buyRate.multiply(BigDecimal.valueOf(1.05));
-//            } else if (target == result && sellRate.compareTo(lastBuyRate) > 0) {
-//                LOGGER.info("ACTION: {}, rate: {}, amount: {}", result, sellRate, availableXRP);
-////                poloniexService.placeOrder(USDT_XRP, sellRate, availableXRP, "sell", "postOnly");
-//            }
-//        }
+        LOGGER.info("Resulting candlesticks: {}", sticks);
     }
 
     //    @Scheduled(fixedDelay = 7200000, zone = DateUtil.TIMEZONE)

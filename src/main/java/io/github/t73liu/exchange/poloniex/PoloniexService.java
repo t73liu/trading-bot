@@ -88,7 +88,7 @@ public class PoloniexService extends ExchangeService {
         }
     }
 
-    private static Tick mapExchangeCandleToTick(PoloniexCandle candle) {
+    public static Tick mapExchangeCandleToTick(PoloniexCandle candle) {
         return new BaseTick(DateUtil.unixTimeStampToZonedDateTime(candle.getDate()), candle.getOpen(), candle.getHigh(), candle.getLow(), candle.getClose(), candle.getVolume());
     }
 
