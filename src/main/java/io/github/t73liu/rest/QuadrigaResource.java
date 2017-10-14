@@ -1,6 +1,6 @@
 package io.github.t73liu.rest;
 
-import io.github.t73liu.exchanges.QuadrigaService;
+import io.github.t73liu.exchange.quadriga.QuadrigaService;
 import io.github.t73liu.model.ExceptionWrapper;
 import io.github.t73liu.model.currency.QuadrigaPair;
 import io.swagger.annotations.Api;

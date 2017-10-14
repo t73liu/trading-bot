@@ -1,12 +1,12 @@
 package io.github.t73liu.calc;
 
 import io.github.t73liu.model.Order;
-import org.springframework.stereotype.Component;
+import org.apache.commons.math3.util.FastMath;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class EarningsCalculator {
-    // FIXME fix logic
     public Double calculateProfit(Order buy, Order sale) {
-        return Math.min(buy.getQuantity(), sale.getQuantity()) * (sale.getPrice() - buy.getPrice());
+        return FastMath.min(buy.getQuantity(), sale.getQuantity()) * (sale.getPrice() - buy.getPrice());
     }
 }

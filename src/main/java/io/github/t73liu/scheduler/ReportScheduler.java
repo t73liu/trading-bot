@@ -1,13 +1,13 @@
-package io.github.t73liu.schedules;
+package io.github.t73liu.scheduler;
 
+import io.github.t73liu.exchange.bittrex.BittrexService;
+import io.github.t73liu.exchange.poloniex.PoloniexService;
+import io.github.t73liu.exchange.quadriga.QuadrigaService;
 import io.github.t73liu.model.Balance;
 import io.github.t73liu.model.Candlestick;
 import io.github.t73liu.model.CandlestickIntervals;
 import io.github.t73liu.model.CandlestickType;
-import io.github.t73liu.service.BittrexService;
-import io.github.t73liu.service.MailingService;
-import io.github.t73liu.service.PoloniexService;
-import io.github.t73liu.service.QuadrigaService;
+import io.github.t73liu.report.MailingService;
 import io.github.t73liu.strategy.candlestick.CandlestickProcessor;
 import io.github.t73liu.util.DateUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -59,7 +59,7 @@ public class ReportScheduler {
 
     private BigDecimal lastBuyRate = null;
 
-    @Scheduled(fixedDelay = 5000, zone = DateUtil.TIMEZONE)
+    //    @Scheduled(fixedDelay = 5000, zone = DateUtil.TIMEZONE)
     public void checkCandlesticks() throws Exception {
         LOGGER.info("Checking Poloniex Candlesticks for opportunities");
         Map<String, Map<String, String>> allBalances = poloniexService.getCompleteBalances();
@@ -91,7 +91,7 @@ public class ReportScheduler {
         }
     }
 
-    @Scheduled(fixedDelay = 7200000, zone = DateUtil.TIMEZONE)
+    //    @Scheduled(fixedDelay = 7200000, zone = DateUtil.TIMEZONE)
     public void reportBalances() throws Exception {
         LOGGER.info("Reporting Poloniex Balance values");
         Map<String, Map<String, String>> allBalances = poloniexService.getCompleteBalances();

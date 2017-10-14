@@ -1,5 +1,6 @@
-package io.github.t73liu.exchanges;
+package io.github.t73liu.exchange.bittrex;
 
+import io.github.t73liu.exchange.ExchangeService;
 import io.github.t73liu.model.currency.BittrexPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

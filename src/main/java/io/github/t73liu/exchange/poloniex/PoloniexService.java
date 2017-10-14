@@ -1,5 +1,6 @@
-package io.github.t73liu.exchanges;
+package io.github.t73liu.exchange.poloniex;
 
+import io.github.t73liu.exchange.ExchangeService;
 import io.github.t73liu.model.CandlestickIntervals;
 import io.github.t73liu.model.currency.PoloniexPair;
 import io.github.t73liu.util.DateUtil;

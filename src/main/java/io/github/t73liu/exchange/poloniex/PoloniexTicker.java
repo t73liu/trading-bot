@@ -1,4 +1,4 @@
-package io.github.t73liu.exchanges;
+package io.github.t73liu.exchange.poloniex;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.github.t73liu.model.currency.PoloniexPair;

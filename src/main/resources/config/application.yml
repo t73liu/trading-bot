@@ -38,6 +38,11 @@ MailingService:
   recipients:
     - replace-with-emails
 
+bitfinex:
+  apiKey: replace-with-api-key
+  baseUrl: https://api.bitfinex.com/v2/
+  secretKey: replace-with-secret
+
 bittrex:
   apiKey: replace-with-api-key
   baseUrl: https://bittrex.com/api/v1.1/

@@ -1,4 +1,4 @@
-package io.github.t73liu.exchanges;
+package io.github.t73liu.report;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
