@@ -1,4 +1,4 @@
-package io.github.t73liu.model;
+package io.github.t73liu.exception;
 
 import javax.ws.rs.core.Response.Status;
 import java.util.Optional;

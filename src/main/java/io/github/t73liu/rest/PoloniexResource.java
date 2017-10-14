@@ -1,8 +1,8 @@
 package io.github.t73liu.rest;
 
+import io.github.t73liu.exception.ExceptionWrapper;
 import io.github.t73liu.exchange.poloniex.PoloniexService;
 import io.github.t73liu.model.Candlestick;
-import io.github.t73liu.model.ExceptionWrapper;
 import io.github.t73liu.model.currency.PoloniexPair;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;

@@ -1,7 +1,7 @@
 package io.github.t73liu.provider;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.github.t73liu.model.ExceptionWrapper;
+import io.github.t73liu.exception.ExceptionWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
