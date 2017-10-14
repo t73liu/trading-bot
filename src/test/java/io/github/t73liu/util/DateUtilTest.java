@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -41,5 +42,11 @@ public class DateUtilTest {
     @Test
     public void testLocalDateToShortDateString() {
         assertEquals("20170630", DateUtil.formatLocalDateShort(LocalDate.of(2017, 6, 30)));
+    }
+
+    @Test
+    public void testUnixTimestampToZonedDateTime() {
+        assertEquals(ZonedDateTime.of(2017, 10, 14, 12, 39, 36, 0, DateUtil.TIMEZONE_ID),
+                DateUtil.unixTimeStampToZonedDateTime(1507999176));
     }
 }
