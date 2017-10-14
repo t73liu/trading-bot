@@ -16,7 +16,8 @@ Supports trading on the following exchanges:
    - Email Credentials (Gmail requires turning off secure apps)
    - Email Recipients
 3. Tweak Strategies
-4. Run TradingApplication
+4. Use a json-formatter browser extension or enable SerializationFeature.INDENT_OUTPUT
+5. Run TradingApplication
 
 ## License
 

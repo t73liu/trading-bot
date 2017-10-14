@@ -9,7 +9,7 @@ logging:
   file: log/app.log
   level:
     root: INFO
-    org.springframework.web: DEBUG
+    org.springframework.web: INFO
     org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
 
 spring:
