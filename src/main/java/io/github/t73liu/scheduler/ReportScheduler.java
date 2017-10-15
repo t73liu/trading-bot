@@ -1,9 +1,9 @@
 package io.github.t73liu.scheduler;
 
 import eu.verdelhan.ta4j.Tick;
-import io.github.t73liu.exchange.bittrex.BittrexService;
-import io.github.t73liu.exchange.poloniex.PoloniexService;
-import io.github.t73liu.exchange.quadriga.QuadrigaService;
+import io.github.t73liu.exchange.bittrex.rest.BittrexService;
+import io.github.t73liu.exchange.poloniex.rest.PoloniexService;
+import io.github.t73liu.exchange.quadriga.rest.QuadrigaService;
 import io.github.t73liu.model.Balance;
 import io.github.t73liu.model.CandlestickIntervals;
 import io.github.t73liu.report.MailingService;

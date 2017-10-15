@@ -1,4 +1,4 @@
-package io.github.t73liu.exchange.bittrex;
+package io.github.t73liu.exchange.bittrex.rest;
 
 import io.github.t73liu.exchange.ExchangeService;
 import io.github.t73liu.model.currency.BittrexPair;

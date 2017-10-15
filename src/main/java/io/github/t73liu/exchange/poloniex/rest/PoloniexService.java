@@ -1,4 +1,4 @@
-package io.github.t73liu.exchange.poloniex;
+package io.github.t73liu.exchange.poloniex.rest;
 
 import eu.verdelhan.ta4j.BaseTick;
 import eu.verdelhan.ta4j.Tick;
@@ -20,7 +20,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +34,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.github.t73liu.model.currency.PoloniexPair.*;
-import static io.github.t73liu.util.ObjectMapperFactory.OBJECT_READER;
+import static io.github.t73liu.util.ObjectMapperFactory.JSON_READER;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Service
@@ -46,13 +45,6 @@ public class PoloniexService extends ExchangeService {
     public static final double TAKER_FEE = 0.0025;
     public static final double MAKER_FEE = 0.0015;
 
-    private final PoloniexTicker ticker;
-
-    @Autowired
-    public PoloniexService(PoloniexTicker ticker) {
-        this.ticker = ticker;
-    }
-
     // PUBLIC API
     public Map<String, Map<String, String>> getTickers() throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(1);
@@ -61,15 +53,14 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
-            return OBJECT_READER.readValue(response.getEntity().getContent());
+            return JSON_READER.readValue(response.getEntity().getContent());
         } finally {
             get.releaseConnection();
         }
     }
 
     public Map getTickerValue(PoloniexPair pair) throws Exception {
-        // TODO sync up getTickers with subscription?
-        return ticker.getTickerValue(pair);
+        return getTickers().get(pair.getPairName());
     }
 
     public Map getOrderBook(PoloniexPair pair) throws Exception {
@@ -82,7 +73,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
-            return OBJECT_READER.readValue(response.getEntity().getContent());
+            return JSON_READER.readValue(response.getEntity().getContent());
         } finally {
             get.releaseConnection();
         }
@@ -111,7 +102,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
-            return OBJECT_READER.forType(PoloniexCandle[].class).readValue(response.getEntity().getContent());
+            return JSON_READER.forType(PoloniexCandle[].class).readValue(response.getEntity().getContent());
         } finally {
             get.releaseConnection();
         }
@@ -124,7 +115,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
-            return OBJECT_READER.readValue(response.getEntity().getContent());
+            return JSON_READER.readValue(response.getEntity().getContent());
         } finally {
             get.releaseConnection();
         }
@@ -138,7 +129,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
-            return OBJECT_READER.readValue(response.getEntity().getContent());
+            return JSON_READER.readValue(response.getEntity().getContent());
         } finally {
             get.releaseConnection();
         }
@@ -168,7 +159,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
-            return OBJECT_READER.readValue(response.getEntity().getContent());
+            return JSON_READER.readValue(response.getEntity().getContent());
         } finally {
             post.releaseConnection();
         }
@@ -182,7 +173,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
-            return OBJECT_READER.readValue(response.getEntity().getContent());
+            return JSON_READER.readValue(response.getEntity().getContent());
         } finally {
             post.releaseConnection();
         }
@@ -197,7 +188,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
-            return OBJECT_READER.readValue(response.getEntity().getContent());
+            return JSON_READER.readValue(response.getEntity().getContent());
         } finally {
             post.releaseConnection();
         }
@@ -214,7 +205,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
-            return OBJECT_READER.readValue(response.getEntity().getContent());
+            return JSON_READER.readValue(response.getEntity().getContent());
         } finally {
             post.releaseConnection();
         }
@@ -241,7 +232,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
-            return OBJECT_READER.readValue(response.getEntity().getContent());
+            return JSON_READER.readValue(response.getEntity().getContent());
         } finally {
             post.releaseConnection();
         }
@@ -257,7 +248,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
-            return OBJECT_READER.readValue(response.getEntity().getContent());
+            return JSON_READER.readValue(response.getEntity().getContent());
         } finally {
             post.releaseConnection();
         }
@@ -284,7 +275,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
-            return OBJECT_READER.readValue(response.getEntity().getContent());
+            return JSON_READER.readValue(response.getEntity().getContent());
         } finally {
             post.releaseConnection();
         }
@@ -304,7 +295,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
-            return OBJECT_READER.readValue(response.getEntity().getContent());
+            return JSON_READER.readValue(response.getEntity().getContent());
         } finally {
             post.releaseConnection();
         }
@@ -319,7 +310,7 @@ public class PoloniexService extends ExchangeService {
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
-            return OBJECT_READER.readValue(response.getEntity().getContent());
+            return JSON_READER.readValue(response.getEntity().getContent());
         } finally {
             post.releaseConnection();
         }

@@ -1,4 +1,4 @@
-package io.github.t73liu.exchange.quadriga;
+package io.github.t73liu.exchange.quadriga.rest;
 
 import io.github.t73liu.exchange.ExchangeService;
 import io.github.t73liu.model.currency.QuadrigaPair;

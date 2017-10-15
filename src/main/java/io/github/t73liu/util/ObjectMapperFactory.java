@@ -1,6 +1,7 @@
 package io.github.t73liu.util;
 
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -12,18 +13,31 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class ObjectMapperFactory {
-    public static final ObjectMapper OBJECT_MAPPER = createObjectMapper();
+    public static final ObjectMapper JSON_MAPPER = createJSONMapper();
 
-    public static final ObjectReader OBJECT_READER = OBJECT_MAPPER.reader();
+    public static final ObjectReader JSON_READER = JSON_MAPPER.reader();
 
-    public static final ObjectWriter OBJECT_WRITER = OBJECT_MAPPER.writer();
+    public static final ObjectWriter JSON_WRITER = JSON_MAPPER.writer();
 
-    private static ObjectMapper createObjectMapper() {
+    public static final CsvMapper CSV_MAPPER = createCSVMapper();
+
+    private static ObjectMapper createJSONMapper() {
         ObjectMapper mapper = new ObjectMapper();
+        configureMapper(mapper);
+        return mapper;
+    }
+
+    private static CsvMapper createCSVMapper() {
+        CsvMapper mapper = new CsvMapper();
+        mapper.disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
+        configureMapper(mapper);
+        return mapper;
+    }
+
+    private static void configureMapper(ObjectMapper mapper) {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-//        mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
         JavaTimeModule timeModule = new JavaTimeModule();
         timeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(DateUtil.LOCALDATE_ISO_FORMATTER));
         timeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateUtil.LOCALDATETIME_ISO_FORMATTER));
@@ -31,6 +45,5 @@ public class ObjectMapperFactory {
         timeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateUtil.LOCALDATETIME_ISO_FORMATTER));
         mapper.registerModule(timeModule);
         mapper.registerModule(new AfterburnerModule());
-        return mapper;
     }
 }

@@ -1,4 +1,4 @@
-package io.github.t73liu.exchange.bitfinex;
+package io.github.t73liu.exchange.bitfinex.rest;
 
 import io.github.t73liu.exchange.ExchangeService;
 import org.slf4j.Logger;
