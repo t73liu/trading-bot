@@ -4,8 +4,8 @@ import eu.verdelhan.ta4j.BaseTick;
 import eu.verdelhan.ta4j.Tick;
 import io.github.t73liu.exchange.ExchangeService;
 import io.github.t73liu.model.CandlestickIntervals;
-import io.github.t73liu.model.currency.PoloniexPair;
 import io.github.t73liu.model.poloniex.PoloniexCandle;
+import io.github.t73liu.model.poloniex.PoloniexPair;
 import io.github.t73liu.util.DateUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.apache.commons.codec.binary.Hex;
@@ -33,8 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static io.github.t73liu.model.currency.PoloniexPair.*;
-import static io.github.t73liu.util.ObjectMapperFactory.JSON_READER;
+import static io.github.t73liu.model.poloniex.PoloniexPair.*;
+import static io.github.t73liu.util.MapperUtil.JSON_READER;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Service
@@ -89,7 +89,7 @@ public class PoloniexService extends ExchangeService {
                 .collect(Collectors.toList());
     }
 
-    private PoloniexCandle[] getExchangeCandle(PoloniexPair pair, LocalDateTime startDateTime, LocalDateTime endDateTime, CandlestickIntervals period) throws Exception {
+    public PoloniexCandle[] getExchangeCandle(PoloniexPair pair, LocalDateTime startDateTime, LocalDateTime endDateTime, CandlestickIntervals period) throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(3);
         queryParams.add(new BasicNameValuePair("command", "returnChartData"));
         // Candlestick period in seconds 300,900,1800,7200,14400,86400

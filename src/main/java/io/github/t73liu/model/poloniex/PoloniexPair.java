@@ -1,4 +1,4 @@
-package io.github.t73liu.model.currency;
+package io.github.t73liu.model.poloniex;
 
 public enum PoloniexPair {
     BTC_AMP,

@@ -4,8 +4,7 @@ public enum CandlestickIntervals {
     FIVE_MIN(300),
     FIFTEEN_MIN(900),
     THIRTY_MIN(1800),
-    //    ONE_HOUR("3600"), // Not supported by poloniex api
-    TWO_HOUR(7200);
+    TWO_HOUR(7200); // NOT IN BITFINEX
 
     private final long interval;
 

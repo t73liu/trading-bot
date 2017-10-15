@@ -32,6 +32,7 @@ public class BitfinexResource {
     @Path("/ticker/{pair}")
     @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Currency Information", response = Map.class))
     public Response getTickers(@PathParam("pair") @NotNull String pair) {
+        // https://api.bitfinex.com/v2/candles/trade:5m:tBTCUSD/last
         return Response.ok().build();
     }
 }

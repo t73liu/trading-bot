@@ -1,7 +1,7 @@
 package io.github.t73liu.exchange.bittrex.rest;
 
 import io.github.t73liu.exchange.ExchangeService;
-import io.github.t73liu.model.currency.BittrexPair;
+import io.github.t73liu.model.bittrex.BittrexPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;

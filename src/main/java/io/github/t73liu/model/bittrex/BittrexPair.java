@@ -1,4 +1,4 @@
-package io.github.t73liu.model.currency;
+package io.github.t73liu.model.bittrex;
 
 public enum BittrexPair {
     BTC_1ST("BTC-1ST"),

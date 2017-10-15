@@ -1,4 +1,4 @@
-package io.github.t73liu.model.currency;
+package io.github.t73liu.model.quadriga;
 
 public enum QuadrigaPair {
     BCH_CAD("bch_cad"),

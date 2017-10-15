@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static io.github.t73liu.model.currency.PoloniexPair.USDT_XRP;
+import static io.github.t73liu.model.poloniex.PoloniexPair.USDT_XRP;
 import static io.github.t73liu.util.DateUtil.getCurrentLocalDateTime;
 
 @Component

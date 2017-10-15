@@ -3,7 +3,7 @@ package io.github.t73liu.rest;
 import eu.verdelhan.ta4j.Tick;
 import io.github.t73liu.exception.ExceptionWrapper;
 import io.github.t73liu.exchange.poloniex.rest.PoloniexService;
-import io.github.t73liu.model.currency.PoloniexPair;
+import io.github.t73liu.model.poloniex.PoloniexPair;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;

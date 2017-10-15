@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
-import static io.github.t73liu.util.ObjectMapperFactory.JSON_MAPPER;
+import static io.github.t73liu.util.MapperUtil.JSON_MAPPER;
 
 @Provider
 public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {

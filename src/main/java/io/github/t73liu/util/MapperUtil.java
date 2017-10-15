@@ -9,10 +9,13 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
-public class ObjectMapperFactory {
+public class MapperUtil {
     public static final ObjectMapper JSON_MAPPER = createJSONMapper();
 
     public static final ObjectReader JSON_READER = JSON_MAPPER.reader();
@@ -20,6 +23,10 @@ public class ObjectMapperFactory {
     public static final ObjectWriter JSON_WRITER = JSON_MAPPER.writer();
 
     public static final CsvMapper CSV_MAPPER = createCSVMapper();
+
+    public static final ObjectReader CSV_READER = CSV_MAPPER.reader();
+
+    public static final ObjectWriter CSV_WRITER = CSV_MAPPER.writer();
 
     private static ObjectMapper createJSONMapper() {
         ObjectMapper mapper = new ObjectMapper();
@@ -45,5 +52,17 @@ public class ObjectMapperFactory {
         timeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateUtil.LOCALDATETIME_ISO_FORMATTER));
         mapper.registerModule(timeModule);
         mapper.registerModule(new AfterburnerModule());
+    }
+
+    public static void writeCSV(Object data, Class dataClass, String path) throws Exception {
+        CSV_WRITER.with(CSV_MAPPER.schemaFor(dataClass).withHeader())
+                .writeValue(Files.newOutputStream(Paths.get(path)), data);
+    }
+
+    public static <Type> List<Type> readCSV(Class<Type> dataClass, String path) throws Exception {
+        MappingIterator<Type> iterator = CSV_READER.forType(dataClass)
+                .with(CSV_MAPPER.schemaFor(dataClass).withHeader())
+                .readValues(Files.newInputStream(Paths.get(path)));
+        return iterator.readAll();
     }
 }
