@@ -1,9 +1,9 @@
 package io.github.t73liu.scheduler;
 
 import eu.verdelhan.ta4j.Tick;
-import io.github.t73liu.exchange.bittrex.rest.BittrexService;
-import io.github.t73liu.exchange.poloniex.rest.PoloniexService;
-import io.github.t73liu.exchange.quadriga.rest.QuadrigaService;
+import io.github.t73liu.exchange.bittrex.rest.BittrexMarketService;
+import io.github.t73liu.exchange.poloniex.rest.PoloniexAccountService;
+import io.github.t73liu.exchange.quadriga.rest.QuadrigaMarketService;
 import io.github.t73liu.model.Balance;
 import io.github.t73liu.model.CandlestickIntervals;
 import io.github.t73liu.report.MailingService;
@@ -30,19 +30,19 @@ import static io.github.t73liu.util.DateUtil.getCurrentLocalDateTime;
 public class ReportScheduler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportScheduler.class);
 
-    private final BittrexService bittrexService;
+    private final BittrexMarketService bittrexService;
 
-    private final PoloniexService poloniexService;
+    private final PoloniexAccountService poloniexAccountService;
 
-    private final QuadrigaService quadrigaService;
+    private final QuadrigaMarketService quadrigaService;
 
     private final MailingService mailingService;
 
     @Autowired
-    public ReportScheduler(BittrexService bittrexService, PoloniexService poloniexService,
-                           QuadrigaService quadrigaService, MailingService mailingService) {
+    public ReportScheduler(BittrexMarketService bittrexService, PoloniexAccountService poloniexAccountService,
+                           QuadrigaMarketService quadrigaService, MailingService mailingService) {
         this.bittrexService = bittrexService;
-        this.poloniexService = poloniexService;
+        this.poloniexAccountService = poloniexAccountService;
         this.quadrigaService = quadrigaService;
         this.mailingService = mailingService;
     }
@@ -58,24 +58,24 @@ public class ReportScheduler {
     //    @Scheduled(fixedDelay = 5000, zone = DateUtil.TIMEZONE)
     public void checkCandlesticks() throws Exception {
         LOGGER.info("Checking Poloniex Candlesticks for opportunities");
-        Map<String, Map<String, String>> allBalances = poloniexService.getCompleteBalances();
+        Map<String, Map<String, String>> allBalances = poloniexAccountService.getCompleteBalances();
         BigDecimal availableUSDT = new BigDecimal(allBalances.get("USDT").get("available")).setScale(8, RoundingMode.HALF_UP);
         BigDecimal availableXRP = new BigDecimal(allBalances.get("XRP").get("available")).setScale(8, RoundingMode.HALF_UP);
 
-        BigDecimal sellRate = new BigDecimal(poloniexService.getTickers().get("USDT_XRP").get("highestBid")).setScale(8, RoundingMode.HALF_UP);
-        BigDecimal buyRate = new BigDecimal(poloniexService.getTickers().get("USDT_XRP").get("lowestAsk")).setScale(8, RoundingMode.HALF_UP);
+        BigDecimal sellRate = new BigDecimal(poloniexAccountService.getTickers().get("USDT_XRP").get("highestBid")).setScale(8, RoundingMode.HALF_UP);
+        BigDecimal buyRate = new BigDecimal(poloniexAccountService.getTickers().get("USDT_XRP").get("lowestAsk")).setScale(8, RoundingMode.HALF_UP);
 
         LocalDateTime endLocalDateTime = getCurrentLocalDateTime();
         LocalDateTime startLocalDateTime = endLocalDateTime.minusHours(1);
-        List<Tick> sticks = poloniexService.getCandlestick(USDT_XRP, startLocalDateTime, endLocalDateTime, CandlestickIntervals.FIFTEEN_MIN);
+        List<Tick> sticks = poloniexAccountService.getCandlestick(USDT_XRP, startLocalDateTime, endLocalDateTime, CandlestickIntervals.FIFTEEN_MIN);
         LOGGER.info("Resulting candlesticks: {}", sticks);
     }
 
     //    @Scheduled(fixedDelay = 7200000, zone = DateUtil.TIMEZONE)
     public void reportBalances() throws Exception {
         LOGGER.info("Reporting Poloniex Balance values");
-        Map<String, Map<String, String>> allBalances = poloniexService.getCompleteBalances();
-        double usdtRate = Double.valueOf(poloniexService.getTickers().get("USDT_BTC").get("last"));
+        Map<String, Map<String, String>> allBalances = poloniexAccountService.getCompleteBalances();
+        double usdtRate = Double.valueOf(poloniexAccountService.getTickers().get("USDT_BTC").get("last"));
         List<Balance> balanceList = new ObjectArrayList<>(2);
         Balance xrp = new Balance();
         xrp.setAvailable(new BigDecimal(allBalances.get("XRP").get("available")).setScale(8, RoundingMode.HALF_UP));

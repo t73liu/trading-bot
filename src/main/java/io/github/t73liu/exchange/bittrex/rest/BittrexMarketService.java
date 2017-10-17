@@ -12,8 +12,8 @@ import java.util.Map;
 
 @Service
 @ConfigurationProperties(prefix = "bittrex")
-public class BittrexService extends ExchangeService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BittrexService.class);
+public class BittrexMarketService extends ExchangeService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BittrexMarketService.class);
     private static final double FEE = 0.0025;
 
     public Map getTicker(BittrexPair pair) {

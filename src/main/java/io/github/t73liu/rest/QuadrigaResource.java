@@ -1,7 +1,7 @@
 package io.github.t73liu.rest;
 
 import io.github.t73liu.exception.ExceptionWrapper;
-import io.github.t73liu.exchange.quadriga.rest.QuadrigaService;
+import io.github.t73liu.exchange.quadriga.rest.QuadrigaMarketService;
 import io.github.t73liu.model.quadriga.QuadrigaPair;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;
@@ -23,10 +23,10 @@ import java.util.Map;
 @Api("QuadrigaResource")
 @ApiResponses(@ApiResponse(code = 500, message = "Internal Server Error", response = ExceptionWrapper.class))
 public class QuadrigaResource {
-    private final QuadrigaService service;
+    private final QuadrigaMarketService service;
 
     @Autowired
-    public QuadrigaResource(QuadrigaService service) {
+    public QuadrigaResource(QuadrigaMarketService service) {
         this.service = service;
     }
 

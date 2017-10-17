@@ -4,7 +4,7 @@ import eu.verdelhan.ta4j.BaseTimeSeries;
 import eu.verdelhan.ta4j.Strategy;
 import eu.verdelhan.ta4j.Tick;
 import eu.verdelhan.ta4j.TimeSeries;
-import io.github.t73liu.exchange.poloniex.rest.PoloniexService;
+import io.github.t73liu.exchange.poloniex.rest.PoloniexAccountService;
 import io.github.t73liu.model.poloniex.PoloniexCandle;
 import io.github.t73liu.strategy.trading.CandleStrategy;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,7 +32,7 @@ public class EarningsCalculatorTest {
     @MethodSource("pathProvider")
     public void testStrategyProfitability(String path) throws Exception {
         List<Tick> ticks = readCSV(PoloniexCandle.class, path).stream()
-                .map(PoloniexService::mapExchangeCandleToTick)
+                .map(PoloniexAccountService::mapExchangeCandleToTick)
                 .collect(Collectors.toList());
         TimeSeries series = new BaseTimeSeries(ticks);
         Strategy strategy = CandleStrategy.getStrategy(series);

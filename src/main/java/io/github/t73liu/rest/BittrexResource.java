@@ -1,7 +1,7 @@
 package io.github.t73liu.rest;
 
 import io.github.t73liu.exception.ExceptionWrapper;
-import io.github.t73liu.exchange.bittrex.rest.BittrexService;
+import io.github.t73liu.exchange.bittrex.rest.BittrexMarketService;
 import io.github.t73liu.model.bittrex.BittrexPair;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;
@@ -23,10 +23,10 @@ import java.util.Map;
 @Api("BittrexResource")
 @ApiResponses(@ApiResponse(code = 500, message = "Internal Server Error", response = ExceptionWrapper.class))
 public class BittrexResource {
-    private final BittrexService service;
+    private final BittrexMarketService service;
 
     @Autowired
-    public BittrexResource(BittrexService service) {
+    public BittrexResource(BittrexMarketService service) {
         this.service = service;
     }
 

@@ -2,7 +2,7 @@ package io.github.t73liu.rest;
 
 import eu.verdelhan.ta4j.Tick;
 import io.github.t73liu.exception.ExceptionWrapper;
-import io.github.t73liu.exchange.poloniex.rest.PoloniexService;
+import io.github.t73liu.exchange.poloniex.rest.PoloniexAccountService;
 import io.github.t73liu.model.poloniex.PoloniexPair;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;
@@ -29,10 +29,10 @@ import static io.github.t73liu.util.DateUtil.getCurrentLocalDateTime;
 @Api("PoloniexResource")
 @ApiResponses(@ApiResponse(code = 500, message = "Internal Server Error", response = ExceptionWrapper.class))
 public class PoloniexResource {
-    private final PoloniexService service;
+    private final PoloniexAccountService service;
 
     @Autowired
-    public PoloniexResource(PoloniexService service) {
+    public PoloniexResource(PoloniexAccountService service) {
         this.service = service;
     }
 

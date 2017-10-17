@@ -2,7 +2,7 @@ package io.github.t73liu.exchange.poloniex.rest;
 
 import eu.verdelhan.ta4j.BaseTick;
 import eu.verdelhan.ta4j.Tick;
-import io.github.t73liu.exchange.ExchangeService;
+import io.github.t73liu.exchange.PrivateExchangeService;
 import io.github.t73liu.model.CandlestickIntervals;
 import io.github.t73liu.model.poloniex.PoloniexCandle;
 import io.github.t73liu.model.poloniex.PoloniexPair;
@@ -39,11 +39,11 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Service
 @ConfigurationProperties(prefix = "poloniex")
-public class PoloniexService extends ExchangeService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PoloniexService.class);
+public class PoloniexAccountService extends PrivateExchangeService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PoloniexAccountService.class);
     // TODO set fees from getFees method
-    public static final double TAKER_FEE = 0.0025;
-    public static final double MAKER_FEE = 0.0015;
+    private static final double TAKER_FEE = 0.0025;
+    private static final double MAKER_FEE = 0.0015;
 
     // PUBLIC API
     public Map<String, Map<String, String>> getTickers() throws Exception {
@@ -85,7 +85,7 @@ public class PoloniexService extends ExchangeService {
 
     public List<Tick> getCandlestick(PoloniexPair pair, LocalDateTime startDateTime, LocalDateTime endDateTime, CandlestickIntervals period) throws Exception {
         return Arrays.stream(getExchangeCandle(pair, startDateTime, endDateTime, period))
-                .map(PoloniexService::mapExchangeCandleToTick)
+                .map(PoloniexAccountService::mapExchangeCandleToTick)
                 .collect(Collectors.toList());
     }
 

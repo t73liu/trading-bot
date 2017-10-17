@@ -25,7 +25,6 @@ spring:
       mail.smtp.ssl.enable: false
     username: replace-with-email-username
     password: replace-with-email-password
-#    test-connection: true
 
 app:
   version: 1.0.0
