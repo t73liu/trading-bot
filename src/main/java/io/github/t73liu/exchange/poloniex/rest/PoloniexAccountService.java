@@ -1,20 +1,15 @@
 package io.github.t73liu.exchange.poloniex.rest;
 
-import eu.verdelhan.ta4j.BaseTick;
-import eu.verdelhan.ta4j.Tick;
+import io.github.t73liu.exchange.AccountService;
 import io.github.t73liu.exchange.PrivateExchangeService;
-import io.github.t73liu.model.CandlestickIntervals;
-import io.github.t73liu.model.poloniex.PoloniexCandle;
+import io.github.t73liu.model.EncryptionType;
 import io.github.t73liu.model.poloniex.PoloniexPair;
 import io.github.t73liu.util.DateUtil;
+import io.github.t73liu.util.HttpUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import org.apache.commons.codec.binary.Hex;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -23,138 +18,26 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import static io.github.t73liu.model.poloniex.PoloniexPair.*;
 import static io.github.t73liu.util.MapperUtil.JSON_READER;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Service
 @ConfigurationProperties(prefix = "poloniex")
-public class PoloniexAccountService extends PrivateExchangeService {
+public class PoloniexAccountService extends PrivateExchangeService implements AccountService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PoloniexAccountService.class);
-    // TODO set fees from getFees method
     private static final double TAKER_FEE = 0.0025;
     private static final double MAKER_FEE = 0.0015;
 
-    // PUBLIC API
-    public Map<String, Map<String, String>> getTickers() throws Exception {
-        List<NameValuePair> queryParams = new ObjectArrayList<>(1);
-        queryParams.add(new BasicNameValuePair("command", "returnTicker"));
-        HttpGet get = generateGet(queryParams);
-
-        try (CloseableHttpClient httpClient = HttpClients.createDefault();
-             CloseableHttpResponse response = httpClient.execute(get)) {
-            return JSON_READER.readValue(response.getEntity().getContent());
-        } finally {
-            get.releaseConnection();
-        }
-    }
-
-    public Map getTickerValue(PoloniexPair pair) throws Exception {
-        return getTickers().get(pair.getPairName());
-    }
-
-    public Map getOrderBook(PoloniexPair pair) throws Exception {
-        List<NameValuePair> queryParams = new ObjectArrayList<>(3);
-        queryParams.add(new BasicNameValuePair("command", "returnOrderBook"));
-        queryParams.add(new BasicNameValuePair("depth", "10"));
-        // Set currencyPair to all to see 95 pairs
-        queryParams.add(new BasicNameValuePair("currencyPair", pair.getPairName()));
-        HttpGet get = generateGet(queryParams);
-
-        try (CloseableHttpClient httpClient = HttpClients.createDefault();
-             CloseableHttpResponse response = httpClient.execute(get)) {
-            return JSON_READER.readValue(response.getEntity().getContent());
-        } finally {
-            get.releaseConnection();
-        }
-    }
-
-    public static Tick mapExchangeCandleToTick(PoloniexCandle candle) {
-        return new BaseTick(DateUtil.unixTimeStampToZonedDateTime(candle.getDate()), candle.getOpen(), candle.getHigh(), candle.getLow(), candle.getClose(), candle.getVolume());
-    }
-
-    public List<Tick> getCandlestick(PoloniexPair pair, LocalDateTime startDateTime, LocalDateTime endDateTime, CandlestickIntervals period) throws Exception {
-        return Arrays.stream(getExchangeCandle(pair, startDateTime, endDateTime, period))
-                .map(PoloniexAccountService::mapExchangeCandleToTick)
-                .collect(Collectors.toList());
-    }
-
-    public PoloniexCandle[] getExchangeCandle(PoloniexPair pair, LocalDateTime startDateTime, LocalDateTime endDateTime, CandlestickIntervals period) throws Exception {
-        List<NameValuePair> queryParams = new ObjectArrayList<>(3);
-        queryParams.add(new BasicNameValuePair("command", "returnChartData"));
-        // Candlestick period in seconds 300,900,1800,7200,14400,86400
-        queryParams.add(new BasicNameValuePair("period", String.valueOf(period.getInterval())));
-        queryParams.add(new BasicNameValuePair("currencyPair", pair.getPairName()));
-        // UNIX timestamp format of specified time range (i.e. last hour)
-        queryParams.add(new BasicNameValuePair("start", String.valueOf(DateUtil.localDateTimeToUnixTimestamp(startDateTime))));
-        queryParams.add(new BasicNameValuePair("end", String.valueOf(DateUtil.localDateTimeToUnixTimestamp(endDateTime))));
-        HttpGet get = generateGet(queryParams);
-
-        try (CloseableHttpClient httpClient = HttpClients.createDefault();
-             CloseableHttpResponse response = httpClient.execute(get)) {
-            return JSON_READER.forType(PoloniexCandle[].class).readValue(response.getEntity().getContent());
-        } finally {
-            get.releaseConnection();
-        }
-    }
-
-    public Map getCurrencies() throws Exception {
-        List<NameValuePair> queryParams = new ObjectArrayList<>(1);
-        queryParams.add(new BasicNameValuePair("command", "returnCurrencies"));
-        HttpGet get = generateGet(queryParams);
-
-        try (CloseableHttpClient httpClient = HttpClients.createDefault();
-             CloseableHttpResponse response = httpClient.execute(get)) {
-            return JSON_READER.readValue(response.getEntity().getContent());
-        } finally {
-            get.releaseConnection();
-        }
-    }
-
-    public Map getLoanOrders(String currency) throws Exception {
-        List<NameValuePair> queryParams = new ObjectArrayList<>(2);
-        queryParams.add(new BasicNameValuePair("command", "returnLoanOrders"));
-        queryParams.add(new BasicNameValuePair("currency", currency));
-        HttpGet get = generateGet(queryParams);
-
-        try (CloseableHttpClient httpClient = HttpClients.createDefault();
-             CloseableHttpResponse response = httpClient.execute(get)) {
-            return JSON_READER.readValue(response.getEntity().getContent());
-        } finally {
-            get.releaseConnection();
-        }
-    }
-
-    // TODO implement actual arbitrage checker
-    public boolean checkArbitrage() throws Exception {
-        // Need to check volume of lowest ask and volume of coins in question, low liquidity safer?
-        Map<String, Map<String, String>> tickers = getTickers();
-        Double btc = Double.valueOf(tickers.get(USDT_BTC.getPairName()).get("lowestAsk"));
-        Double eth = Double.valueOf(tickers.get(USDT_ZEC.getPairName()).get("lowestAsk"));
-        Double eth2btc = Double.valueOf(tickers.get(BTC_ZEC.getPairName()).get("lowestAsk"));
-        double revenue = Math.abs((eth2btc / (eth / btc)) - 1);
-        double cost = TAKER_FEE * 3;
-        LOGGER.info("exchange: {}, actual: {}, revenue: {}, cost:{}", eth / btc, eth2btc, revenue, cost);
-        return revenue > cost;
-    }
-
     // PRIVATE API - NOTE: LIMIT SIX CALLS PER SECOND
     public Map getCompleteBalances() throws Exception {
+        // Setting account to all will include margin and lending accounts
         List<NameValuePair> queryParams = new ObjectArrayList<>(2);
         queryParams.add(new BasicNameValuePair("command", "returnCompleteBalances"));
         queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
-        // Setting account type to all will include margin and lending accounts
-//        queryParams.add(new BasicNameValuePair("account", "all"));
+
         HttpPost post = generatePost(queryParams);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -169,21 +52,7 @@ public class PoloniexAccountService extends PrivateExchangeService {
         List<NameValuePair> queryParams = new ObjectArrayList<>(2);
         queryParams.add(new BasicNameValuePair("command", "returnDepositAddresses"));
         queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
-        HttpPost post = generatePost(queryParams);
 
-        try (CloseableHttpClient httpClient = HttpClients.createDefault();
-             CloseableHttpResponse response = httpClient.execute(post)) {
-            return JSON_READER.readValue(response.getEntity().getContent());
-        } finally {
-            post.releaseConnection();
-        }
-    }
-
-    public Map getOpenOrders(PoloniexPair pair) throws Exception {
-        List<NameValuePair> queryParams = new ObjectArrayList<>(3);
-        queryParams.add(new BasicNameValuePair("command", "returnOpenOrders"));
-        queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
-        queryParams.add(pair == null ? new BasicNameValuePair("currencyPair", "all") : new BasicNameValuePair("currencyPair", pair.getPairName()));
         HttpPost post = generatePost(queryParams);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -201,75 +70,6 @@ public class PoloniexAccountService extends PrivateExchangeService {
         queryParams.add(pair == null ? new BasicNameValuePair("currencyPair", "all") : new BasicNameValuePair("currencyPair", pair.getPairName()));
         queryParams.add(new BasicNameValuePair("start", String.valueOf(DateUtil.localDateTimeToUnixTimestamp(startDateTime))));
         queryParams.add(new BasicNameValuePair("end", String.valueOf(DateUtil.localDateTimeToUnixTimestamp(endDateTime))));
-        HttpPost post = generatePost(queryParams);
-
-        try (CloseableHttpClient httpClient = HttpClients.createDefault();
-             CloseableHttpResponse response = httpClient.execute(post)) {
-            return JSON_READER.readValue(response.getEntity().getContent());
-        } finally {
-            post.releaseConnection();
-        }
-    }
-
-    public Map placeOrder(@NotNull PoloniexPair pair, BigDecimal rate, BigDecimal amount, String orderType, String fulfillmentType) throws Exception {
-        List<NameValuePair> queryParams = new ObjectArrayList<>(6);
-        queryParams.add(new BasicNameValuePair("command", "buy".equalsIgnoreCase(orderType) ? "buy" : "sell"));
-        queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
-        queryParams.add(new BasicNameValuePair("currencyPair", pair.getPairName()));
-        queryParams.add(new BasicNameValuePair("rate", String.valueOf(rate)));
-        queryParams.add(new BasicNameValuePair("amount", String.valueOf(amount)));
-        if ("fillOrKill".equalsIgnoreCase(fulfillmentType)) {
-            // order will either fill in its entirety or be completely aborted
-            queryParams.add(new BasicNameValuePair("fillOrKill", "1"));
-        } else if ("immediateOrCancel".equalsIgnoreCase(fulfillmentType)) {
-            // order can be partially or completely filled, but any portion of the order that cannot be filled immediately will be canceled rather than left on the order book
-            queryParams.add(new BasicNameValuePair("immediateOrCancel", "1"));
-        } else {
-            // order will only be placed if no portion of it fills immediately; this guarantees you will never pay the taker fee on any part of the order that fills
-            queryParams.add(new BasicNameValuePair("postOnly", "1"));
-        }
-        HttpPost post = generatePost(queryParams);
-
-        try (CloseableHttpClient httpClient = HttpClients.createDefault();
-             CloseableHttpResponse response = httpClient.execute(post)) {
-            return JSON_READER.readValue(response.getEntity().getContent());
-        } finally {
-            post.releaseConnection();
-        }
-    }
-
-    private Map cancelOrder(String orderNumber) throws Exception {
-        List<NameValuePair> queryParams = new ObjectArrayList<>(3);
-        queryParams.add(new BasicNameValuePair("command", "cancelOrder"));
-        queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
-        queryParams.add(new BasicNameValuePair("orderNumber", orderNumber));
-
-        HttpPost post = generatePost(queryParams);
-
-        try (CloseableHttpClient httpClient = HttpClients.createDefault();
-             CloseableHttpResponse response = httpClient.execute(post)) {
-            return JSON_READER.readValue(response.getEntity().getContent());
-        } finally {
-            post.releaseConnection();
-        }
-    }
-
-    private Map moveOrder(String orderNumber, double rate, Double amount, String fulfillmentType) throws Exception {
-        List<NameValuePair> queryParams = new ObjectArrayList<>(3);
-        queryParams.add(new BasicNameValuePair("command", "moveOrder"));
-        queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
-        queryParams.add(new BasicNameValuePair("orderNumber", orderNumber));
-        queryParams.add(new BasicNameValuePair("rate", String.valueOf(rate)));
-        if (amount != null) {
-            queryParams.add(new BasicNameValuePair("amount", amount.toString()));
-        }
-        if ("immediateOrCancel".equalsIgnoreCase(fulfillmentType)) {
-            // order can be partially or completely filled, but any portion of the order that cannot be filled immediately will be canceled rather than left on the order book
-            queryParams.add(new BasicNameValuePair("immediateOrCancel", "1"));
-        } else {
-            // order will only be placed if no portion of it fills immediately; this guarantees you will never pay the taker fee on any part of the order that fills
-            queryParams.add(new BasicNameValuePair("postOnly", "1"));
-        }
 
         HttpPost post = generatePost(queryParams);
 
@@ -282,14 +82,13 @@ public class PoloniexAccountService extends PrivateExchangeService {
     }
 
     private Map withdrawCurrency(String currency, double amount, String depositAddress) throws Exception {
-        List<NameValuePair> queryParams = new ObjectArrayList<>(3);
+        List<NameValuePair> queryParams = new ObjectArrayList<>(5);
+        // TODO investigate paymentId parameter
         queryParams.add(new BasicNameValuePair("command", "withdraw"));
         queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
         queryParams.add(new BasicNameValuePair("currency", currency));
         queryParams.add(new BasicNameValuePair("amount", String.valueOf(amount)));
         queryParams.add(new BasicNameValuePair("address", depositAddress));
-        // TODO verify purpose of paymentId
-//        queryParams.add(new BasicNameValuePair("paymentId", paymentId));
 
         HttpPost post = generatePost(queryParams);
 
@@ -316,35 +115,11 @@ public class PoloniexAccountService extends PrivateExchangeService {
         }
     }
 
-    // HELPER
     private HttpPost generatePost(List<NameValuePair> queryParams) throws Exception {
-        String queryParamStr = queryParams.stream()
-                .map(Object::toString)
-                .reduce((queryOne, queryTwo) -> queryOne + "&" + queryTwo)
-                .orElse("");
-
-        // Generating special headers
-        Mac shaMac = Mac.getInstance("HmacSHA512");
-        SecretKeySpec keySpec = new SecretKeySpec(getSecretKey().getBytes(UTF_8), "HmacSHA512");
-        shaMac.init(keySpec);
-        String sign = Hex.encodeHexString(shaMac.doFinal(queryParamStr.getBytes(UTF_8)));
-        HttpPost post = new HttpPost(getTradingUrl());
-        post.addHeader("Key", getApiKey());
-        post.addHeader("Sign", sign);
-
-        post.setEntity(new UrlEncodedFormEntity(queryParams));
-        return post;
+        return HttpUtil.generatePost(getAccountUrl(), queryParams, getApiKey(), getSecretKey(), EncryptionType.HMAC_SHA512);
     }
 
-    private HttpGet generateGet(List<NameValuePair> queryParams) throws Exception {
-        return new HttpGet(new URIBuilder(getPublicUrl()).addParameters(queryParams).build());
-    }
-
-    private String getTradingUrl() {
+    private String getAccountUrl() {
         return getBaseUrl() + "tradingApi";
-    }
-
-    private String getPublicUrl() {
-        return getBaseUrl() + "public";
     }
 }

@@ -3,6 +3,8 @@ package io.github.t73liu.rest;
 import eu.verdelhan.ta4j.Tick;
 import io.github.t73liu.exception.ExceptionWrapper;
 import io.github.t73liu.exchange.poloniex.rest.PoloniexAccountService;
+import io.github.t73liu.exchange.poloniex.rest.PoloniexMarketService;
+import io.github.t73liu.exchange.poloniex.rest.PoloniexOrderService;
 import io.github.t73liu.model.poloniex.PoloniexPair;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;
@@ -29,18 +31,15 @@ import static io.github.t73liu.util.DateUtil.getCurrentLocalDateTime;
 @Api("PoloniexResource")
 @ApiResponses(@ApiResponse(code = 500, message = "Internal Server Error", response = ExceptionWrapper.class))
 public class PoloniexResource {
-    private final PoloniexAccountService service;
+    private final PoloniexAccountService accountService;
+    private final PoloniexMarketService marketService;
+    private final PoloniexOrderService orderService;
 
     @Autowired
-    public PoloniexResource(PoloniexAccountService service) {
-        this.service = service;
-    }
-
-    @GET
-    @Path("/arbitrage")
-    @ApiResponses(@ApiResponse(code = 200, message = "Checks if there is arbitrage opportunity", response = Boolean.class))
-    public Response checkArbitrage() throws Exception {
-        return Response.ok(service.checkArbitrage()).build();
+    public PoloniexResource(PoloniexAccountService service, PoloniexMarketService marketService, PoloniexOrderService orderService) {
+        this.accountService = service;
+        this.marketService = marketService;
+        this.orderService = orderService;
     }
 
     @GET
@@ -49,28 +48,28 @@ public class PoloniexResource {
     public Response checkCandles() throws Exception {
         LocalDateTime endLocalDateTime = getCurrentLocalDateTime();
         LocalDateTime startLocalDateTime = endLocalDateTime.minusHours(6);
-        return Response.ok(service.getCandlestick(PoloniexPair.USDT_XRP, startLocalDateTime, endLocalDateTime, THIRTY_MIN)).build();
+        return Response.ok(marketService.getCandlestick(PoloniexPair.USDT_XRP, startLocalDateTime, endLocalDateTime, THIRTY_MIN)).build();
     }
 
     @GET
     @Path("/tickers")
     @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Ticker of Specified Pair in Poloniex", response = Map.class))
     public Response getTicker(@QueryParam("pair") @Valid @NotNull PoloniexPair pair) throws Exception {
-        return Response.ok(service.getTickerValue(pair)).build();
+        return Response.ok(marketService.getTickerForPair(pair)).build();
     }
 
     @GET
     @Path("/balances")
     @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Balances in Poloniex", response = Map.class))
     public Response getBalances() throws Exception {
-        return Response.ok(service.getCompleteBalances()).build();
+        return Response.ok(accountService.getCompleteBalances()).build();
     }
 
     @GET
     @Path("/orders/open")
     @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Open Orders in Poloniex", response = Map.class))
     public Response getOpenOrders(@QueryParam("pair") PoloniexPair pair) throws Exception {
-        return Response.ok(service.getOpenOrders(pair)).build();
+        return Response.ok(orderService.getOpenOrders(pair)).build();
     }
 
     @GET
@@ -79,6 +78,6 @@ public class PoloniexResource {
     public Response placeBuy(@QueryParam("pair") @Valid @NotNull PoloniexPair pair,
                              @QueryParam("orderType") @DefaultValue("buy") String orderType,
                              @QueryParam("fulfillmentType") @DefaultValue("immediateOrCancel") String fulfillmentType) throws Exception {
-        return Response.ok(service.placeOrder(pair, BigDecimal.valueOf(0), BigDecimal.valueOf(0), orderType, fulfillmentType)).build();
+        return Response.ok(orderService.placeOrder(pair, BigDecimal.valueOf(0), BigDecimal.valueOf(0), orderType, fulfillmentType)).build();
     }
 }
