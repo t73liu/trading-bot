@@ -1,5 +1,9 @@
 package io.github.t73liu.model.poloniex;
 
+import eu.verdelhan.ta4j.BaseTick;
+import eu.verdelhan.ta4j.Tick;
+import io.github.t73liu.util.DateUtil;
+
 public class PoloniexCandle {
     private long date;
     private double high;
@@ -40,5 +44,9 @@ public class PoloniexCandle {
 
     public double getWeightedAverage() {
         return weightedAverage;
+    }
+
+    public Tick toTick() {
+        return new BaseTick(DateUtil.unixTimeStampToZonedDateTime(date), open, high, low, close, volume);
     }
 }

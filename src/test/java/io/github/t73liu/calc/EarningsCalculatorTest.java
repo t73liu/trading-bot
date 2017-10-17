@@ -1,7 +1,6 @@
 package io.github.t73liu.calc;
 
 import eu.verdelhan.ta4j.*;
-import io.github.t73liu.exchange.poloniex.rest.PoloniexMarketService;
 import io.github.t73liu.model.poloniex.PoloniexCandle;
 import io.github.t73liu.strategy.trading.CandleStrategy;
 import org.apache.commons.math3.util.Precision;
@@ -32,14 +31,14 @@ public class EarningsCalculatorTest {
     @MethodSource("pathProvider")
     public void testStrategyProfitability(String path) throws Exception {
         List<Tick> ticks = readCSV(PoloniexCandle.class, path).stream()
-                .map(PoloniexMarketService::mapExchangeCandleToTick)
+                .map(PoloniexCandle::toTick)
                 .collect(Collectors.toList());
         TimeSeries series = new BaseTimeSeries(ticks);
         Strategy strategy = CandleStrategy.getStrategy(series);
         double takerFee = 0.002;
         double profit = EarningsCalculator.calculateProfit(series, strategy, takerFee);
         Decimal growth = ticks.get(ticks.size() - 1).getClosePrice().dividedBy(ticks.get(0).getClosePrice());
-        LOGGER.info("LONG GROWTH: {}, STRATEGY YIELD:{}", roundDecimalToDouble(growth), Precision.round(profit, 8));
+        LOGGER.info("DEFAULT: {}, STRATEGY:{}", roundDecimalToDouble(growth), Precision.round(profit, 8));
         Assertions.assertTrue(profit > growth.multipliedBy(Decimal.valueOf(1.05)).toDouble());
     }
 }

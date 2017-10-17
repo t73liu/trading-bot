@@ -1,6 +1,5 @@
 package io.github.t73liu.exchange.poloniex.rest;
 
-import eu.verdelhan.ta4j.BaseTick;
 import eu.verdelhan.ta4j.Tick;
 import io.github.t73liu.exchange.ExchangeService;
 import io.github.t73liu.exchange.MarketService;
@@ -30,10 +29,6 @@ import static io.github.t73liu.util.MapperUtil.JSON_READER;
 @Service
 @ConfigurationProperties(prefix = "poloniex")
 public class PoloniexMarketService extends ExchangeService implements MarketService {
-    public static Tick mapExchangeCandleToTick(PoloniexCandle candle) {
-        return new BaseTick(DateUtil.unixTimeStampToZonedDateTime(candle.getDate()), candle.getOpen(), candle.getHigh(), candle.getLow(), candle.getClose(), candle.getVolume());
-    }
-
     public Map<String, Map<String, String>> getAllTicker() throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(1);
         queryParams.add(new BasicNameValuePair("command", "returnTicker"));
@@ -83,7 +78,7 @@ public class PoloniexMarketService extends ExchangeService implements MarketServ
 
     public List<Tick> getCandlestick(PoloniexPair pair, LocalDateTime startDateTime, LocalDateTime endDateTime, CandlestickIntervals period) throws Exception {
         return Arrays.stream(getExchangeCandle(pair, startDateTime, endDateTime, period))
-                .map(PoloniexMarketService::mapExchangeCandleToTick)
+                .map(PoloniexCandle::toTick)
                 .collect(Collectors.toList());
     }
 
