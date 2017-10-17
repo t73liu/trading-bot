@@ -1,7 +1,9 @@
 package io.github.t73liu.rest;
 
 import io.github.t73liu.exception.ExceptionWrapper;
+import io.github.t73liu.exchange.quadriga.rest.QuadrigaAccountService;
 import io.github.t73liu.exchange.quadriga.rest.QuadrigaMarketService;
+import io.github.t73liu.exchange.quadriga.rest.QuadrigaOrderService;
 import io.github.t73liu.model.quadriga.QuadrigaPair;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;
@@ -23,17 +25,21 @@ import java.util.Map;
 @Api("QuadrigaResource")
 @ApiResponses(@ApiResponse(code = 500, message = "Internal Server Error", response = ExceptionWrapper.class))
 public class QuadrigaResource {
-    private final QuadrigaMarketService service;
+    private final QuadrigaAccountService accountService;
+    private final QuadrigaMarketService marketService;
+    private final QuadrigaOrderService orderService;
 
     @Autowired
-    public QuadrigaResource(QuadrigaMarketService service) {
-        this.service = service;
+    public QuadrigaResource(QuadrigaAccountService accountService, QuadrigaMarketService marketService, QuadrigaOrderService orderService) {
+        this.accountService = accountService;
+        this.marketService = marketService;
+        this.orderService = orderService;
     }
 
     @GET
     @Path("/ticker/{pair}")
     @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Currency Information", response = Map.class))
     public Response getTickers(@PathParam("pair") @Valid @NotNull QuadrigaPair pair) {
-        return Response.ok(service.getTicker(pair)).build();
+        return Response.ok().build();
     }
 }

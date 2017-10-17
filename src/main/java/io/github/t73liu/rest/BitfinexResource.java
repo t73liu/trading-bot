@@ -2,6 +2,8 @@ package io.github.t73liu.rest;
 
 import io.github.t73liu.exception.ExceptionWrapper;
 import io.github.t73liu.exchange.bitfinex.rest.BitfinexAccountService;
+import io.github.t73liu.exchange.bitfinex.rest.BitfinexMarketService;
+import io.github.t73liu.exchange.bitfinex.rest.BitfinexOrderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -21,11 +23,15 @@ import java.util.Map;
 @Api("BitfinexResource")
 @ApiResponses(@ApiResponse(code = 500, message = "Internal Server Error", response = ExceptionWrapper.class))
 public class BitfinexResource {
-    private final BitfinexAccountService service;
+    private final BitfinexAccountService accountService;
+    private final BitfinexMarketService marketService;
+    private final BitfinexOrderService orderService;
 
     @Autowired
-    public BitfinexResource(BitfinexAccountService service) {
-        this.service = service;
+    public BitfinexResource(BitfinexAccountService accountService, BitfinexMarketService marketService, BitfinexOrderService orderService) {
+        this.accountService = accountService;
+        this.marketService = marketService;
+        this.orderService = orderService;
     }
 
     @GET

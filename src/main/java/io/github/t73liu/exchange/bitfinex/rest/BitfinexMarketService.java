@@ -8,4 +8,5 @@ import org.springframework.stereotype.Service;
 @Service
 @ConfigurationProperties(prefix = "bitfinex")
 public class BitfinexMarketService extends ExchangeService implements MarketService {
+    // TODO implement
 }

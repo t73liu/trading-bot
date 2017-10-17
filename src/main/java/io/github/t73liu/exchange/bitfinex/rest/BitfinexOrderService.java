@@ -8,4 +8,5 @@ import org.springframework.stereotype.Service;
 @Service
 @ConfigurationProperties(prefix = "bitfinex")
 public class BitfinexOrderService extends PrivateExchangeService implements OrderService {
+    // TODO implement
 }

@@ -7,9 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Service
 @ConfigurationProperties(prefix = "bitfinex")
 public class BitfinexAccountService extends PrivateExchangeService implements AccountService {
@@ -17,7 +14,5 @@ public class BitfinexAccountService extends PrivateExchangeService implements Ac
     private static final double MAKER_FEE = 0.001;
     private static final Logger LOGGER = LoggerFactory.getLogger(BitfinexAccountService.class);
 
-    public Map getTicker(String pair) {
-        return new HashMap();
-    }
+    // TODO implement
 }

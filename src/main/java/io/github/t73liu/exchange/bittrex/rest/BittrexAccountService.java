@@ -8,4 +8,5 @@ import org.springframework.stereotype.Service;
 @Service
 @ConfigurationProperties(prefix = "bittrex")
 public class BittrexAccountService extends PrivateExchangeService implements AccountService {
+    // TODO implement
 }

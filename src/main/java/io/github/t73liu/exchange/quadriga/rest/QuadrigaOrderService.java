@@ -8,4 +8,5 @@ import org.springframework.stereotype.Service;
 @Service
 @ConfigurationProperties(prefix = "quadrigacx")
 public class QuadrigaOrderService extends PrivateExchangeService implements OrderService {
+    // TODO implement
 }

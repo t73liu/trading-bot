@@ -1,12 +1,11 @@
 package io.github.t73liu.calc;
 
-import eu.verdelhan.ta4j.BaseTimeSeries;
-import eu.verdelhan.ta4j.Strategy;
-import eu.verdelhan.ta4j.Tick;
-import eu.verdelhan.ta4j.TimeSeries;
+import eu.verdelhan.ta4j.*;
 import io.github.t73liu.exchange.poloniex.rest.PoloniexMarketService;
 import io.github.t73liu.model.poloniex.PoloniexCandle;
 import io.github.t73liu.strategy.trading.CandleStrategy;
+import org.apache.commons.math3.util.Precision;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
@@ -17,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.github.t73liu.util.MapperUtil.readCSV;
+import static io.github.t73liu.util.MathUtil.roundDecimalToDouble;
 
 public class EarningsCalculatorTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(EarningsCalculatorTest.class);
@@ -38,11 +38,8 @@ public class EarningsCalculatorTest {
         Strategy strategy = CandleStrategy.getStrategy(series);
         double takerFee = 0.002;
         double profit = EarningsCalculator.calculateProfit(series, strategy, takerFee);
-        if (profit > 1.05) {
-            LOGGER.info("File:{}, PROFIT:{}", path, profit);
-        } else {
-            LOGGER.error("File:{}, LOSS:{}", path, profit);
-        }
-//        Assertions.assertTrue(profit > 1.05);
+        Decimal growth = ticks.get(ticks.size() - 1).getClosePrice().dividedBy(ticks.get(0).getClosePrice());
+        LOGGER.info("LONG GROWTH: {}, STRATEGY YIELD:{}", roundDecimalToDouble(growth), Precision.round(profit, 8));
+        Assertions.assertTrue(profit > growth.multipliedBy(Decimal.valueOf(1.05)).toDouble());
     }
 }
