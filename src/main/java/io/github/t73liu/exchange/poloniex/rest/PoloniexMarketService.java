@@ -19,6 +19,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,10 +34,17 @@ import static io.github.t73liu.util.MapperUtil.TYPE_FACTORY;
 @Service
 @ConfigurationProperties(prefix = "poloniex")
 public class PoloniexMarketService extends ExchangeService implements MarketService {
+    private String PUBLIC_URL;
+
+    @PostConstruct
+    public void init() {
+        PUBLIC_URL = getBaseUrl() + "public";
+    }
+
     public Map<PoloniexPair, PoloniexTicker> getAllTicker() throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(1);
         queryParams.add(new BasicNameValuePair("command", "returnTicker"));
-        HttpGet get = generateGet(getPublicUrl(), queryParams);
+        HttpGet get = generateGet(PUBLIC_URL, queryParams);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
@@ -56,7 +64,7 @@ public class PoloniexMarketService extends ExchangeService implements MarketServ
         queryParams.add(new BasicNameValuePair("command", "returnOrderBook"));
         queryParams.add(new BasicNameValuePair("depth", String.valueOf(amount)));
         queryParams.add(new BasicNameValuePair("currencyPair", "all"));
-        HttpGet get = generateGet(getPublicUrl(), queryParams);
+        HttpGet get = generateGet(PUBLIC_URL, queryParams);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
@@ -72,7 +80,7 @@ public class PoloniexMarketService extends ExchangeService implements MarketServ
         queryParams.add(new BasicNameValuePair("command", "returnOrderBook"));
         queryParams.add(new BasicNameValuePair("depth", String.valueOf(amount)));
         queryParams.add(new BasicNameValuePair("currencyPair", pair.getPairName()));
-        HttpGet get = generateGet(getPublicUrl(), queryParams);
+        HttpGet get = generateGet(PUBLIC_URL, queryParams);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
@@ -97,7 +105,7 @@ public class PoloniexMarketService extends ExchangeService implements MarketServ
         // UNIX timestamp format of specified time range (i.e. last hour)
         queryParams.add(new BasicNameValuePair("start", String.valueOf(DateUtil.localDateTimeToUnixTimestamp(startDateTime))));
         queryParams.add(new BasicNameValuePair("end", String.valueOf(DateUtil.localDateTimeToUnixTimestamp(endDateTime))));
-        HttpGet get = generateGet(getPublicUrl(), queryParams);
+        HttpGet get = generateGet(PUBLIC_URL, queryParams);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
@@ -105,9 +113,5 @@ public class PoloniexMarketService extends ExchangeService implements MarketServ
         } finally {
             get.releaseConnection();
         }
-    }
-
-    private String getPublicUrl() {
-        return getBaseUrl() + "public";
     }
 }

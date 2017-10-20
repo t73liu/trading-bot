@@ -48,7 +48,7 @@ public class PoloniexAccountService extends PrivateExchangeService implements Ac
         }
     }
 
-    public Map getDepositAddresses() throws Exception {
+    public Map<String, String> getDepositAddresses() throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(2);
         queryParams.add(new BasicNameValuePair("command", "returnDepositAddresses"));
         queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));

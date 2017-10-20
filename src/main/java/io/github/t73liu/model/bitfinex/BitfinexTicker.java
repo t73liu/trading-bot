@@ -1,7 +1,6 @@
 package io.github.t73liu.model.bitfinex;
 
 public class BitfinexTicker {
-    private String symbol;
     private double bid;
     private double bidSize;
     private double ask;
@@ -13,22 +12,17 @@ public class BitfinexTicker {
     private double high;
     private double low;
 
-    public BitfinexTicker(Object[] jsonArray) {
-        this.symbol = jsonArray[0].toString();
-        this.bid = (double) jsonArray[1];
-        this.bidSize = (double) jsonArray[2];
-        this.ask = (double) jsonArray[3];
-        this.askSize = (double) jsonArray[4];
-        this.dailyChange = (double) jsonArray[5];
-        this.dailyChangePercent = (double) jsonArray[6];
-        this.lastPrice = (double) jsonArray[7];
-        this.volume = (double) jsonArray[8];
-        this.high = (double) jsonArray[9];
-        this.low = (double) jsonArray[10];
-    }
-
-    public String getSymbol() {
-        return symbol;
+    public BitfinexTicker(double[] jsonArray) {
+        this.bid = jsonArray[0];
+        this.bidSize = jsonArray[1];
+        this.ask = jsonArray[2];
+        this.askSize = jsonArray[3];
+        this.dailyChange = jsonArray[4];
+        this.dailyChangePercent = jsonArray[5];
+        this.lastPrice = jsonArray[6];
+        this.volume = jsonArray[7];
+        this.high = jsonArray[8];
+        this.low = jsonArray[9];
     }
 
     public double getBid() {
