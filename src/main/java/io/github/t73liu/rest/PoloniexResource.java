@@ -6,6 +6,7 @@ import io.github.t73liu.exchange.poloniex.rest.PoloniexAccountService;
 import io.github.t73liu.exchange.poloniex.rest.PoloniexMarketService;
 import io.github.t73liu.exchange.poloniex.rest.PoloniexOrderService;
 import io.github.t73liu.model.poloniex.PoloniexPair;
+import io.github.t73liu.model.poloniex.PoloniexTicker;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -53,9 +54,31 @@ public class PoloniexResource {
 
     @GET
     @Path("/tickers")
-    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Ticker of Specified Pair in Poloniex", response = Map.class))
-    public Response getTicker(@QueryParam("pair") @Valid @NotNull PoloniexPair pair) throws Exception {
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved All Tickers in Poloniex", response = Map.class))
+    public Response getAllTickers() throws Exception {
+        return Response.ok(marketService.getAllTicker()).build();
+    }
+
+    @GET
+    @Path("/tickers/{pair}")
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Ticker of Specified Pair in Poloniex", response = PoloniexTicker.class))
+    public Response getTickerForPair(@PathParam("pair") @Valid @NotNull PoloniexPair pair) throws Exception {
         return Response.ok(marketService.getTickerForPair(pair)).build();
+    }
+
+    @GET
+    @Path("/orders")
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved All Order Books in Poloniex", response = Map.class))
+    public Response getAllOrderBooks(@QueryParam("depth") @DefaultValue("3") int depth) throws Exception {
+        return Response.ok(marketService.getAllOrderBook(depth)).build();
+    }
+
+    @GET
+    @Path("/orders/{pair}")
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Order Book of Specified Pair in Poloniex", response = PoloniexTicker.class))
+    public Response getOrderBookForPair(@PathParam("pair") @Valid @NotNull PoloniexPair pair,
+                                        @QueryParam("depth") @DefaultValue("3") int depth) throws Exception {
+        return Response.ok(marketService.getOrderBookForPair(pair, depth)).build();
     }
 
     @GET

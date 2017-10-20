@@ -1,6 +1,7 @@
 package io.github.t73liu.util;
 
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
@@ -21,6 +22,8 @@ public class MapperUtil {
     public static final ObjectReader JSON_READER = JSON_MAPPER.reader();
 
     public static final ObjectWriter JSON_WRITER = JSON_MAPPER.writer();
+
+    public static final TypeFactory TYPE_FACTORY = JSON_MAPPER.getTypeFactory();
 
     public static final CsvMapper CSV_MAPPER = createCSVMapper();
 

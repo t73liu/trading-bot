@@ -5,7 +5,9 @@ import io.github.t73liu.exchange.ExchangeService;
 import io.github.t73liu.exchange.MarketService;
 import io.github.t73liu.model.CandlestickIntervals;
 import io.github.t73liu.model.poloniex.PoloniexCandle;
+import io.github.t73liu.model.poloniex.PoloniexOrderBook;
 import io.github.t73liu.model.poloniex.PoloniexPair;
+import io.github.t73liu.model.poloniex.PoloniexTicker;
 import io.github.t73liu.util.DateUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.apache.http.NameValuePair;
@@ -19,49 +21,37 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.github.t73liu.util.HttpUtil.generateGet;
 import static io.github.t73liu.util.MapperUtil.JSON_READER;
+import static io.github.t73liu.util.MapperUtil.TYPE_FACTORY;
 
 @Service
 @ConfigurationProperties(prefix = "poloniex")
 public class PoloniexMarketService extends ExchangeService implements MarketService {
-    public Map<String, Map<String, String>> getAllTicker() throws Exception {
+    public Map<PoloniexPair, PoloniexTicker> getAllTicker() throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(1);
         queryParams.add(new BasicNameValuePair("command", "returnTicker"));
         HttpGet get = generateGet(getPublicUrl(), queryParams);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
-            return JSON_READER.readValue(response.getEntity().getContent());
+            return JSON_READER.forType(TYPE_FACTORY.constructMapType(HashMap.class, PoloniexPair.class, PoloniexTicker.class))
+                    .readValue(response.getEntity().getContent());
         } finally {
             get.releaseConnection();
         }
     }
 
-    public Map getTickerForPair(PoloniexPair pair) throws Exception {
-        return getAllTicker().get(pair.getPairName());
+    public PoloniexTicker getTickerForPair(PoloniexPair pair) throws Exception {
+        return getAllTicker().get(pair);
     }
 
-    public Map getOrderBookForPair(PoloniexPair pair, int amount) throws Exception {
-        List<NameValuePair> queryParams = new ObjectArrayList<>(3);
-        queryParams.add(new BasicNameValuePair("command", "returnOrderBook"));
-        queryParams.add(new BasicNameValuePair("depth", String.valueOf(amount)));
-        queryParams.add(new BasicNameValuePair("currencyPair", pair.getPairName()));
-        HttpGet get = generateGet(getPublicUrl(), queryParams);
-
-        try (CloseableHttpClient httpClient = HttpClients.createDefault();
-             CloseableHttpResponse response = httpClient.execute(get)) {
-            return JSON_READER.readValue(response.getEntity().getContent());
-        } finally {
-            get.releaseConnection();
-        }
-    }
-
-    public Map getAllOrderBook(int amount) throws Exception {
+    public Map<PoloniexPair, PoloniexOrderBook> getAllOrderBook(int amount) throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(3);
         queryParams.add(new BasicNameValuePair("command", "returnOrderBook"));
         queryParams.add(new BasicNameValuePair("depth", String.valueOf(amount)));
@@ -70,7 +60,23 @@ public class PoloniexMarketService extends ExchangeService implements MarketServ
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
-            return JSON_READER.readValue(response.getEntity().getContent());
+            return JSON_READER.forType(TYPE_FACTORY.constructMapType(HashMap.class, PoloniexPair.class, PoloniexOrderBook.class))
+                    .readValue(response.getEntity().getContent());
+        } finally {
+            get.releaseConnection();
+        }
+    }
+
+    public PoloniexOrderBook getOrderBookForPair(PoloniexPair pair, int amount) throws Exception {
+        List<NameValuePair> queryParams = new ObjectArrayList<>(3);
+        queryParams.add(new BasicNameValuePair("command", "returnOrderBook"));
+        queryParams.add(new BasicNameValuePair("depth", String.valueOf(amount)));
+        queryParams.add(new BasicNameValuePair("currencyPair", pair.getPairName()));
+        HttpGet get = generateGet(getPublicUrl(), queryParams);
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+             CloseableHttpResponse response = httpClient.execute(get)) {
+            return JSON_READER.forType(PoloniexOrderBook.class).readValue(response.getEntity().getContent());
         } finally {
             get.releaseConnection();
         }
@@ -82,7 +88,7 @@ public class PoloniexMarketService extends ExchangeService implements MarketServ
                 .collect(Collectors.toList());
     }
 
-    public PoloniexCandle[] getExchangeCandle(PoloniexPair pair, LocalDateTime startDateTime, LocalDateTime endDateTime, CandlestickIntervals period) throws Exception {
+    private PoloniexCandle[] getExchangeCandle(PoloniexPair pair, LocalDateTime startDateTime, LocalDateTime endDateTime, CandlestickIntervals period) throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(3);
         queryParams.add(new BasicNameValuePair("command", "returnChartData"));
         // Candlestick period in seconds 300,900,1800,7200,14400,86400
@@ -96,33 +102,6 @@ public class PoloniexMarketService extends ExchangeService implements MarketServ
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
             return JSON_READER.forType(PoloniexCandle[].class).readValue(response.getEntity().getContent());
-        } finally {
-            get.releaseConnection();
-        }
-    }
-
-    public Map getCurrencies() throws Exception {
-        List<NameValuePair> queryParams = new ObjectArrayList<>(1);
-        queryParams.add(new BasicNameValuePair("command", "returnCurrencies"));
-        HttpGet get = generateGet(getPublicUrl(), queryParams);
-
-        try (CloseableHttpClient httpClient = HttpClients.createDefault();
-             CloseableHttpResponse response = httpClient.execute(get)) {
-            return JSON_READER.readValue(response.getEntity().getContent());
-        } finally {
-            get.releaseConnection();
-        }
-    }
-
-    public Map getLoanOrders(String currency) throws Exception {
-        List<NameValuePair> queryParams = new ObjectArrayList<>(2);
-        queryParams.add(new BasicNameValuePair("command", "returnLoanOrders"));
-        queryParams.add(new BasicNameValuePair("currency", currency));
-        HttpGet get = generateGet(getPublicUrl(), queryParams);
-
-        try (CloseableHttpClient httpClient = HttpClients.createDefault();
-             CloseableHttpResponse response = httpClient.execute(get)) {
-            return JSON_READER.readValue(response.getEntity().getContent());
         } finally {
             get.releaseConnection();
         }
