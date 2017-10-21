@@ -6,6 +6,7 @@ import io.github.t73liu.exchange.poloniex.rest.PoloniexAccountService;
 import io.github.t73liu.exchange.poloniex.rest.PoloniexMarketService;
 import io.github.t73liu.exchange.poloniex.rest.PoloniexOrderService;
 import io.github.t73liu.model.poloniex.PoloniexCandleInterval;
+import io.github.t73liu.model.poloniex.PoloniexOrderBook;
 import io.github.t73liu.model.poloniex.PoloniexPair;
 import io.github.t73liu.model.poloniex.PoloniexTicker;
 import io.swagger.annotations.Api;
@@ -73,7 +74,7 @@ public class PoloniexResource {
 
     @GET
     @Path("/orderBooks/{pair}")
-    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Order Book of Specified Pair in Poloniex", response = PoloniexTicker.class))
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Order Book of Specified Pair in Poloniex", response = PoloniexOrderBook.class))
     public Response getOrderBookForPair(@PathParam("pair") @Valid @NotNull PoloniexPair pair,
                                         @QueryParam("depth") @DefaultValue("3") int depth) throws Exception {
         return Response.ok(marketService.getOrderBookForPair(pair, depth)).build();

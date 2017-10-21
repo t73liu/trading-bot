@@ -4,9 +4,7 @@ import io.github.t73liu.exception.ExceptionWrapper;
 import io.github.t73liu.exchange.bitfinex.rest.BitfinexAccountService;
 import io.github.t73liu.exchange.bitfinex.rest.BitfinexMarketService;
 import io.github.t73liu.exchange.bitfinex.rest.BitfinexOrderService;
-import io.github.t73liu.model.bitfinex.BitfinexCandleInterval;
-import io.github.t73liu.model.bitfinex.BitfinexPair;
-import io.github.t73liu.model.bitfinex.BitfinexTicker;
+import io.github.t73liu.model.bitfinex.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -46,7 +44,7 @@ public class BitfinexResource {
 
     @GET
     @Path("/candles/{pair}")
-    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Ticker of Specified Pair in Bitfinex", response = BitfinexTicker.class))
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Ticker of Specified Pair in Bitfinex", response = BitfinexCandle.class))
     public Response getCandleForPair(@PathParam("pair") @Valid @NotNull BitfinexPair pair,
                                      @QueryParam("interval") @Valid @NotNull BitfinexCandleInterval candleInterval,
                                      @QueryParam("startMilliseconds") Long startMilliseconds,
@@ -54,5 +52,12 @@ public class BitfinexResource {
                                      @QueryParam("limit") @DefaultValue("10") int limit,
                                      @QueryParam("newestFirst") @DefaultValue("true") boolean newestFirst) throws Exception {
         return Response.ok(marketService.getExchangeCandleForPair(pair, candleInterval, startMilliseconds, endMilliseconds, limit, newestFirst)).build();
+    }
+
+    @GET
+    @Path("/orderBooks/{pair}")
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Order Book of Specified Pair in Bitfinex", responseContainer = "List", response = BitfinexOrderBook.class))
+    public Response getOrderBookForPair(@PathParam("pair") @Valid @NotNull BitfinexPair pair) throws Exception {
+        return Response.ok(marketService.getExchangeOrderBookForPair(pair)).build();
     }
 }
