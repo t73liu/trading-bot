@@ -37,8 +37,8 @@ public class BittrexResource {
     }
 
     @GET
-    @Path("/ticker/{pair}")
-    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Currency Information", response = Map.class))
+    @Path("/tickers/{pair}")
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Ticker of Specified Pair in Bittrex", response = Map.class))
     public Response getTickers(@PathParam("pair") @Valid @NotNull BittrexPair pair) {
         return Response.ok().build();
     }

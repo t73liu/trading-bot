@@ -65,14 +65,14 @@ public class PoloniexResource {
     }
 
     @GET
-    @Path("/orders")
+    @Path("/orderBooks")
     @ApiResponses(@ApiResponse(code = 200, message = "Retrieved All Order Books in Poloniex", response = Map.class))
     public Response getAllOrderBooks(@QueryParam("depth") @DefaultValue("3") int depth) throws Exception {
         return Response.ok(marketService.getAllOrderBook(depth)).build();
     }
 
     @GET
-    @Path("/orders/{pair}")
+    @Path("/orderBooks/{pair}")
     @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Order Book of Specified Pair in Poloniex", response = PoloniexTicker.class))
     public Response getOrderBookForPair(@PathParam("pair") @Valid @NotNull PoloniexPair pair,
                                         @QueryParam("depth") @DefaultValue("3") int depth) throws Exception {

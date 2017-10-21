@@ -4,7 +4,9 @@ import io.github.t73liu.exception.ExceptionWrapper;
 import io.github.t73liu.exchange.quadriga.rest.QuadrigaAccountService;
 import io.github.t73liu.exchange.quadriga.rest.QuadrigaMarketService;
 import io.github.t73liu.exchange.quadriga.rest.QuadrigaOrderService;
+import io.github.t73liu.model.quadriga.QuadrigaOrderBook;
 import io.github.t73liu.model.quadriga.QuadrigaPair;
+import io.github.t73liu.model.quadriga.QuadrigaTicker;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -16,7 +18,6 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Map;
 
 @Component
 @Path("/quadriga")
@@ -37,9 +38,16 @@ public class QuadrigaResource {
     }
 
     @GET
-    @Path("/ticker/{pair}")
-    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Currency Information", response = Map.class))
-    public Response getTickers(@PathParam("pair") @Valid @NotNull QuadrigaPair pair) {
-        return Response.ok().build();
+    @Path("/tickers/{pair}")
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Ticker of Specified Pair in Quadriga", response = QuadrigaTicker.class))
+    public Response getTickerForPair(@PathParam("pair") @Valid @NotNull QuadrigaPair pair) throws Exception {
+        return Response.ok(marketService.getTickerForPair(pair)).build();
+    }
+
+    @GET
+    @Path("/orderBooks/{pair}")
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Order Book of Specified Pair in Quadriga", response = QuadrigaOrderBook.class))
+    public Response getOrderBookForPair(@PathParam("pair") @Valid @NotNull QuadrigaPair pair) throws Exception {
+        return Response.ok(marketService.getOrderBookForPair(pair)).build();
     }
 }
