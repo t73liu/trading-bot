@@ -33,7 +33,7 @@ schedules:
   report:
     cron: 0 15 16 * * *
 
-MailingService:
+mailing-service:
   recipients:
     - replace-with-emails
 

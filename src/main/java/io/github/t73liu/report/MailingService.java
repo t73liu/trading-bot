@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@ConfigurationProperties(prefix = "MailingService")
+@ConfigurationProperties(prefix = "mailing-service")
 public class MailingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MailingService.class);
 
