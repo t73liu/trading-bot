@@ -2,7 +2,8 @@ package io.github.t73liu.model.bitfinex;
 
 import eu.verdelhan.ta4j.BaseTick;
 import eu.verdelhan.ta4j.Tick;
-import io.github.t73liu.util.DateUtil;
+
+import static io.github.t73liu.util.DateUtil.unixMillisecondsToZonedDateTime;
 
 public class BitfinexCandle {
     private long millisecondTimeStamp;
@@ -12,13 +13,13 @@ public class BitfinexCandle {
     private double low;
     private double volume;
 
-    public BitfinexCandle(Object[] jsonArray) {
+    public BitfinexCandle(double[] jsonArray) {
         this.millisecondTimeStamp = (long) jsonArray[0];
-        this.open = (double) jsonArray[1];
-        this.close = (double) jsonArray[2];
-        this.high = (double) jsonArray[3];
-        this.low = (double) jsonArray[4];
-        this.volume = (double) jsonArray[5];
+        this.open = jsonArray[1];
+        this.close = jsonArray[2];
+        this.high = jsonArray[3];
+        this.low = jsonArray[4];
+        this.volume = jsonArray[5];
     }
 
     public long getMillisecondTimeStamp() {
@@ -46,6 +47,6 @@ public class BitfinexCandle {
     }
 
     public Tick toTick() {
-        return new BaseTick(DateUtil.unixTimeStampToZonedDateTime(millisecondTimeStamp / 1000), open, high, low, close, volume);
+        return new BaseTick(unixMillisecondsToZonedDateTime(millisecondTimeStamp), open, high, low, close, volume);
     }
 }

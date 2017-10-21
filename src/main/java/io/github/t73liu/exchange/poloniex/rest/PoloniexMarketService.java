@@ -3,12 +3,7 @@ package io.github.t73liu.exchange.poloniex.rest;
 import eu.verdelhan.ta4j.Tick;
 import io.github.t73liu.exchange.ExchangeService;
 import io.github.t73liu.exchange.MarketService;
-import io.github.t73liu.model.CandlestickIntervals;
-import io.github.t73liu.model.poloniex.PoloniexCandle;
-import io.github.t73liu.model.poloniex.PoloniexOrderBook;
-import io.github.t73liu.model.poloniex.PoloniexPair;
-import io.github.t73liu.model.poloniex.PoloniexTicker;
-import io.github.t73liu.util.DateUtil;
+import io.github.t73liu.model.poloniex.*;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -19,8 +14,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -34,17 +27,24 @@ import static io.github.t73liu.util.MapperUtil.TYPE_FACTORY;
 @Service
 @ConfigurationProperties(prefix = "poloniex")
 public class PoloniexMarketService extends ExchangeService implements MarketService {
-    private String PUBLIC_URL;
+    private static List<NameValuePair> getCandleParameters(PoloniexPair pair, long startSeconds, long endSeconds, PoloniexCandleInterval period) {
+        List<NameValuePair> queryParams = new ObjectArrayList<>(5);
+        queryParams.add(new BasicNameValuePair("command", "returnChartData"));
+        queryParams.add(new BasicNameValuePair("period", period.getIntervalName()));
+        queryParams.add(new BasicNameValuePair("currencyPair", pair.getPairName()));
+        queryParams.add(new BasicNameValuePair("start", String.valueOf(startSeconds)));
+        queryParams.add(new BasicNameValuePair("end", String.valueOf(endSeconds)));
+        return queryParams;
+    }
 
-    @PostConstruct
-    public void init() {
-        PUBLIC_URL = getBaseUrl() + "public";
+    public PoloniexTicker getTickerForPair(PoloniexPair pair) throws Exception {
+        return getAllTicker().get(pair);
     }
 
     public Map<PoloniexPair, PoloniexTicker> getAllTicker() throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(1);
         queryParams.add(new BasicNameValuePair("command", "returnTicker"));
-        HttpGet get = generateGet(PUBLIC_URL, queryParams);
+        HttpGet get = generateGet(getPublicUrl(), queryParams);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
@@ -55,16 +55,12 @@ public class PoloniexMarketService extends ExchangeService implements MarketServ
         }
     }
 
-    public PoloniexTicker getTickerForPair(PoloniexPair pair) throws Exception {
-        return getAllTicker().get(pair);
-    }
-
     public Map<PoloniexPair, PoloniexOrderBook> getAllOrderBook(int amount) throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(3);
         queryParams.add(new BasicNameValuePair("command", "returnOrderBook"));
         queryParams.add(new BasicNameValuePair("depth", String.valueOf(amount)));
         queryParams.add(new BasicNameValuePair("currencyPair", "all"));
-        HttpGet get = generateGet(PUBLIC_URL, queryParams);
+        HttpGet get = generateGet(getPublicUrl(), queryParams);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
@@ -80,7 +76,7 @@ public class PoloniexMarketService extends ExchangeService implements MarketServ
         queryParams.add(new BasicNameValuePair("command", "returnOrderBook"));
         queryParams.add(new BasicNameValuePair("depth", String.valueOf(amount)));
         queryParams.add(new BasicNameValuePair("currencyPair", pair.getPairName()));
-        HttpGet get = generateGet(PUBLIC_URL, queryParams);
+        HttpGet get = generateGet(getPublicUrl(), queryParams);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
@@ -90,22 +86,14 @@ public class PoloniexMarketService extends ExchangeService implements MarketServ
         }
     }
 
-    public List<Tick> getCandlestick(PoloniexPair pair, LocalDateTime startDateTime, LocalDateTime endDateTime, CandlestickIntervals period) throws Exception {
-        return Arrays.stream(getExchangeCandle(pair, startDateTime, endDateTime, period))
+    public List<Tick> getCandlestickForPair(PoloniexPair pair, long startSeconds, long endSeconds, PoloniexCandleInterval period) throws Exception {
+        return Arrays.stream(getExchangeCandleForPair(pair, startSeconds, endSeconds, period))
                 .map(PoloniexCandle::toTick)
                 .collect(Collectors.toList());
     }
 
-    private PoloniexCandle[] getExchangeCandle(PoloniexPair pair, LocalDateTime startDateTime, LocalDateTime endDateTime, CandlestickIntervals period) throws Exception {
-        List<NameValuePair> queryParams = new ObjectArrayList<>(3);
-        queryParams.add(new BasicNameValuePair("command", "returnChartData"));
-        // Candlestick period in seconds 300,900,1800,7200,14400,86400
-        queryParams.add(new BasicNameValuePair("period", String.valueOf(period.getInterval())));
-        queryParams.add(new BasicNameValuePair("currencyPair", pair.getPairName()));
-        // UNIX timestamp format of specified time range (i.e. last hour)
-        queryParams.add(new BasicNameValuePair("start", String.valueOf(DateUtil.localDateTimeToUnixTimestamp(startDateTime))));
-        queryParams.add(new BasicNameValuePair("end", String.valueOf(DateUtil.localDateTimeToUnixTimestamp(endDateTime))));
-        HttpGet get = generateGet(PUBLIC_URL, queryParams);
+    private PoloniexCandle[] getExchangeCandleForPair(PoloniexPair pair, long startSeconds, long endSeconds, PoloniexCandleInterval period) throws Exception {
+        HttpGet get = generateGet(getPublicUrl(), getCandleParameters(pair, startSeconds, endSeconds, period));
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
@@ -113,5 +101,9 @@ public class PoloniexMarketService extends ExchangeService implements MarketServ
         } finally {
             get.releaseConnection();
         }
+    }
+
+    private String getPublicUrl() {
+        return getBaseUrl() + "public";
     }
 }

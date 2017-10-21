@@ -5,6 +5,7 @@ import io.github.t73liu.exception.ExceptionWrapper;
 import io.github.t73liu.exchange.poloniex.rest.PoloniexAccountService;
 import io.github.t73liu.exchange.poloniex.rest.PoloniexMarketService;
 import io.github.t73liu.exchange.poloniex.rest.PoloniexOrderService;
+import io.github.t73liu.model.poloniex.PoloniexCandleInterval;
 import io.github.t73liu.model.poloniex.PoloniexPair;
 import io.github.t73liu.model.poloniex.PoloniexTicker;
 import io.swagger.annotations.Api;
@@ -19,11 +20,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Map;
-
-import static io.github.t73liu.model.CandlestickIntervals.THIRTY_MIN;
-import static io.github.t73liu.util.DateUtil.getCurrentLocalDateTime;
 
 @Component
 @Path("/poloniex")
@@ -44,12 +41,13 @@ public class PoloniexResource {
     }
 
     @GET
-    @Path("/candles")
+    @Path("/candles/{pair}")
     @ApiResponses(@ApiResponse(code = 200, message = "Checks if there is candlestick opportunity", responseContainer = "List", response = Tick.class))
-    public Response checkCandles() throws Exception {
-        LocalDateTime endLocalDateTime = getCurrentLocalDateTime();
-        LocalDateTime startLocalDateTime = endLocalDateTime.minusHours(6);
-        return Response.ok(marketService.getCandlestick(PoloniexPair.USDT_XRP, startLocalDateTime, endLocalDateTime, THIRTY_MIN)).build();
+    public Response checkCandles(@PathParam("pair") @Valid @NotNull PoloniexPair pair,
+                                 @QueryParam("interval") @Valid @NotNull PoloniexCandleInterval interval,
+                                 @QueryParam("startSeconds") long startSeconds,
+                                 @QueryParam("endSeconds") long endSeconds) throws Exception {
+        return Response.ok(marketService.getCandlestickForPair(pair, startSeconds, endSeconds, interval)).build();
     }
 
     @GET

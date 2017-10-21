@@ -4,7 +4,6 @@ import io.github.t73liu.exchange.AccountService;
 import io.github.t73liu.exchange.PrivateExchangeService;
 import io.github.t73liu.model.EncryptionType;
 import io.github.t73liu.model.poloniex.PoloniexPair;
-import io.github.t73liu.util.DateUtil;
 import io.github.t73liu.util.HttpUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.apache.http.NameValuePair;
@@ -22,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import static io.github.t73liu.util.DateUtil.localDateTimeToUnixSeconds;
 import static io.github.t73liu.util.MapperUtil.JSON_READER;
 
 @Service
@@ -68,8 +68,8 @@ public class PoloniexAccountService extends PrivateExchangeService implements Ac
         queryParams.add(new BasicNameValuePair("command", "returnTradeHistory"));
         queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));
         queryParams.add(pair == null ? new BasicNameValuePair("currencyPair", "all") : new BasicNameValuePair("currencyPair", pair.getPairName()));
-        queryParams.add(new BasicNameValuePair("start", String.valueOf(DateUtil.localDateTimeToUnixTimestamp(startDateTime))));
-        queryParams.add(new BasicNameValuePair("end", String.valueOf(DateUtil.localDateTimeToUnixTimestamp(endDateTime))));
+        queryParams.add(new BasicNameValuePair("start", String.valueOf(localDateTimeToUnixSeconds(startDateTime))));
+        queryParams.add(new BasicNameValuePair("end", String.valueOf(localDateTimeToUnixSeconds(endDateTime))));
 
         HttpPost post = generatePost(queryParams);
 

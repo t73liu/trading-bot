@@ -4,6 +4,7 @@ import io.github.t73liu.exception.ExceptionWrapper;
 import io.github.t73liu.exchange.bitfinex.rest.BitfinexAccountService;
 import io.github.t73liu.exchange.bitfinex.rest.BitfinexMarketService;
 import io.github.t73liu.exchange.bitfinex.rest.BitfinexOrderService;
+import io.github.t73liu.model.bitfinex.BitfinexCandleInterval;
 import io.github.t73liu.model.bitfinex.BitfinexPair;
 import io.github.t73liu.model.bitfinex.BitfinexTicker;
 import io.swagger.annotations.Api;
@@ -39,7 +40,19 @@ public class BitfinexResource {
     @GET
     @Path("/tickers/{pair}")
     @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Ticker of Specified Pair in Bitfinex", response = BitfinexTicker.class))
-    public Response getTickers(@PathParam("pair") @Valid @NotNull BitfinexPair pair) throws Exception {
+    public Response getTickerForPair(@PathParam("pair") @Valid @NotNull BitfinexPair pair) throws Exception {
         return Response.ok(marketService.getTickerForPair(pair)).build();
+    }
+
+    @GET
+    @Path("/candles/{pair}")
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Ticker of Specified Pair in Bitfinex", response = BitfinexTicker.class))
+    public Response getCandleForPair(@PathParam("pair") @Valid @NotNull BitfinexPair pair,
+                                     @QueryParam("interval") @Valid @NotNull BitfinexCandleInterval candleInterval,
+                                     @QueryParam("startMilliseconds") Long startMilliseconds,
+                                     @QueryParam("endMilliseconds") Long endMilliseconds,
+                                     @QueryParam("limit") @DefaultValue("10") int limit,
+                                     @QueryParam("newestFirst") @DefaultValue("true") boolean newestFirst) throws Exception {
+        return Response.ok(marketService.getExchangeCandleForPair(pair, candleInterval, startMilliseconds, endMilliseconds, limit, newestFirst)).build();
     }
 }

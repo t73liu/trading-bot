@@ -47,6 +47,6 @@ public class PoloniexCandle {
     }
 
     public Tick toTick() {
-        return new BaseTick(DateUtil.unixTimeStampToZonedDateTime(date), open, high, low, close, volume);
+        return new BaseTick(DateUtil.unixSecondsToZonedDateTime(date), open, high, low, close, volume);
     }
 }
