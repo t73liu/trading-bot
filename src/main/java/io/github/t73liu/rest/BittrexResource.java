@@ -4,7 +4,9 @@ import io.github.t73liu.exception.ExceptionWrapper;
 import io.github.t73liu.exchange.bittrex.rest.BittrexAccountService;
 import io.github.t73liu.exchange.bittrex.rest.BittrexMarketService;
 import io.github.t73liu.exchange.bittrex.rest.BittrexOrderService;
+import io.github.t73liu.model.bittrex.BittrexOrderBook;
 import io.github.t73liu.model.bittrex.BittrexPair;
+import io.github.t73liu.model.bittrex.BittrexTicker;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -16,7 +18,6 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Map;
 
 @Component
 @Path("/bittrex")
@@ -38,8 +39,15 @@ public class BittrexResource {
 
     @GET
     @Path("/tickers/{pair}")
-    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Ticker of Specified Pair in Bittrex", response = Map.class))
-    public Response getTickers(@PathParam("pair") @Valid @NotNull BittrexPair pair) {
-        return Response.ok().build();
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Ticker of Specified Pair in Bittrex", response = BittrexTicker.class))
+    public Response getTickers(@PathParam("pair") @Valid @NotNull BittrexPair pair) throws Exception {
+        return Response.ok(marketService.getTickerForPair(pair)).build();
+    }
+
+    @GET
+    @Path("/orderBooks/{pair}")
+    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Order Book of Specified Pair in Bittrex", response = BittrexOrderBook.class))
+    public Response getOrderBookForPair(@PathParam("pair") @Valid @NotNull BittrexPair pair) throws Exception {
+        return Response.ok(marketService.getOrderBookForPair(pair)).build();
     }
 }
