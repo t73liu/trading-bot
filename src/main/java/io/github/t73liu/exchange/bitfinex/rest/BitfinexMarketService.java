@@ -98,15 +98,15 @@ public class BitfinexMarketService extends ExchangeService implements MarketServ
     }
 
     private String getTickerUrl(String pairName) {
-        return getBaseUrl() + "ticker/" + pairName;
+        return getBaseUrl() + "v2/ticker/" + pairName;
     }
 
     private String getCandleUrl(String pairName, String candleInterval) {
-        return getBaseUrl() + "candles/trade:" + candleInterval + ":" + pairName + "/hist";
+        return getBaseUrl() + "v2/candles/trade:" + candleInterval + ":" + pairName + "/hist";
     }
 
     private String getOrderBookUrl(String pairName) {
         // Level of price aggregation (P0, P1, P2, P3, R0)
-        return getBaseUrl() + "book/" + pairName + "/P0";
+        return getBaseUrl() + "v2/book/" + pairName + "/P0";
     }
 }

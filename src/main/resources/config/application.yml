@@ -39,7 +39,7 @@ mailing-service:
 
 bitfinex:
   apiKey: replace-with-api-key
-  baseUrl: https://api.bitfinex.com/v2/
+  baseUrl: https://api.bitfinex.com/
   secretKey: replace-with-secret
 
 bittrex:

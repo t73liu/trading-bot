@@ -27,8 +27,7 @@ public class HttpUtil {
 
         // Generating special headers
         Mac shaMac = Mac.getInstance(encryptionType.getName());
-        SecretKeySpec keySpec = new SecretKeySpec(secretKey.getBytes(UTF_8), encryptionType.getName());
-        shaMac.init(keySpec);
+        shaMac.init(new SecretKeySpec(secretKey.getBytes(UTF_8), encryptionType.getName()));
         String sign = Hex.encodeHexString(shaMac.doFinal(queryParamStr.getBytes(UTF_8)));
         HttpPost post = new HttpPost(url);
         post.addHeader("Key", apiKey);
