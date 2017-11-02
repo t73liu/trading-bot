@@ -1,7 +1,7 @@
 package io.github.t73liu.model.bitfinex;
 
-import eu.verdelhan.ta4j.BaseTick;
-import eu.verdelhan.ta4j.Tick;
+import org.ta4j.core.BaseTick;
+import org.ta4j.core.Tick;
 
 import static io.github.t73liu.util.DateUtil.unixMillisecondsToZonedDateTime;
 

@@ -1,6 +1,5 @@
 package io.github.t73liu.calc;
 
-import eu.verdelhan.ta4j.*;
 import io.github.t73liu.model.poloniex.PoloniexCandle;
 import io.github.t73liu.strategy.trading.CandleStrategy;
 import org.apache.commons.math3.util.Precision;
@@ -8,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.ta4j.core.*;
 
 import java.util.List;
 import java.util.stream.Collectors;

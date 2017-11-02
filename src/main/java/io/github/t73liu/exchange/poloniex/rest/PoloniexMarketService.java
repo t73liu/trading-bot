@@ -1,6 +1,5 @@
 package io.github.t73liu.exchange.poloniex.rest;
 
-import eu.verdelhan.ta4j.Tick;
 import io.github.t73liu.exchange.ExchangeService;
 import io.github.t73liu.exchange.MarketService;
 import io.github.t73liu.model.poloniex.*;
@@ -13,6 +12,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
+import org.ta4j.core.Tick;
 
 import java.util.Arrays;
 import java.util.HashMap;

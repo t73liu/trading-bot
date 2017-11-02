@@ -1,7 +1,7 @@
 package io.github.t73liu.util;
 
-import eu.verdelhan.ta4j.Decimal;
 import org.apache.commons.math3.util.Precision;
+import org.ta4j.core.Decimal;
 
 public class MathUtil {
     public static double roundDecimalToDouble(Decimal decimal) {

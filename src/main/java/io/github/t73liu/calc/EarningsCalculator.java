@@ -1,8 +1,8 @@
 package io.github.t73liu.calc;
 
-import eu.verdelhan.ta4j.*;
-import eu.verdelhan.ta4j.analysis.criteria.TotalProfitCriterion;
 import org.springframework.stereotype.Service;
+import org.ta4j.core.*;
+import org.ta4j.core.analysis.criteria.TotalProfitCriterion;
 
 @Service
 public class EarningsCalculator {

@@ -1,8 +1,8 @@
 package io.github.t73liu.model.poloniex;
 
-import eu.verdelhan.ta4j.BaseTick;
-import eu.verdelhan.ta4j.Tick;
 import io.github.t73liu.util.DateUtil;
+import org.ta4j.core.BaseTick;
+import org.ta4j.core.Tick;
 
 public class PoloniexCandle {
     private long date;

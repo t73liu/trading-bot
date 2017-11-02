@@ -1,6 +1,5 @@
 package io.github.t73liu.rest;
 
-import eu.verdelhan.ta4j.Tick;
 import io.github.t73liu.exception.ExceptionWrapper;
 import io.github.t73liu.exchange.poloniex.rest.PoloniexAccountService;
 import io.github.t73liu.exchange.poloniex.rest.PoloniexMarketService;
@@ -14,6 +13,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.ta4j.core.BaseTick;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -43,7 +43,7 @@ public class PoloniexResource {
 
     @GET
     @Path("/candles/{pair}")
-    @ApiResponses(@ApiResponse(code = 200, message = "Checks if there is candlestick opportunity", responseContainer = "List", response = Tick.class))
+    @ApiResponses(@ApiResponse(code = 200, message = "Checks if there is candlestick opportunity", responseContainer = "List", response = BaseTick.class))
     public Response checkCandles(@PathParam("pair") @Valid @NotNull PoloniexPair pair,
                                  @QueryParam("interval") @Valid @NotNull PoloniexCandleInterval interval,
                                  @QueryParam("startSeconds") long startSeconds,

@@ -143,9 +143,9 @@
 
         <!-- Analysis -->
         <dependency>
-            <groupId>eu.verdelhan</groupId>
-            <artifactId>ta4j</artifactId>
-            <version>0.9</version>
+            <groupId>org.ta4j</groupId>
+            <artifactId>ta4j-core</artifactId>
+            <version>0.10</version>
         </dependency>
 
         <!-- Testing -->

@@ -1,12 +1,12 @@
 package io.github.t73liu.strategy.trading;
 
-import eu.verdelhan.ta4j.*;
-import eu.verdelhan.ta4j.indicators.candles.BearishEngulfingIndicator;
-import eu.verdelhan.ta4j.indicators.candles.ThreeBlackCrowsIndicator;
-import eu.verdelhan.ta4j.indicators.candles.ThreeWhiteSoldiersIndicator;
-import eu.verdelhan.ta4j.indicators.helpers.ClosePriceIndicator;
-import eu.verdelhan.ta4j.trading.rules.BooleanIndicatorRule;
-import eu.verdelhan.ta4j.trading.rules.StopLossRule;
+import org.ta4j.core.*;
+import org.ta4j.core.indicators.candles.BearishEngulfingIndicator;
+import org.ta4j.core.indicators.candles.ThreeBlackCrowsIndicator;
+import org.ta4j.core.indicators.candles.ThreeWhiteSoldiersIndicator;
+import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
+import org.ta4j.core.trading.rules.BooleanIndicatorRule;
+import org.ta4j.core.trading.rules.StopLossRule;
 
 public class CandleStrategy {
     public static Strategy getStrategy(TimeSeries series) {
