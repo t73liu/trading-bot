@@ -14,7 +14,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.0.0.M5</version>
+        <version>2.0.0.M6</version>
     </parent>
 
     <properties>
@@ -43,10 +43,6 @@
                     <artifactId>junit</artifactId>
                     <groupId>junit</groupId>
                 </exclusion>
-                <exclusion>
-                    <artifactId>mockito-core</artifactId>
-                    <groupId>org.mockito</groupId>
-                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -58,18 +54,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>org.springframework.boot</groupId>-->
-        <!--<artifactId>spring-boot-starter-actuator</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.springframework.boot</groupId>-->
-        <!--<artifactId>spring-boot-starter-websocket</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.springframework.social</groupId>-->
-        <!--<artifactId>spring-social-twitter</artifactId>-->
-        <!--</dependency>-->
 
         <!-- SWAGGER + SERIALIZERS -->
         <dependency>
@@ -99,11 +83,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.hibernate.validator</groupId>
-            <artifactId>hibernate-validator</artifactId>
-            <version>6.0.3.Final</version>
-        </dependency>
 
         <!-- CLIENTS -->
         <dependency>
@@ -122,11 +101,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
             <version>3.6.1</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.10</version>
         </dependency>
         <dependency>
             <groupId>it.unimi.dsi</groupId>
@@ -159,12 +133,6 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
             <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>2.11.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
