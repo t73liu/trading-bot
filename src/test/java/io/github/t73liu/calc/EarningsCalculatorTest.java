@@ -2,6 +2,7 @@ package io.github.t73liu.calc;
 
 import io.github.t73liu.model.poloniex.PoloniexCandle;
 import io.github.t73liu.strategy.trading.CandleStrategy;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.apache.commons.math3.util.Precision;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -31,7 +32,7 @@ public class EarningsCalculatorTest {
     public void testStrategyProfitability(String path) throws Exception {
         List<Tick> ticks = readCSV(PoloniexCandle.class, path).stream()
                 .map(PoloniexCandle::toTick)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ObjectArrayList::new));
         TimeSeries series = new BaseTimeSeries(ticks);
         Strategy strategy = CandleStrategy.getStrategy(series);
         double takerFee = 0.002;

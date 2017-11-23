@@ -32,7 +32,7 @@ public class BitfinexMarketService extends ExchangeService implements MarketServ
                                        int limit, boolean newestFirst) throws Exception {
         return getExchangeCandleForPair(pair, period, startMilliseconds, endMilliseconds, limit, newestFirst).stream()
                 .map(BitfinexCandle::toTick)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ObjectArrayList::new));
     }
 
     public List<BitfinexCandle> getExchangeCandleForPair(BitfinexPair pair, BitfinexCandleInterval period, Long startMilliseconds,

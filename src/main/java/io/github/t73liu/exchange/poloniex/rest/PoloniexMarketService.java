@@ -3,6 +3,7 @@ package io.github.t73liu.exchange.poloniex.rest;
 import io.github.t73liu.exchange.ExchangeService;
 import io.github.t73liu.exchange.MarketService;
 import io.github.t73liu.model.poloniex.*;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMaps.UnmodifiableMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.ta4j.core.Tick;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,7 +48,7 @@ public class PoloniexMarketService extends ExchangeService implements MarketServ
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
-            return JSON_READER.forType(TYPE_FACTORY.constructMapType(HashMap.class, PoloniexPair.class, PoloniexTicker.class))
+            return JSON_READER.forType(TYPE_FACTORY.constructMapType(UnmodifiableMap.class, PoloniexPair.class, PoloniexTicker.class))
                     .readValue(response.getEntity().getContent());
         } finally {
             get.releaseConnection();
@@ -64,7 +64,7 @@ public class PoloniexMarketService extends ExchangeService implements MarketServ
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(get)) {
-            return JSON_READER.forType(TYPE_FACTORY.constructMapType(HashMap.class, PoloniexPair.class, PoloniexOrderBook.class))
+            return JSON_READER.forType(TYPE_FACTORY.constructMapType(UnmodifiableMap.class, PoloniexPair.class, PoloniexOrderBook.class))
                     .readValue(response.getEntity().getContent());
         } finally {
             get.releaseConnection();
@@ -89,7 +89,7 @@ public class PoloniexMarketService extends ExchangeService implements MarketServ
     public List<Tick> getCandlestickForPair(PoloniexPair pair, long startSeconds, long endSeconds, PoloniexCandleInterval period) throws Exception {
         return Arrays.stream(getExchangeCandleForPair(pair, startSeconds, endSeconds, period))
                 .map(PoloniexCandle::toTick)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ObjectArrayList::new));
     }
 
     private PoloniexCandle[] getExchangeCandleForPair(PoloniexPair pair, long startSeconds, long endSeconds, PoloniexCandleInterval period) throws Exception {
