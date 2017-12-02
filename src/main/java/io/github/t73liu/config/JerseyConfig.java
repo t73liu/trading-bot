@@ -1,13 +1,16 @@
 package io.github.t73liu.config;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import com.google.common.collect.ImmutableSet;
 import io.github.t73liu.provider.*;
-import io.swagger.jaxrs.config.BeanConfig;
-import io.swagger.jaxrs.listing.ApiListingResource;
-import io.swagger.jaxrs.listing.SwaggerSerializers;
-import io.swagger.models.Contact;
-import io.swagger.models.Info;
-import io.swagger.models.License;
+import io.swagger.v3.jaxrs2.SwaggerSerializers;
+import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
+import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
+import io.swagger.v3.oas.integration.SwaggerConfiguration;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
@@ -53,8 +56,6 @@ public class JerseyConfig extends ResourceConfig {
         // General Providers
         register(JacksonFeature.class);
         register(JacksonJaxbJsonProvider.class);
-        // FIXME implement CORS?
-//        register(CORSFilter.class);
 
         // Internal Custom Providers
         register(ObjectMapperContextResolver.class);
@@ -64,7 +65,7 @@ public class JerseyConfig extends ResourceConfig {
         register(ValidationExceptionMapper.class);
 
         // Swagger Providers
-        register(ApiListingResource.class);
+        register(OpenApiResource.class);
         register(SwaggerSerializers.class);
         register(WadlResource.class);
     }
@@ -74,22 +75,24 @@ public class JerseyConfig extends ResourceConfig {
     }
 
     @PostConstruct
-    private void initializeSwagger() {
-        BeanConfig beanConfig = new BeanConfig();
-        beanConfig.setResourcePackage("io.github.t73liu.rest");
-        beanConfig.setScan(true);
-        beanConfig.setPrettyPrint(true);
-        beanConfig.setBasePath(this.apiPath);
-
-        Info info = new Info();
-        beanConfig.setInfo(info);
-        info.setTitle("Crypto-Currency Trading Bot");
-        info.setVersion(this.appVersion);
-
-        Contact contact = new Contact();
-        info.setContact(contact);
-
-        License license = new License();
-        info.setLicense(license);
+    private void initializeSwagger() throws Exception {
+        OpenAPI oas = new OpenAPI();
+        Info info = new Info()
+                .title("Crypto-Currency Trading Bot")
+                .description("This is a crypto-currency trading bot with a front end and custom news feeds.")
+                .version(this.appVersion)
+                .contact(new Contact()
+                        .email("cryptotest92@gmail.com"))
+                .license(new License()
+                        .name("Apache 2.0")
+                        .url("http://www.apache.org/licenses/LICENSE-2.0.html"));
+        oas.info(info);
+        SwaggerConfiguration oasConfig = new SwaggerConfiguration()
+                .prettyPrint(true)
+                .openAPI(oas)
+                .resourcePackages(ImmutableSet.of("io.github.t73liu.rest"));
+        new JaxrsOpenApiContextBuilder()
+                .openApiConfiguration(oasConfig)
+                .buildContext(true);
     }
 }

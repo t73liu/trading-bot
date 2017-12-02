@@ -1,15 +1,15 @@
 package io.github.t73liu.rest;
 
-import io.github.t73liu.exception.ExceptionWrapper;
 import io.github.t73liu.exchange.quadriga.rest.QuadrigaAccountService;
 import io.github.t73liu.exchange.quadriga.rest.QuadrigaMarketService;
 import io.github.t73liu.exchange.quadriga.rest.QuadrigaOrderService;
 import io.github.t73liu.model.quadriga.QuadrigaOrderBook;
 import io.github.t73liu.model.quadriga.QuadrigaPair;
 import io.github.t73liu.model.quadriga.QuadrigaTicker;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,8 +23,7 @@ import javax.ws.rs.core.Response;
 @Path("/quadriga")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api("QuadrigaResource")
-@ApiResponses(@ApiResponse(code = 500, message = "Internal Server Error", response = ExceptionWrapper.class))
+@Tag(name = "QuadrigaResource")
 public class QuadrigaResource {
     private final QuadrigaAccountService accountService;
     private final QuadrigaMarketService marketService;
@@ -39,14 +38,14 @@ public class QuadrigaResource {
 
     @GET
     @Path("/tickers/{pair}")
-    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Ticker of Specified Pair in Quadriga", response = QuadrigaTicker.class))
+    @ApiResponse(responseCode = "200", description = "Retrieved Ticker of Specified Pair in Quadriga", content = @Content(schema = @Schema(implementation = QuadrigaTicker.class)))
     public Response getTickerForPair(@PathParam("pair") @Valid @NotNull QuadrigaPair pair) throws Exception {
         return Response.ok(marketService.getTickerForPair(pair)).build();
     }
 
     @GET
     @Path("/orderBooks/{pair}")
-    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Order Book of Specified Pair in Quadriga", response = QuadrigaOrderBook.class))
+    @ApiResponse(responseCode = "200", description = "Retrieved Order Book of Specified Pair in Quadriga", content = @Content(schema = @Schema(implementation = QuadrigaOrderBook.class)))
     public Response getOrderBookForPair(@PathParam("pair") @Valid @NotNull QuadrigaPair pair) throws Exception {
         return Response.ok(marketService.getOrderBookForPair(pair)).build();
     }

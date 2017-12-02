@@ -1,15 +1,15 @@
 package io.github.t73liu.rest;
 
-import io.github.t73liu.exception.ExceptionWrapper;
 import io.github.t73liu.exchange.bittrex.rest.BittrexAccountService;
 import io.github.t73liu.exchange.bittrex.rest.BittrexMarketService;
 import io.github.t73liu.exchange.bittrex.rest.BittrexOrderService;
 import io.github.t73liu.model.bittrex.BittrexOrderBook;
 import io.github.t73liu.model.bittrex.BittrexPair;
 import io.github.t73liu.model.bittrex.BittrexTicker;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,8 +23,7 @@ import javax.ws.rs.core.Response;
 @Path("/bittrex")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api("BittrexResource")
-@ApiResponses(@ApiResponse(code = 500, message = "Internal Server Error", response = ExceptionWrapper.class))
+@Tag(name = "BittrexResource")
 public class BittrexResource {
     private final BittrexAccountService accountService;
     private final BittrexMarketService marketService;
@@ -39,14 +38,14 @@ public class BittrexResource {
 
     @GET
     @Path("/tickers/{pair}")
-    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Ticker of Specified Pair in Bittrex", response = BittrexTicker.class))
+    @ApiResponse(responseCode = "200", description = "Retrieved Ticker of Specified Pair in Bittrex", content = @Content(schema = @Schema(implementation = BittrexTicker.class)))
     public Response getTickers(@PathParam("pair") @Valid @NotNull BittrexPair pair) throws Exception {
         return Response.ok(marketService.getTickerForPair(pair)).build();
     }
 
     @GET
     @Path("/orderBooks/{pair}")
-    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Order Book of Specified Pair in Bittrex", response = BittrexOrderBook.class))
+    @ApiResponse(responseCode = "200", description = "Retrieved Order Book of Specified Pair in Bittrex", content = @Content(schema = @Schema(implementation = BittrexOrderBook.class)))
     public Response getOrderBookForPair(@PathParam("pair") @Valid @NotNull BittrexPair pair) throws Exception {
         return Response.ok(marketService.getOrderBookForPair(pair)).build();
     }

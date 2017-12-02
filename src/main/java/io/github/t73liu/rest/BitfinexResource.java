@@ -1,13 +1,15 @@
 package io.github.t73liu.rest;
 
-import io.github.t73liu.exception.ExceptionWrapper;
 import io.github.t73liu.exchange.bitfinex.rest.BitfinexAccountService;
 import io.github.t73liu.exchange.bitfinex.rest.BitfinexMarketService;
 import io.github.t73liu.exchange.bitfinex.rest.BitfinexOrderService;
 import io.github.t73liu.model.bitfinex.*;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,8 +23,7 @@ import javax.ws.rs.core.Response;
 @Path("/bitfinex")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api("BitfinexResource")
-@ApiResponses(@ApiResponse(code = 500, message = "Internal Server Error", response = ExceptionWrapper.class))
+@Tag(name = "BitfinexResource")
 public class BitfinexResource {
     private final BitfinexAccountService accountService;
     private final BitfinexMarketService marketService;
@@ -37,15 +38,15 @@ public class BitfinexResource {
 
     @GET
     @Path("/tickers/{pair}")
-    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Ticker of Specified Pair in Bitfinex", response = BitfinexTicker.class))
+    @ApiResponse(responseCode = "200", description = "Retrieved Ticker of Specified Pair in Bitfinex", content = @Content(schema = @Schema(implementation = BitfinexTicker.class)))
     public Response getTickerForPair(@PathParam("pair") @Valid @NotNull BitfinexPair pair) throws Exception {
         return Response.ok(marketService.getTickerForPair(pair)).build();
     }
 
     @GET
     @Path("/candles/{pair}")
-    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Ticker of Specified Pair in Bitfinex", response = BitfinexCandle.class))
-    public Response getCandleForPair(@PathParam("pair") @Valid @NotNull BitfinexPair pair,
+    @ApiResponse(responseCode = "200", description = "Retrieved Ticker of Specified Pair in Bitfinex", content = @Content(schema = @Schema(implementation = BitfinexCandle.class)))
+    public Response getCandleForPair(@Parameter(schema = @Schema(implementation = BitfinexPair.class)) @PathParam("pair") @Valid @NotNull BitfinexPair pair,
                                      @QueryParam("interval") @Valid @NotNull BitfinexCandleInterval candleInterval,
                                      @QueryParam("startMilliseconds") Long startMilliseconds,
                                      @QueryParam("endMilliseconds") Long endMilliseconds,
@@ -56,8 +57,8 @@ public class BitfinexResource {
 
     @GET
     @Path("/orderBooks/{pair}")
-    @ApiResponses(@ApiResponse(code = 200, message = "Retrieved Order Book of Specified Pair in Bitfinex", responseContainer = "List", response = BitfinexOrderBook.class))
-    public Response getOrderBookForPair(@PathParam("pair") @Valid @NotNull BitfinexPair pair) throws Exception {
+    @ApiResponse(responseCode = "200", description = "Retrieved Order Book of Specified Pair in Bitfinex", content = @Content(array = @ArraySchema(schema = @Schema(implementation = BitfinexOrderBook.class))))
+    public Response getOrderBookForPair(@Parameter(schema = @Schema(implementation = BitfinexPair.class)) @PathParam("pair") @Valid @NotNull BitfinexPair pair) throws Exception {
         return Response.ok(marketService.getExchangeOrderBookForPair(pair)).build();
     }
 }
