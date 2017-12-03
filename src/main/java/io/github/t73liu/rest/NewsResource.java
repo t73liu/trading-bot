@@ -34,7 +34,7 @@ public class NewsResource {
     @GET
     @Path("/rss")
     @ApiResponse(responseCode = "200", description = "Get Latest Unread News From RSS Feed", content = @Content(schema = @Schema(implementation = Object.class)))
-    public Response getRssFeeds() {
+    public Response getRssFeeds() throws Exception {
         return Response.ok(rssSource.getLatest()).build();
     }
 

@@ -1,5 +1,6 @@
 package io.github.t73liu.report;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,6 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -18,7 +18,7 @@ public class MailingService {
 
     private final JavaMailSenderImpl mailer;
 
-    private List<String> recipients = new ArrayList<>();
+    private List<String> recipients = new ObjectArrayList<>();
 
     @Autowired
     private MailingService(JavaMailSenderImpl mailer) {
