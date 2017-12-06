@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -63,9 +62,10 @@ public class BitfinexResource {
     @Path("/orderBooks/{pair}")
     @ApiResponse(responseCode = "200", description = "Retrieved Order Book of Specified Pair in Bitfinex", content = @Content(array = @ArraySchema(schema = @Schema(implementation = BitfinexOrderBook.class))))
     public Response getOrderBookForPair(@Parameter(schema = @Schema(implementation = BitfinexPair.class)) @PathParam("pair") @Valid @NotNull BitfinexPair pair) throws Exception {
+        // TODO move to proper location/class
         WebSocketClient client = new WebSocketClient();
         client.start();
-        client.connect(new BitfinexSocket(), new URI("wss://api.bitfinex.com/ws/2"), new ClientUpgradeRequest());
+        client.connect(new BitfinexSocket(), new URI("wss://api.bitfinex.com/ws/2"));
         return Response.ok(marketService.getExchangeOrderBookForPair(pair)).build();
     }
 }
