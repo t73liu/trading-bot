@@ -3,7 +3,6 @@ package io.github.t73liu.rest;
 import io.github.t73liu.exchange.bitfinex.rest.BitfinexAccountService;
 import io.github.t73liu.exchange.bitfinex.rest.BitfinexMarketService;
 import io.github.t73liu.exchange.bitfinex.rest.BitfinexOrderService;
-import io.github.t73liu.exchange.bitfinex.websocket.BitfinexSocket;
 import io.github.t73liu.model.bitfinex.*;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -11,7 +10,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +18,6 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.net.URI;
 
 @Component
 @Path("/bitfinex")
@@ -62,10 +59,6 @@ public class BitfinexResource {
     @Path("/orderBooks/{pair}")
     @ApiResponse(responseCode = "200", description = "Retrieved Order Book of Specified Pair in Bitfinex", content = @Content(array = @ArraySchema(schema = @Schema(implementation = BitfinexOrderBook.class))))
     public Response getOrderBookForPair(@Parameter(schema = @Schema(implementation = BitfinexPair.class)) @PathParam("pair") @Valid @NotNull BitfinexPair pair) throws Exception {
-        // TODO move to proper location/class
-        WebSocketClient client = new WebSocketClient();
-        client.start();
-        client.connect(new BitfinexSocket(), new URI("wss://api.bitfinex.com/ws/2"));
         return Response.ok(marketService.getExchangeOrderBookForPair(pair)).build();
     }
 }

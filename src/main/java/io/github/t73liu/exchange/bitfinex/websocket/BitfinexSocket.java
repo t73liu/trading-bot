@@ -2,10 +2,7 @@ package io.github.t73liu.exchange.bitfinex.websocket;
 
 import com.google.common.collect.ImmutableMap;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
-import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import org.eclipse.jetty.websocket.api.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,9 +22,15 @@ public class BitfinexSocket {
         LOGGER.info("Connecting to socket session: {}", session);
         this.session = session;
         if (session != null) {
+            // TODO make configurable
             session.getRemote().sendString(JSON_WRITER.writeValueAsString(ImmutableMap.of("event", "subscribe", "channel", "ticker", "symbol", "tBTCUSD")));
             session.getRemote().sendString(JSON_WRITER.writeValueAsString(ImmutableMap.of("event", "subscribe", "channel", "candles", "key", "trade:1m:tBTCUSD")));
         }
+    }
+
+    @OnWebSocketError
+    public void onError(Session session, Throwable throwable) {
+        LOGGER.error("Session: {}, Error Message: {}", session, throwable.getMessage(), throwable);
     }
 
     @OnWebSocketMessage
