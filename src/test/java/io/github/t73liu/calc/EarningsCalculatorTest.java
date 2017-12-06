@@ -30,7 +30,7 @@ public class EarningsCalculatorTest {
     @ParameterizedTest
     @MethodSource("pathProvider")
     public void testStrategyProfitability(String path) throws Exception {
-        List<Tick> ticks = readCSV(PoloniexCandle.class, path).stream()
+        List<Bar> ticks = readCSV(PoloniexCandle.class, path).stream()
                 .map(PoloniexCandle::toTick)
                 .collect(Collectors.toCollection(ObjectArrayList::new));
         TimeSeries series = new BaseTimeSeries(ticks);
@@ -40,6 +40,6 @@ public class EarningsCalculatorTest {
         Decimal growth = ticks.get(ticks.size() - 1).getClosePrice().dividedBy(ticks.get(0).getClosePrice());
         LOGGER.info("DEFAULT: {}, STRATEGY:{}", roundDecimalToDouble(growth), Precision.round(profit, 8));
         // RE-ENABLE TEST WHEN STRATEGY SOUND
-//        Assertions.assertTrue(profit > growth.multipliedBy(Decimal.valueOf(1.05)).toDouble());
+//        Assertions.assertTrue(profit > growth.multipliedBy(Decimal.valueOf(1.05)).doubleValue());
     }
 }

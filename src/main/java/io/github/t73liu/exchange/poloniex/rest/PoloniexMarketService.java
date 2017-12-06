@@ -13,7 +13,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
-import org.ta4j.core.Tick;
+import org.ta4j.core.Bar;
 
 import java.util.Arrays;
 import java.util.List;
@@ -86,7 +86,7 @@ public class PoloniexMarketService extends ExchangeService implements MarketServ
         }
     }
 
-    public List<Tick> getCandlestickForPair(PoloniexPair pair, long startSeconds, long endSeconds, PoloniexCandleInterval period) throws Exception {
+    public List<Bar> getCandlestickForPair(PoloniexPair pair, long startSeconds, long endSeconds, PoloniexCandleInterval period) throws Exception {
         return Arrays.stream(getExchangeCandleForPair(pair, startSeconds, endSeconds, period))
                 .map(PoloniexCandle::toTick)
                 .collect(Collectors.toCollection(ObjectArrayList::new));

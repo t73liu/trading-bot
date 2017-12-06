@@ -12,7 +12,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
-import org.ta4j.core.Tick;
+import org.ta4j.core.Bar;
 
 import java.util.Iterator;
 import java.util.List;
@@ -28,8 +28,8 @@ public class BitfinexMarketService extends ExchangeService implements MarketServ
         return new BitfinexTicker(getExchangeTickerForPair(pair));
     }
 
-    public List<Tick> getCandleForPair(BitfinexPair pair, BitfinexCandleInterval period, Long startMilliseconds, Long endMilliseconds,
-                                       int limit, boolean newestFirst) throws Exception {
+    public List<Bar> getCandleForPair(BitfinexPair pair, BitfinexCandleInterval period, Long startMilliseconds, Long endMilliseconds,
+                                      int limit, boolean newestFirst) throws Exception {
         return getExchangeCandleForPair(pair, period, startMilliseconds, endMilliseconds, limit, newestFirst).stream()
                 .map(BitfinexCandle::toTick)
                 .collect(Collectors.toCollection(ObjectArrayList::new));

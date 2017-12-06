@@ -9,6 +9,6 @@ public class MathUtil {
     }
 
     public static double roundDecimalToDouble(Decimal decimal, int precision) {
-        return Precision.round(decimal.toDouble(), precision);
+        return Precision.round(decimal.doubleValue(), precision);
     }
 }
