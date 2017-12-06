@@ -15,7 +15,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +81,7 @@ public class PoloniexOrderService extends PrivateExchangeService implements Orde
         }
     }
 
-    public Map placeOrder(@NotNull PoloniexPair pair, BigDecimal rate, BigDecimal amount, String orderType, String fulfillmentType) throws Exception {
+    public Map placeOrder(PoloniexPair pair, BigDecimal rate, BigDecimal amount, String orderType, String fulfillmentType) throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(6);
         queryParams.add(new BasicNameValuePair("command", "buy".equalsIgnoreCase(orderType) ? "buy" : "sell"));
         queryParams.add(new BasicNameValuePair("nonce", String.valueOf(System.currentTimeMillis())));

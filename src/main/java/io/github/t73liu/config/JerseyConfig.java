@@ -88,7 +88,7 @@ public class JerseyConfig extends ResourceConfig {
                         .url("http://www.apache.org/licenses/LICENSE-2.0.html"));
         oas.info(info);
         SwaggerConfiguration oasConfig = new SwaggerConfiguration()
-                .prettyPrint(true)
+                .prettyPrint(Boolean.TRUE)
                 .openAPI(oas)
                 .resourcePackages(ImmutableSet.of("io.github.t73liu.rest"));
         new JaxrsOpenApiContextBuilder()
