@@ -7,6 +7,7 @@ import org.ta4j.core.analysis.criteria.*;
 import java.util.Map;
 
 public class StrategyAnalysis {
+    // TODO place into enum?
     private static final AnalysisCriterion AVERAGE_PROFIT_CRITERION = new AverageProfitCriterion();
     private static final AnalysisCriterion AVERAGE_PROFITABLE_TRADES_CRITERION = new AverageProfitableTradesCriterion();
     private static final AnalysisCriterion BUY_HOLD_CRITERION = new BuyAndHoldCriterion();
