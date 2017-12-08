@@ -61,3 +61,12 @@ quadrigacx:
   apiKey: replace-with-api-key
   baseUrl: https://api.quadrigacx.com/v2/
   secretKey: replace-with-secret
+
+news:
+  twitter:
+    consumerKey: replace-with-value
+    consumerSecret: replace-with-value
+    accessToken: replace-with-value
+    accessTokenSecret: replace-with-value
+    users:
+      - replace-with-usernames
