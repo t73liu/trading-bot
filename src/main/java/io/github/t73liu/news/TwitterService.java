@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import twitter4j.*;
+import twitter4j.api.TweetsResources;
 import twitter4j.api.UsersResources;
 import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
@@ -52,7 +53,9 @@ public class TwitterService {
                 .setOAuthAccessToken(accessToken)
                 .setOAuthAccessTokenSecret(accessTokenSecret)
                 .build();
-        UsersResources usersResources = new TwitterFactory(configuration).getInstance().users();
+        Twitter twitter = new TwitterFactory(configuration).getInstance();
+        UsersResources usersResources = twitter.users();
+        TweetsResources tweetsResources = twitter.tweets();
         Set<Long> userIds = new LongOpenHashSet();
         for (String userName : users) {
             try {
@@ -67,6 +70,20 @@ public class TwitterService {
             public void onStatus(Status status) {
                 if (userIds.contains(status.getUser().getId())) {
                     LOGGER.info("User: {}, Text: {}", status.getUser().getScreenName(), status.getText());
+                    long inReplyToStatusId = status.getInReplyToStatusId();
+                    if (inReplyToStatusId > 0) {
+                        try {
+                            Status repliedToTweet = tweetsResources.showStatus(inReplyToStatusId);
+                            LOGGER.info("User: {}, Text: {}", repliedToTweet.getUser().getScreenName(), repliedToTweet.getText());
+                        } catch (TwitterException e) {
+                            LOGGER.warn("Unable to lookup repliedToTweet status: {}", inReplyToStatusId);
+                        }
+                    }
+                    // TODO verify if required
+                    if (status.isRetweet()) {
+                        Status retweetedStatus = status.getRetweetedStatus();
+                        LOGGER.info("Retweeted By: {} - User: {}, Text: {}", status.getUser().getScreenName(), retweetedStatus.getUser().getScreenName(), retweetedStatus.getText());
+                    }
                 }
             }
 
