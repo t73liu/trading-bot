@@ -1,12 +1,18 @@
-# Cryptocurrency Trading Bot
+# Trading Bot
 
 ## Features
 
-Supports trading on the following exchanges:
+Stock Exchange:
+- [Questrade](http://www.questrade.com/api)
+
+Cryptocurrency Exchanges:
 - [Bitfinex](https://bitfinex.readme.io/v2/docs)
 - [Bittrex](https://bittrex.com/home/api)
 - [Poloniex](https://poloniex.com/support/api/)
 - [QuadrigaCX](https://www.quadrigacx.com/api_info)
+
+Other:
+- [Alpha Vantage](https://www.alphavantage.co/documentation/)
 
 ## Setup
 
@@ -16,7 +22,6 @@ Supports trading on the following exchanges:
    - Email Credentials (Gmail requires turning off secure apps)
    - Email Recipients
 3. Tweak Strategies
-4. Use a json-formatter browser extension or enable SerializationFeature.INDENT_OUTPUT
 5. Run TradingApplication
 
 ## License
