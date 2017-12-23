@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 
 import static io.github.t73liu.util.MapperUtil.readCSV;
 
-public class StrategyAnalysisTest {
+class StrategyAnalysisTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(StrategyAnalysisTest.class);
 
     private static Stream<String> pathProvider() {
@@ -44,25 +44,25 @@ public class StrategyAnalysisTest {
 
     @ParameterizedTest
     @MethodSource("pathProvider")
-    public void testGlobalExtremeStrategy(String path) throws Exception {
+    void testGlobalExtremeStrategy(String path) throws Exception {
         analyzeStrategy(path, PlaceholderStrategy::getGlobalExtremaStrategy, "GLOBAL EXTREMA");
     }
 
     @ParameterizedTest
     @MethodSource("pathProvider")
-    public void testRsiStrategy(String path) throws Exception {
+    void testRsiStrategy(String path) throws Exception {
         analyzeStrategy(path, PlaceholderStrategy::getRsiStrategy, "RSI");
     }
 
     @ParameterizedTest
     @MethodSource("pathProvider")
-    public void testCciStrategy(String path) throws Exception {
+    void testCciStrategy(String path) throws Exception {
         analyzeStrategy(path, PlaceholderStrategy::getCciStrategy, "CCI");
     }
 
     @ParameterizedTest
     @MethodSource("pathProvider")
-    public void testMovingMomentumStrategy(String path) throws Exception {
+    void testMovingMomentumStrategy(String path) throws Exception {
         analyzeStrategy(path, PlaceholderStrategy::getMovingMomentumStrategy, "MOVING MOMENTUM");
     }
 }
