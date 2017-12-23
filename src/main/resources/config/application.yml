@@ -1,3 +1,4 @@
+# General
 server:
   port: 9229
   compression:
@@ -34,13 +35,16 @@ spring:
 app:
   version: 1.0.0
 
-schedules:
-  report:
-    cron: 0 15 16 * * *
+# Analysis Service
+alphavantage:
+  apiKey: replace-with-api-key
+  baseUrl: https://www.alphavantage.co/query
 
-mailing-service:
-  recipients:
-    - replace-with-emails
+# Crypto Services
+binance:
+  apiKey: replace-with-api-key
+  baseUrl: https://api.binance.com/api/
+  secretKey: replace-with-secret
 
 bitfinex:
   apiKey: replace-with-api-key
@@ -62,6 +66,15 @@ quadrigacx:
   baseUrl: https://api.quadrigacx.com/v2/
   secretKey: replace-with-secret
 
+# Mail Service
+schedules:
+  report:
+    cron: 0 15 16 * * *
+mailing-service:
+  recipients:
+    - replace-with-emails
+
+# News Service
 news:
   twitter:
     consumerKey: replace-with-value
@@ -70,3 +83,8 @@ news:
     accessTokenSecret: replace-with-value
     users:
       - replace-with-usernames
+
+# Stock Service
+questrade:
+  apiKey: replace-with-api-key
+  baseUrl: https://api01.iq.questrade.com/v1/
