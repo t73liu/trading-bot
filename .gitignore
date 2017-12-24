@@ -1,6 +1,5 @@
-backend/target/
-frontend/target/
-#.log
+*/target/
+log/
 !.mvn/wrapper/maven-wrapper.jar
 
 ### STS ###

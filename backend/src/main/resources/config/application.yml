@@ -6,7 +6,7 @@ server:
     mime-types: application/json, text/plain
 
 logging:
-  config: config/logback.xml
+  config: classpath:config/logback.xml
   file: log/app.log
   level:
     root: INFO
