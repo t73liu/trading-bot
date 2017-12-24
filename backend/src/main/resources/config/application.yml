@@ -14,6 +14,8 @@ logging:
     org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
 
 spring:
+  profiles:
+    active: personal
   http:
     encoding:
       charset: UTF-8
