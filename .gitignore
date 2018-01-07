@@ -1,4 +1,7 @@
-target/
+# Custom
+backend/src/main/resources/public/
+application-personal.yml
+*/target/
 log/
 !.mvn/wrapper/maven-wrapper.jar
 
