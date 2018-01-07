@@ -38,4 +38,46 @@ public class AlphaAnalysisService extends PrivateExchangeService {
             get.releaseConnection();
         }
     }
+
+    public Object getEMA(String symbol, int numOfEntries) throws Exception {
+        List<NameValuePair> queryParams = new ObjectArrayList<>(6);
+        queryParams.add(new BasicNameValuePair("function", "EMA"));
+        queryParams.add(new BasicNameValuePair("symbol", symbol));
+        // following values are supported: 1min, 5min, 15min, 30min, 60min, daily, weekly, monthly
+        queryParams.add(new BasicNameValuePair("interval", "1min"));
+        queryParams.add(new BasicNameValuePair("time_period", String.valueOf(numOfEntries)));
+        // Four types are supported: close, open, high, low
+        queryParams.add(new BasicNameValuePair("series_type", "close"));
+        queryParams.add(new BasicNameValuePair("apikey", getApiKey()));
+        HttpGet get = generateGet(getBaseUrl(), queryParams);
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+             CloseableHttpResponse response = httpClient.execute(get)) {
+            return JSON_READER.readValue(response.getEntity().getContent());
+        } finally {
+            get.releaseConnection();
+        }
+    }
+
+    public Object getMACD(String symbol, int fastPeriod, int slowPeriod, int signalPeriod) throws Exception {
+        List<NameValuePair> queryParams = new ObjectArrayList<>(6);
+        queryParams.add(new BasicNameValuePair("function", "EMA"));
+        queryParams.add(new BasicNameValuePair("symbol", symbol));
+        // following values are supported: 1min, 5min, 15min, 30min, 60min, daily, weekly, monthly
+        queryParams.add(new BasicNameValuePair("interval", "1min"));
+        // Four types are supported: close, open, high, low
+        queryParams.add(new BasicNameValuePair("series_type", "close"));
+        queryParams.add(new BasicNameValuePair("fastperiod", String.valueOf(fastPeriod)));
+        queryParams.add(new BasicNameValuePair("slowperiod", String.valueOf(slowPeriod)));
+        queryParams.add(new BasicNameValuePair("signalperiod", String.valueOf(signalPeriod)));
+        queryParams.add(new BasicNameValuePair("apikey", getApiKey()));
+        HttpGet get = generateGet(getBaseUrl(), queryParams);
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+             CloseableHttpResponse response = httpClient.execute(get)) {
+            return JSON_READER.readValue(response.getEntity().getContent());
+        } finally {
+            get.releaseConnection();
+        }
+    }
 }
