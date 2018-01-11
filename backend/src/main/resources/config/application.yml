@@ -78,6 +78,10 @@ mailing-service:
 
 # News Service
 news:
+  rss:
+    subscriptions:
+#      - https://www.reddit.com/r/CryptoMarkets+CryptoCurrency/top/.rss?t=hour
+      - replace-with-rss-feeds
   twitter:
     consumerKey: replace-with-value
     consumerSecret: replace-with-value

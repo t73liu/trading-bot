@@ -42,6 +42,7 @@ public class TwitterService {
         return users;
     }
 
+    // TODO implement fetching latest tweets of selected users
     public Object getLatest() {
         return null;
     }
