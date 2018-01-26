@@ -24,10 +24,10 @@ class StrategyAnalysisTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(StrategyAnalysisTest.class);
 
     private static Stream<String> pathProvider() {
-        return Stream.of("src/test/resources/USDT_ETH.300.poloniex.csv", "src/test/resources/USDT_ETH.900.poloniex.csv",
-                "src/test/resources/USDT_ETH.1800.poloniex.csv", "src/test/resources/USDT_ETH.7200.poloniex.csv",
-                "src/test/resources/USDT_XRP.300.poloniex.csv", "src/test/resources/USDT_XRP.900.poloniex.csv",
-                "src/test/resources/USDT_XRP.1800.poloniex.csv", "src/test/resources/USDT_XRP.7200.poloniex.csv");
+        return Stream.of("src/test/resources/candles/USDT_ETH.300.poloniex.csv", "src/test/resources/candles/USDT_ETH.900.poloniex.csv",
+                "src/test/resources/candles/USDT_ETH.1800.poloniex.csv", "src/test/resources/candles/USDT_ETH.7200.poloniex.csv",
+                "src/test/resources/candles/USDT_XRP.300.poloniex.csv", "src/test/resources/candles/USDT_XRP.900.poloniex.csv",
+                "src/test/resources/candles/USDT_XRP.1800.poloniex.csv", "src/test/resources/candles/USDT_XRP.7200.poloniex.csv");
     }
 
     private static void analyzeStrategy(String path, Function<TimeSeries, Strategy> strategyFunction, String strategyName) throws Exception {

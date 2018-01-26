@@ -25,7 +25,7 @@
                 <!--<version>1.6</version>-->
                 <!--<configuration>-->
                     <!--<workingDirectory>src/main/client</workingDirectory>-->
-                    <!--<nodeVersion>v8.9.3</nodeVersion>-->
+                    <!--<nodeVersion>v8.9.4</nodeVersion>-->
                     <!--<npmVersion>5.6.0</npmVersion>-->
                 <!--</configuration>-->
                 <!--<executions>-->
