@@ -8,12 +8,14 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.ZonedDateTimeSerializer;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 public class MapperUtil {
@@ -53,6 +55,7 @@ public class MapperUtil {
         timeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateUtil.LOCALDATETIME_ISO_FORMATTER));
         timeModule.addSerializer(LocalDate.class, new LocalDateSerializer(DateUtil.LOCALDATE_ISO_FORMATTER));
         timeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateUtil.LOCALDATETIME_ISO_FORMATTER));
+        timeModule.addSerializer(ZonedDateTime.class, new ZonedDateTimeSerializer(DateUtil.ZONED_DATETIME_ISO_FORMATTER));
         mapper.registerModule(timeModule);
         mapper.registerModule(new AfterburnerModule());
     }

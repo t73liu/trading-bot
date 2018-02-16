@@ -1,5 +1,6 @@
 package io.github.t73liu.analysis;
 
+import io.github.t73liu.model.Candlestick;
 import io.github.t73liu.model.poloniex.PoloniexCandle;
 import io.github.t73liu.strategy.trading.PlaceholderStrategy;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -32,7 +33,7 @@ class StrategyAnalysisTest {
 
     private static void analyzeStrategy(String path, Function<TimeSeries, Strategy> strategyFunction, String strategyName) throws Exception {
         List<Bar> ticks = readCSV(PoloniexCandle.class, path).stream()
-                .map(PoloniexCandle::toTick)
+                .map(Candlestick::convertToBar)
                 .collect(Collectors.toCollection(ObjectArrayList::new));
         TimeSeries series = new BaseTimeSeries(ticks);
         double relativeFee = 0.002;

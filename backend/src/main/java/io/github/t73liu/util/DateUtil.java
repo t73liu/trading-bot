@@ -7,6 +7,7 @@ public class DateUtil {
     public static final DateTimeFormatter LOCALDATE_ISO_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
     public static final DateTimeFormatter LOCALDATE_SHORT_FORMATTER = DateTimeFormatter.ofPattern("uuuuMMdd");
     public static final DateTimeFormatter LOCALDATETIME_ISO_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    public static final DateTimeFormatter ZONED_DATETIME_ISO_FORMATTER = DateTimeFormatter.ISO_ZONED_DATE_TIME;
     public static final String TIMEZONE = "America/New_York";
     public static final ZoneId TIMEZONE_ID = ZoneId.of(TIMEZONE);
     private static final int SECOND_TO_MILLISECOND = 1000;

@@ -2,6 +2,7 @@ package io.github.t73liu.exchange.bitfinex.rest;
 
 import io.github.t73liu.exchange.ExchangeService;
 import io.github.t73liu.exchange.MarketService;
+import io.github.t73liu.model.Candlestick;
 import io.github.t73liu.model.bitfinex.*;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.apache.http.NameValuePair;
@@ -31,7 +32,7 @@ public class BitfinexMarketService extends ExchangeService implements MarketServ
     public List<Bar> getCandleForPair(BitfinexPair pair, BitfinexCandleInterval period, Long startMilliseconds, Long endMilliseconds,
                                       int limit, boolean newestFirst) throws Exception {
         return getExchangeCandleForPair(pair, period, startMilliseconds, endMilliseconds, limit, newestFirst).stream()
-                .map(BitfinexCandle::toTick)
+                .map(Candlestick::convertToBar)
                 .collect(Collectors.toCollection(ObjectArrayList::new));
     }
 

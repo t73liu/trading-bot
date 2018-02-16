@@ -2,6 +2,7 @@ package io.github.t73liu.exchange.poloniex.rest;
 
 import io.github.t73liu.exchange.ExchangeService;
 import io.github.t73liu.exchange.MarketService;
+import io.github.t73liu.model.Candlestick;
 import io.github.t73liu.model.poloniex.*;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps.UnmodifiableMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -88,7 +89,7 @@ public class PoloniexMarketService extends ExchangeService implements MarketServ
 
     public List<Bar> getCandlestickForPair(PoloniexPair pair, long startSeconds, long endSeconds, PoloniexCandleInterval period) throws Exception {
         return Arrays.stream(getExchangeCandleForPair(pair, startSeconds, endSeconds, period))
-                .map(PoloniexCandle::toTick)
+                .map(Candlestick::convertToBar)
                 .collect(Collectors.toCollection(ObjectArrayList::new));
     }
 

@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.ta4j.core.BaseBar;
+import org.ta4j.core.Bar;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -42,7 +42,7 @@ public class PoloniexResource {
 
     @GET
     @Path("/candles/{pair}")
-    @ApiResponse(responseCode = "200", description = "Retrieved Candle Stick of Specified Pair in Poloniex", content = @Content(array = @ArraySchema(schema = @Schema(implementation = BaseBar.class))))
+    @ApiResponse(responseCode = "200", description = "Retrieved Candle Stick of Specified Pair in Poloniex", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Bar.class))))
     public Response checkCandles(@PathParam("pair") @Valid @NotNull PoloniexPair pair,
                                  @QueryParam("interval") @Valid @NotNull PoloniexCandleInterval interval,
                                  @QueryParam("startSeconds") long startSeconds,
