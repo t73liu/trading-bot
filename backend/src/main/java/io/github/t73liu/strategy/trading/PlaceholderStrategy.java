@@ -1,8 +1,13 @@
 package io.github.t73liu.strategy.trading;
 
-import org.ta4j.core.*;
+import org.ta4j.core.BaseStrategy;
+import org.ta4j.core.Rule;
+import org.ta4j.core.Strategy;
+import org.ta4j.core.TimeSeries;
 import org.ta4j.core.indicators.*;
 import org.ta4j.core.indicators.helpers.*;
+import org.ta4j.core.num.DoubleNum;
+import org.ta4j.core.num.Num;
 import org.ta4j.core.trading.rules.CrossedDownIndicatorRule;
 import org.ta4j.core.trading.rules.CrossedUpIndicatorRule;
 import org.ta4j.core.trading.rules.OverIndicatorRule;
@@ -23,11 +28,11 @@ public class PlaceholderStrategy {
         LowestValueIndicator weekMinPrice = new LowestValueIndicator(minPrices, NB_TICKS_PER_WEEK);
 
         // Going long if the close price goes below the min price
-        MultiplierIndicator downWeek = new MultiplierIndicator(weekMinPrice, Decimal.valueOf("1.004"));
+        MultiplierIndicator downWeek = new MultiplierIndicator(weekMinPrice, 1.004);
         Rule buyingRule = new UnderIndicatorRule(closePrices, downWeek);
 
         // Going short if the close price goes above the max price
-        MultiplierIndicator upWeek = new MultiplierIndicator(weekMaxPrice, Decimal.valueOf("0.996"));
+        MultiplierIndicator upWeek = new MultiplierIndicator(weekMaxPrice, 0.996);
         Rule sellingRule = new OverIndicatorRule(closePrices, upWeek);
 
         return new BaseStrategy(buyingRule, sellingRule);
@@ -45,13 +50,13 @@ public class PlaceholderStrategy {
         // Entry rule
         // The long-term trend is up when a security is above its 200-period SMA.
         Rule entryRule = new OverIndicatorRule(shortSma, longSma) // Trend
-                .and(new CrossedDownIndicatorRule(rsi, Decimal.valueOf(5))) // Signal 1
+                .and(new CrossedDownIndicatorRule(rsi, 5d)) // Signal 1
                 .and(new OverIndicatorRule(shortSma, closePrice)); // Signal 2
 
         // Exit rule
         // The long-term trend is down when a security is below its 200-period SMA.
         Rule exitRule = new UnderIndicatorRule(shortSma, longSma) // Trend
-                .and(new CrossedUpIndicatorRule(rsi, Decimal.valueOf(95))) // Signal 1
+                .and(new CrossedUpIndicatorRule(rsi, 95d)) // Signal 1
                 .and(new UnderIndicatorRule(shortSma, closePrice)); // Signal 2
 
         return new BaseStrategy(entryRule, exitRule);
@@ -60,8 +65,8 @@ public class PlaceholderStrategy {
     public static Strategy getCciStrategy(TimeSeries series) {
         CCIIndicator longCci = new CCIIndicator(series, 200);
         CCIIndicator shortCci = new CCIIndicator(series, 5);
-        Decimal plus100 = Decimal.HUNDRED;
-        Decimal minus100 = Decimal.valueOf(-100);
+        Num plus100 = DoubleNum.valueOf(100);
+        Num minus100 = DoubleNum.valueOf(-100);
 
         Rule entryRule = new OverIndicatorRule(longCci, plus100) // Bull trend
                 .and(new UnderIndicatorRule(shortCci, minus100)); // Signal
@@ -89,12 +94,12 @@ public class PlaceholderStrategy {
 
         // Entry rule
         Rule entryRule = new OverIndicatorRule(shortEma, longEma) // Trend
-                .and(new CrossedDownIndicatorRule(stochasticOscillK, Decimal.valueOf(20))) // Signal 1
+                .and(new CrossedDownIndicatorRule(stochasticOscillK, 20d)) // Signal 1
                 .and(new OverIndicatorRule(macd, emaMacd)); // Signal 2
 
         // Exit rule
         Rule exitRule = new UnderIndicatorRule(shortEma, longEma) // Trend
-                .and(new CrossedUpIndicatorRule(stochasticOscillK, Decimal.valueOf(80))) // Signal 1
+                .and(new CrossedUpIndicatorRule(stochasticOscillK, 80d)) // Signal 1
                 .and(new UnderIndicatorRule(macd, emaMacd)); // Signal 2
 
         return new BaseStrategy(entryRule, exitRule);

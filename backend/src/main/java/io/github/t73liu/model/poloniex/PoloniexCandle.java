@@ -3,6 +3,7 @@ package io.github.t73liu.model.poloniex;
 import io.github.t73liu.util.DateUtil;
 import org.ta4j.core.Bar;
 import org.ta4j.core.BaseBar;
+import org.ta4j.core.num.DoubleNum;
 
 public class PoloniexCandle {
     private long date;
@@ -47,6 +48,6 @@ public class PoloniexCandle {
     }
 
     public Bar toTick() {
-        return new BaseBar(DateUtil.unixSecondsToZonedDateTime(date), open, high, low, close, volume);
+        return new BaseBar(DateUtil.unixSecondsToZonedDateTime(date), open, high, low, close, volume, DoubleNum::valueOf);
     }
 }

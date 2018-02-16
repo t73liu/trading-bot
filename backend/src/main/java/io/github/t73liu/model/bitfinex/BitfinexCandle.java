@@ -2,6 +2,7 @@ package io.github.t73liu.model.bitfinex;
 
 import org.ta4j.core.Bar;
 import org.ta4j.core.BaseBar;
+import org.ta4j.core.num.DoubleNum;
 
 import static io.github.t73liu.util.DateUtil.unixMillisecondsToZonedDateTime;
 
@@ -47,6 +48,6 @@ public class BitfinexCandle {
     }
 
     public Bar toTick() {
-        return new BaseBar(unixMillisecondsToZonedDateTime(millisecondTimeStamp), open, high, low, close, volume);
+        return new BaseBar(unixMillisecondsToZonedDateTime(millisecondTimeStamp), open, high, low, close, volume, DoubleNum::valueOf);
     }
 }
