@@ -20,7 +20,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.filter.CommonsRequestLoggingFilter;
 
 import javax.annotation.PostConstruct;
 import javax.ws.rs.Path;
@@ -78,14 +80,9 @@ public class JerseyConfig extends ResourceConfig {
     private void initializeSwagger() throws Exception {
         OpenAPI oas = new OpenAPI();
         Info info = new Info()
-                .title("Crypto-Currency Trading Bot")
-                .description("This is a crypto-currency trading bot with a front end and custom news feeds.")
-                .version(this.appVersion)
-                .contact(new Contact()
-                        .email("cryptotest92@gmail.com"))
-                .license(new License()
-                        .name("Apache 2.0")
-                        .url("http://www.apache.org/licenses/LICENSE-2.0.html"));
+                .title("Trading Bot")
+                .description("This is a trading bot with RSS feeds and extensible strategies.")
+                .version(this.appVersion);
         oas.info(info);
         SwaggerConfiguration oasConfig = new SwaggerConfiguration()
                 .prettyPrint(Boolean.TRUE)
@@ -94,5 +91,15 @@ public class JerseyConfig extends ResourceConfig {
         new JaxrsOpenApiContextBuilder()
                 .openApiConfiguration(oasConfig)
                 .buildContext(true);
+    }
+
+    @Bean
+    public CommonsRequestLoggingFilter requestLoggingFilter() {
+        CommonsRequestLoggingFilter filter = new CommonsRequestLoggingFilter();
+        filter.setIncludeClientInfo(true);
+        filter.setIncludeHeaders(true);
+        filter.setIncludePayload(true);
+        filter.setIncludeQueryString(true);
+        return filter;
     }
 }
