@@ -49,9 +49,7 @@ binance:
   secretKey: replace-with-secret
 
 bitfinex:
-  apiKey: replace-with-api-key
   baseUrl: https://api.bitfinex.com/
-  secretKey: replace-with-secret
 
 bittrex:
   apiKey: replace-with-api-key
@@ -72,6 +70,7 @@ quadrigacx:
 schedules:
   report:
     cron: 0 15 16 * * *
+
 mailing-service:
   recipients:
     - replace-with-emails
@@ -92,5 +91,5 @@ news:
 
 # Stock Service
 questrade:
-  apiKey: replace-with-api-key
+  refreshToken: replace-with-refresh-token
   baseUrl: https://api01.iq.questrade.com/v1/

@@ -1,3 +1,6 @@
+server:
+  port: 9119
+
 news:
   twitter:
     enabled: false

@@ -1,6 +1,5 @@
 package io.github.t73liu.scheduler;
 
-import io.github.t73liu.exchange.bitfinex.rest.BitfinexAccountService;
 import io.github.t73liu.exchange.bittrex.rest.BittrexAccountService;
 import io.github.t73liu.exchange.poloniex.rest.PoloniexAccountService;
 import io.github.t73liu.exchange.quadriga.rest.QuadrigaAccountService;
@@ -16,8 +15,6 @@ import org.springframework.stereotype.Component;
 public class ReportScheduler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportScheduler.class);
 
-    private final BitfinexAccountService bitfinexAccountService;
-
     private final BittrexAccountService bittrexAccountService;
 
     private final PoloniexAccountService poloniexAccountService;
@@ -27,10 +24,8 @@ public class ReportScheduler {
     private final MailingService mailingService;
 
     @Autowired
-    public ReportScheduler(BitfinexAccountService bitfinexAccountService, BittrexAccountService bittrexAccountService,
-                           PoloniexAccountService poloniexAccountService, QuadrigaAccountService quadrigaAccountService,
-                           MailingService mailingService) {
-        this.bitfinexAccountService = bitfinexAccountService;
+    public ReportScheduler(BittrexAccountService bittrexAccountService, PoloniexAccountService poloniexAccountService,
+                           QuadrigaAccountService quadrigaAccountService, MailingService mailingService) {
         this.bittrexAccountService = bittrexAccountService;
         this.poloniexAccountService = poloniexAccountService;
         this.quadrigaAccountService = quadrigaAccountService;

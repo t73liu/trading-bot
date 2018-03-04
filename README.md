@@ -7,21 +7,21 @@ TBD
 ## Third Party Services
 
 Stock Exchange:
-- [Questrade](http://www.questrade.com/api)
+- [Questrade](http://www.questrade.com/api) (In-Progress)
 
 Cryptocurrency Exchanges:
-- [Binance](https://www.binance.com/restapipub.html)
-- [Bitfinex](https://bitfinex.readme.io/v2/docs)
-- [Bittrex](https://bittrex.com/home/api)
+- [Binance](https://github.com/binance-exchange/binance-official-api-docs) (In-Progress)
+- [Bitfinex](https://bitfinex.readme.io/v2/docs) (Market Data Only)
+- [Bittrex](https://bittrex.com/home/api) (Market Data Only)
 - [Poloniex](https://poloniex.com/support/api/)
-- [QuadrigaCX](https://www.quadrigacx.com/api_info)
+- [QuadrigaCX](https://www.quadrigacx.com/api_info) (Market Data Only)
 
 Analysis:
 - [Alpha Vantage](https://www.alphavantage.co/documentation/)
 
 ## Setup
 
-1. Install JDK 8, NodeJS 8.X
+1. Install JDK 8, NodeJS 8.9.4
 2. Clone the repository.
 3. Update the application.yml file
    - Enable the services required

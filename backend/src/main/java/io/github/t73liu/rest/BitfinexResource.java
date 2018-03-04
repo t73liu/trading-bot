@@ -1,8 +1,6 @@
 package io.github.t73liu.rest;
 
-import io.github.t73liu.exchange.bitfinex.rest.BitfinexAccountService;
 import io.github.t73liu.exchange.bitfinex.rest.BitfinexMarketService;
-import io.github.t73liu.exchange.bitfinex.rest.BitfinexOrderService;
 import io.github.t73liu.model.bitfinex.*;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -25,15 +23,11 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "BitfinexResource")
 public class BitfinexResource {
-    private final BitfinexAccountService accountService;
     private final BitfinexMarketService marketService;
-    private final BitfinexOrderService orderService;
 
     @Autowired
-    public BitfinexResource(BitfinexAccountService accountService, BitfinexMarketService marketService, BitfinexOrderService orderService) {
-        this.accountService = accountService;
+    public BitfinexResource(BitfinexMarketService marketService) {
         this.marketService = marketService;
-        this.orderService = orderService;
     }
 
     @GET
