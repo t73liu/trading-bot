@@ -6,8 +6,8 @@ TBD
 
 ## Third Party Services
 
-Stock Exchange:
-- [Questrade](http://www.questrade.com/api) (In-Progress)
+Analysis:
+- [Alpha Vantage](https://www.alphavantage.co/documentation/) (In-Progress)
 
 Cryptocurrency Exchanges:
 - [Binance](https://github.com/binance-exchange/binance-official-api-docs) (In-Progress)
@@ -16,8 +16,8 @@ Cryptocurrency Exchanges:
 - [Poloniex](https://poloniex.com/support/api/)
 - [QuadrigaCX](https://www.quadrigacx.com/api_info) (Market Data Only)
 
-Analysis:
-- [Alpha Vantage](https://www.alphavantage.co/documentation/)
+Stock Exchange:
+- [Questrade](http://www.questrade.com/api) (In-Progress)
 
 ## Setup
 

@@ -2,7 +2,10 @@ package io.github.t73liu.analysis;
 
 import io.github.t73liu.model.Candlestick;
 import io.github.t73liu.model.poloniex.PoloniexCandle;
-import io.github.t73liu.strategy.trading.PlaceholderStrategy;
+import io.github.t73liu.strategy.momentum.MinMaxStrategy;
+import io.github.t73liu.strategy.momentum.MovingMomentumStrategy;
+import io.github.t73liu.strategy.trend.CCIStrategy;
+import io.github.t73liu.strategy.trend.RSIStrategy;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -46,24 +49,24 @@ class StrategyAnalysisTest {
     @ParameterizedTest
     @MethodSource("pathProvider")
     void testGlobalExtremeStrategy(String path) throws Exception {
-        analyzeStrategy(path, PlaceholderStrategy::getGlobalExtremaStrategy, "GLOBAL EXTREMA");
+        analyzeStrategy(path, MinMaxStrategy::getStrategy, "GLOBAL EXTREMA");
     }
 
     @ParameterizedTest
     @MethodSource("pathProvider")
     void testRsiStrategy(String path) throws Exception {
-        analyzeStrategy(path, PlaceholderStrategy::getRsiStrategy, "RSI");
+        analyzeStrategy(path, RSIStrategy::getStrategy, "RSI");
     }
 
     @ParameterizedTest
     @MethodSource("pathProvider")
     void testCciStrategy(String path) throws Exception {
-        analyzeStrategy(path, PlaceholderStrategy::getCciStrategy, "CCI");
+        analyzeStrategy(path, CCIStrategy::getStrategy, "CCI");
     }
 
     @ParameterizedTest
     @MethodSource("pathProvider")
     void testMovingMomentumStrategy(String path) throws Exception {
-        analyzeStrategy(path, PlaceholderStrategy::getMovingMomentumStrategy, "MOVING MOMENTUM");
+        analyzeStrategy(path, MovingMomentumStrategy::getStrategy, "MOVING MOMENTUM");
     }
 }

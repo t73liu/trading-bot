@@ -1,4 +1,4 @@
-package io.github.t73liu.exchange.alpha.rest;
+package io.github.t73liu.news;
 
 import io.github.t73liu.exchange.PrivateExchangeService;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -18,7 +18,7 @@ import static io.github.t73liu.util.MapperUtil.JSON_READER;
 
 @Service
 @ConfigurationProperties(prefix = "alphavantage")
-public class AlphaAnalysisService extends PrivateExchangeService {
+public class AlphaVantageService extends PrivateExchangeService {
     public Object getCandle(String symbol) throws Exception {
         List<NameValuePair> queryParams = new ObjectArrayList<>(5);
         queryParams.add(new BasicNameValuePair("function", "TIME_SERIES_INTRADAY"));
