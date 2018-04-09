@@ -17,7 +17,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <junit.version>5.1.0</junit.version>
+        <junit.version>5.1.1</junit.version>
     </properties>
 
     <dependencies>
@@ -74,13 +74,7 @@
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-jaxrs2</artifactId>
-            <version>2.0.0-rc4</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>guava</artifactId>
-                    <groupId>com.google.guava</groupId>
-                </exclusion>
-            </exclusions>
+            <version>2.0.0</version>
         </dependency>
 
         <!-- CLIENTS -->
@@ -92,7 +86,7 @@
         <dependency>
             <groupId>org.eclipse.jetty.websocket</groupId>
             <artifactId>websocket-client</artifactId>
-            <version>9.4.8.v20171121</version>
+            <version>9.4.9.v20180320</version>
         </dependency>
         <dependency>
             <groupId>com.rometools</groupId>
@@ -109,7 +103,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>24.0-jre</version>
+            <version>24.1-jre</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
