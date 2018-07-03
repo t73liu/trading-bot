@@ -21,7 +21,7 @@ Stock Exchange:
 
 ## Setup
 
-1. Install JDK 8, NodeJS 8.9.4
+1. Install JDK 8, NodeJS 8.11.X
 2. Clone the repository.
 3. Update the application.yml file
    - Enable the services required
