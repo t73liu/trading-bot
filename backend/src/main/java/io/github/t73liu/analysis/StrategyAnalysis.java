@@ -23,10 +23,10 @@ public class StrategyAnalysis {
         TradingRecord tradingRecord = new TimeSeriesManager(series).run(strategy);
         Map<String, Double> analysisMap = new Object2DoubleLinkedOpenHashMap<>(TOTAL_CRITERION_COUNT);
         AnalysisCriterion transactionCostCriterion = new LinearTransactionCostCriterion(INITIAL_AMOUNT, relativeTransactionFee, flatTransactionFee);
-        double transactionCost = transactionCostCriterion.calculate(series, tradingRecord);
-        double maxDrawdown = MAX_DRAWDOWN_CRITERION.calculate(series, tradingRecord);
-        analysisMap.put("PROFIT_CRITERION", PROFIT_CRITERION.calculate(series, tradingRecord) - transactionCost);
-        analysisMap.put("BUY_HOLD_CRITERION", BUY_HOLD_CRITERION.calculate(series, tradingRecord));
+        double transactionCost = transactionCostCriterion.calculate(series, tradingRecord).doubleValue();
+        double maxDrawdown = MAX_DRAWDOWN_CRITERION.calculate(series, tradingRecord).doubleValue();
+        analysisMap.put("PROFIT_CRITERION", PROFIT_CRITERION.calculate(series, tradingRecord).doubleValue() - transactionCost);
+        analysisMap.put("BUY_HOLD_CRITERION", BUY_HOLD_CRITERION.calculate(series, tradingRecord).doubleValue());
         analysisMap.put("MAX_DRAWDOWN_CRITERION", maxDrawdown);
         analysisMap.put("REWARD_RISK_RATIO_CRITERION", analysisMap.get("PROFIT_CRITERION") / maxDrawdown);
 //        analysisMap.put("AVERAGE_PROFIT_CRITERION", AVERAGE_PROFIT_CRITERION.calculate(series, tradingRecord));
