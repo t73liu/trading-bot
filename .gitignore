@@ -1,25 +1,21 @@
-# Custom
-log/
-!.mvn/wrapper/maven-wrapper.jar
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
+# Test binary, built with `go test -c`
+*.test
 
-### IntelliJ IDEA ###
-.idea
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+### JetBrains IDE ###
+.idea/
 *.iws
 *.iml
 *.ipr
-
-### NetBeans ###
-nbproject/private/
-build/
-nbbuild/
-dist/
-nbdist/
-.nb-gradle/
