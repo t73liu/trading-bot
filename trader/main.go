@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
+	"github.com/caddyserver/certmagic"
 	"github.com/julienschmidt/httprouter"
-	"github.com/mholt/certmagic"
 	"github.com/t73liu/trading-bot/trader/news"
 	"github.com/t73liu/trading-bot/trader/stock"
 	"log"
@@ -42,5 +42,5 @@ func main() {
 		logger.Fatal(certmagic.HTTPS(strings.Split(*domains, ","), router))
 	}
 	logger.Printf("Starting service with HTTP at port %s\n", ":80")
-	logger.Fatal(http.ListenAndServe(":80", router))
+	logger.Fatal(http.ListenAndServe(":8080", router))
 }

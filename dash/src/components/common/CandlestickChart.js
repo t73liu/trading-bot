@@ -39,7 +39,7 @@ const CandlestickChart = ({ data = fakeData }) => {
           />
         }
       >
-        <VictoryAxis tickFormat={t => `${t.getDate()}/${t.getMonth()}`} />
+        <VictoryAxis tickFormat={(t) => `${t.getDate()}/${t.getMonth()}`} />
         <VictoryAxis dependentAxis />
         <VictoryCandlestick data={data} />
       </VictoryChart>
