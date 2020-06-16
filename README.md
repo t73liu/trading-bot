@@ -24,11 +24,11 @@ This directory will be referred to by the `TRADING_BOT_REPO` environment variabl
 
 ### Technologies
 
-- Go 1.13
+- Go 1.14
 - Node 12
-- Postgres 11
+- Postgres 12
 - Python 3.7
-- React 16.12
+- React 16.13
 - TensorFlow 2
 - Terraform 0.12
 - Yarn 1.21
