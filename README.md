@@ -18,6 +18,7 @@ This repository is divided into the following sections:
 - `dash`: UI for visualizing trades and account balances
 - `db`: Database containing financial, ML and user info
 - `jobs`: Periodically scheduled jobs
+- `lib`: Shared Go libraries
 - `quant`: Machine learning models and trading strategies
 - `trader`: Backend server for UI and makes periodic trades
 
