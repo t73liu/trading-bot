@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  email text UNIQUE NOT NULL,
+  password text NOT NULL,
+  is_active BOOLEAN NOT NULL DEFAULT FALSE
+);

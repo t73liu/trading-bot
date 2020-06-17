@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS watchlists CASCADE;
+DROP TABLE IF EXISTS watchlist_stocks CASCADE;
