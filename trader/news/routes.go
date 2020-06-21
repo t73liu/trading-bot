@@ -2,6 +2,7 @@ package news
 
 import (
 	"encoding/json"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/julienschmidt/httprouter"
 	"github.com/t73liu/trading-bot/lib/newsapi"
 	"log"
@@ -12,12 +13,14 @@ import (
 type Handlers struct {
 	logger *log.Logger
 	client *newsapi.Client
+	dbPool *pgxpool.Pool
 }
 
-func NewHandlers(logger *log.Logger, client *newsapi.Client) *Handlers {
+func NewHandlers(logger *log.Logger, client *newsapi.Client, dbPool *pgxpool.Pool) *Handlers {
 	return &Handlers{
 		logger: logger,
 		client: client,
+		dbPool: dbPool,
 	}
 }
 

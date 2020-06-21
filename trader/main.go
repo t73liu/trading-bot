@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"github.com/caddyserver/certmagic"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/julienschmidt/httprouter"
 	"github.com/t73liu/trading-bot/lib/newsapi"
 	"github.com/t73liu/trading-bot/trader/news"
@@ -34,7 +36,13 @@ func main() {
 
 	client := utils.NewHttpClient()
 
-	handler := initApp(logger, client)
+	dbPool, err := pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	if err != nil {
+		logger.Fatalln("Unable to connect to database:", err)
+	}
+	defer dbPool.Close()
+
+	handler := initApp(logger, client, dbPool)
 
 	if *httpsFlag {
 		// https://github.com/caddyserver/certmagic#requirements
@@ -60,7 +68,7 @@ func main() {
 	logger.Fatalln(server.ListenAndServe())
 }
 
-func initApp(logger *log.Logger, client *http.Client) http.Handler {
+func initApp(logger *log.Logger, client *http.Client, dbPool *pgxpool.Pool) http.Handler {
 	router := httprouter.New()
 
 	router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -69,7 +77,7 @@ func initApp(logger *log.Logger, client *http.Client) http.Handler {
 	router.ServeFiles("/assets/*filepath", http.Dir("assets/"))
 
 	newsClient := newsapi.NewClient(client, os.Getenv("NEWS_API_KEY"))
-	newsHandlers := news.NewHandlers(logger, newsClient)
+	newsHandlers := news.NewHandlers(logger, newsClient, dbPool)
 	newsHandlers.AddRoutes(router)
 
 	stockHandlers := stock.NewHandlers(logger)
