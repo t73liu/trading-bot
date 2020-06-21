@@ -52,9 +52,9 @@ type RequestError struct {
 	Message string `json:"message"`
 }
 
-func NewClient(httpClient http.Client, apiKey string) *Client {
+func NewClient(httpClient *http.Client, apiKey string) *Client {
 	return &Client{
-		client: httpClient,
+		client: *httpClient,
 		apiKey: apiKey,
 	}
 }
