@@ -7,9 +7,9 @@ import (
 )
 
 // Use sensible defaults for timeouts for HTTP server
-func NewHttpServer(handler *http.Handler) *http.Server {
+func NewHttpServer(port string, handler *http.Handler) *http.Server {
 	return &http.Server{
-		Addr:              ":8080",
+		Addr:              port,
 		ReadHeaderTimeout: 10 * time.Second,
 		ReadTimeout:       30 * time.Second,
 		WriteTimeout:      2 * time.Minute,

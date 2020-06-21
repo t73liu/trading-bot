@@ -4,6 +4,7 @@ import (
 	"flag"
 	"github.com/caddyserver/certmagic"
 	"github.com/julienschmidt/httprouter"
+	"github.com/t73liu/trading-bot/lib/newsapi"
 	"github.com/t73liu/trading-bot/trader/news"
 	"github.com/t73liu/trading-bot/trader/stock"
 	"github.com/t73liu/trading-bot/trader/utils"
@@ -53,8 +54,9 @@ func main() {
 		logger.Fatalln(certmagic.HTTPS(domainNames, handler))
 	}
 
-	logger.Printf("Starting service with HTTP at port %s\n", ":8080")
-	server := utils.NewHttpServer(&handler)
+	port := ":8080"
+	logger.Printf("Starting service with HTTP at port %s\n", port)
+	server := utils.NewHttpServer(port, &handler)
 	logger.Fatalln(server.ListenAndServe())
 }
 
@@ -66,7 +68,7 @@ func initApp(logger *log.Logger, client *http.Client) http.Handler {
 	})
 	router.ServeFiles("/assets/*filepath", http.Dir("assets/"))
 
-	newsClient := news.NewClient(client, os.Getenv("NEWS_API_KEY"))
+	newsClient := newsapi.NewClient(client, os.Getenv("NEWS_API_KEY"))
 	newsHandlers := news.NewHandlers(logger, newsClient)
 	newsHandlers.AddRoutes(router)
 

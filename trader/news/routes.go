@@ -3,6 +3,7 @@ package news
 import (
 	"encoding/json"
 	"github.com/julienschmidt/httprouter"
+	"github.com/t73liu/trading-bot/lib/newsapi"
 	"log"
 	"net/http"
 	"time"
@@ -10,10 +11,10 @@ import (
 
 type Handlers struct {
 	logger *log.Logger
-	client *Client
+	client *newsapi.Client
 }
 
-func NewHandlers(logger *log.Logger, client *Client) *Handlers {
+func NewHandlers(logger *log.Logger, client *newsapi.Client) *Handlers {
 	return &Handlers{
 		logger: logger,
 		client: client,
