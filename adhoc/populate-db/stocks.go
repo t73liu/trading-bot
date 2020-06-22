@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v4"
-	"github.com/t73liu/trading-bot/lib/newsapi"
+	"github.com/t73liu/trading-bot/lib/alpaca"
 	"net/http"
 	"os"
 	"strings"
@@ -17,9 +17,14 @@ func main() {
 		fmt.Println("DATABASE_URL environment variable is required")
 		os.Exit(1)
 	}
-	apiKey := strings.TrimSpace(os.Getenv("NEWS_API_KEY"))
+	apiKey := strings.TrimSpace(os.Getenv("ALPACA_API_KEY"))
 	if apiKey == "" {
-		fmt.Println("NEWS_API_KEY environment variable is required")
+		fmt.Println("ALPACA_API_KEY environment variable is required")
+		os.Exit(1)
+	}
+	apiSecretKey := strings.TrimSpace(os.Getenv("ALPACA_API_SECRET_KEY"))
+	if apiSecretKey == "" {
+		fmt.Println("ALPACA_API_SECRET_KEY environment variable is required")
 		os.Exit(1)
 	}
 
@@ -29,27 +34,29 @@ func main() {
 		os.Exit(1)
 	}
 
-	client := newsapi.NewClient(
+	client := alpaca.NewClient(
 		&http.Client{
 			Timeout: 15 * time.Second,
 		},
 		apiKey,
+		apiSecretKey,
+		false,
 	)
 
-	sources, err := client.GetSources("", "en", "")
+	assets, err := client.GetAssets("active", "")
 	if err != nil {
-		fmt.Println("Failed to fetch news sources:", err)
+		fmt.Println("Failed to fetch Alpaca supported stocks:", err)
 		os.Exit(1)
 	}
 
-	err = bulkInsertNewsSources(conn, sources)
+	err = bulkInsertStocks(conn, assets)
 	if err != nil {
-		fmt.Println("Failed to populate DB with news sources:", err)
+		fmt.Println("Failed to populate DB with stocks:", err)
 		os.Exit(1)
 	}
 }
 
-func bulkInsertNewsSources(conn *pgx.Conn, sources []newsapi.Source) error {
+func bulkInsertStocks(conn *pgx.Conn, assets []alpaca.Asset) error {
 	tx, err := conn.Begin(context.Background())
 	if err != nil {
 		return err
@@ -58,15 +65,20 @@ func bulkInsertNewsSources(conn *pgx.Conn, sources []newsapi.Source) error {
 	// the tx commits successfully, this is a no-op
 	defer tx.Rollback(context.Background())
 
-	rows := make([][]interface{}, 0, len(sources))
-	for _, source := range sources {
-		rows = append(rows, []interface{}{source.Id, source.Name, source.Description, source.Url})
+	rows := make([][]interface{}, 0, len(assets))
+	for _, asset := range assets {
+		rows = append(rows, []interface{}{
+			asset.Symbol,
+			asset.Name,
+			asset.Exchange,
+			asset.Tradable,
+		})
 	}
 
 	_, err = tx.CopyFrom(
 		context.Background(),
-		pgx.Identifier{"news_sources"},
-		[]string{"id", "name", "description", "url"},
+		pgx.Identifier{"stocks"},
+		[]string{"symbol", "company", "exchange", "is_tradable"},
 		pgx.CopyFromRows(rows),
 	)
 	if err != nil {
