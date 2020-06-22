@@ -13,5 +13,11 @@ CLI. Usage instructions can be found [here](https://github.com/golang-migrate/mi
 # Example migrating local DB with user = "postgres" and password = "test"
 cd ${TRADING_BOT_REPO}
 migrate -path db/migrations \
- -database "postgres://postgres:test@localhost:5432/trader?sslmode=disable" up 1
+ -database "postgres://postgres:test@localhost:5432/trader?sslmode=disable" \
+ up 1
+
+# Fix failed migration manually and force correct migration version number (e.g. 4)
+migrate -path db/migrations \
+ -database "postgres://postgres:test@localhost:5432/trader?sslmode=disable" \
+ force 4
 ```

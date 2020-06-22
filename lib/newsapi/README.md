@@ -2,7 +2,7 @@
 
 Go client for [News API](https://newsapi.org/).
 
-**NOTE:** An API key is required.
+**NOTE:** "Developer" plan has one hour delay.
 
 ## Usage
 
