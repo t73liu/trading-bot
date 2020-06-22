@@ -2,5 +2,5 @@
 
 docker build \
   --disable-content-trust false \
-  --file ${TRADING_BOT_REPO}/Dockerfile \
+  --file "${TRADING_BOT_REPO}/Dockerfile" \
   --tag trader .

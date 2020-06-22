@@ -1,9 +1,9 @@
 # Build trader
-FROM golang:1.13-alpine AS trader-builder
+FROM golang:1.14-alpine AS trader-builder
 
 WORKDIR $GOPATH/src/trading-bot/trader/
 
-COPY trader .
+COPY ../../trader .
 
 RUN go mod download
 RUN go mod verify
@@ -17,7 +17,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
 # Build dash
 FROM node:lts-alpine AS dash-builder
 
-COPY dash .
+COPY ../../dash .
 
 RUN yarn install
 RUN yarn run build
