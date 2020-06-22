@@ -2,7 +2,7 @@
 
 Go client for [Polygon](https://polygon.io/).
 
-**NOTE:** API key is provided by Alpaca.
+**Note:** API key is provided by Alpaca.
 
 ## Usage
 

@@ -6,4 +6,4 @@ Scrape Yahoo Finance to fetch upcoming stock events:
 - [ ] Quarterly Earnings
 - [ ] Stock Splits
 
-**NOTE:** Annual General Meeting calendar is not provided by Yahoo Finance.
+**Note:** Annual General Meeting calendar is not provided by Yahoo Finance.

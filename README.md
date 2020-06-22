@@ -7,7 +7,7 @@
 - [ ] Live and paper stock trading with [Alpaca](https://alpaca.markets/)
 - [ ] Live crypto trading with [Binance](https://www.binance.com/en)
 
-Note: Functionality requires setting up API keys with corresponding services.
+**Note:** Functionality requires setting up API keys with corresponding services.
 Polygon API key is provided by Alpaca.
 
 ### Getting Started
@@ -34,7 +34,3 @@ This directory will be referred to by the `TRADING_BOT_REPO` environment variabl
 - [TensorFlow 2](https://www.tensorflow.org/)
 - [Terraform 0.12](https://www.terraform.io/)
 - [Yarn 1.21](https://classic.yarnpkg.com/lang/en/)
-
-### Future Ideas
-
-- Send Email/SMS alerts via Twilio

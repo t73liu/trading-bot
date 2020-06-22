@@ -2,7 +2,7 @@
 
 Go client for [News API](https://newsapi.org/).
 
-**NOTE:** "Developer" plan has one hour delay.
+**Note:** "Developer" plan has one hour delay.
 
 ## Usage
 
