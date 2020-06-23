@@ -2,8 +2,10 @@ package newsapi
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -63,20 +65,20 @@ func (e *RequestError) Error() string {
 	return fmt.Sprintf("%s - %s - %s", e.Status, e.Code, e.Message)
 }
 
-func (c *Client) GetTopHeadlinesBySources(query, sources string) (*ArticlesResponse, error) {
-	return c.getHeadlines("/v2/top-headlines", query, sources)
+func (c *Client) GetTopHeadlinesBySources(query, sources string, pageSize int) (ArticlesResponse, error) {
+	return c.getHeadlines("/v2/top-headlines", query, sources, pageSize)
 }
 
-func (c *Client) GetAllHeadlinesBySources(query, sources string) (*ArticlesResponse, error) {
-	return c.getHeadlines("/v2/everything", query, sources)
+func (c *Client) GetAllHeadlinesBySources(query, sources string, pageSize int) (ArticlesResponse, error) {
+	return c.getHeadlines("/v2/everything", query, sources, pageSize)
 }
 
-func (c *Client) getHeadlines(path, query, sources string) (*ArticlesResponse, error) {
+func (c *Client) getHeadlines(path, query, sources string, pageSize int) (result ArticlesResponse, err error) {
 	req, err := http.NewRequest("GET", newsAPIHost+path, nil)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
-	req.Header.Set("X-Api-Key", c.apiKey)
+	c.setHeaders(req)
 	queryParams := req.URL.Query()
 	if query != "" {
 		queryParams.Add("q", query)
@@ -84,32 +86,34 @@ func (c *Client) getHeadlines(path, query, sources string) (*ArticlesResponse, e
 	if sources != "" {
 		queryParams.Add("sources", sources)
 	}
+	if pageSize > 0 {
+		queryParams.Add("pageSize", strconv.Itoa(pageSize))
+	}
 	req.URL.RawQuery = queryParams.Encode()
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 	if resp.StatusCode != http.StatusOK {
 		var requestError RequestError
 		if err := json.NewDecoder(resp.Body).Decode(&requestError); err != nil {
-			return nil, err
+			return result, err
 		}
-		return nil, &requestError
+		return result, &requestError
 	}
-	var result ArticlesResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, err
+		return result, err
 	}
-	return &result, nil
+	return result, nil
 }
 
-func (c *Client) GetSources(category, language, country string) ([]Source, error) {
+func (c *Client) GetSources(category, language, country string) (sources []Source, err error) {
 	req, err := http.NewRequest("GET", newsAPIHost+"/v2/sources", nil)
 	if err != nil {
-		return nil, err
+		return sources, err
 	}
-	req.Header.Set("X-Api-Key", c.apiKey)
+	c.setHeaders(req)
 	queryParams := req.URL.Query()
 	if category != "" {
 		queryParams.Add("category", category)
@@ -124,18 +128,18 @@ func (c *Client) GetSources(category, language, country string) ([]Source, error
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return nil, err
+		return sources, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		var requestError RequestError
-		if err := json.NewDecoder(resp.Body).Decode(&requestError); err != nil {
-			return nil, err
-		}
-		return nil, &requestError
+		return sources, errors.New("Response failed with status code: " + resp.Status)
 	}
 	var result SourcesResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, err
+		return sources, err
 	}
 	return result.Sources, nil
+}
+
+func (c *Client) setHeaders(request *http.Request) {
+	request.Header.Set("X-Api-Key", c.apiKey)
 }
