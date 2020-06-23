@@ -14,6 +14,6 @@ import "github.com/t73liu/trading-bot/lib/polygon"
 func main() {
   httpClient := &http.Client{Timeout: 15 * time.Second}
   polygonClient := polygon.Client(httpClient, "API_KEY")
-  polygonClient.GetTickers()
+  polygonClient.GetTickers(polygon.TickerQueryParams{})
 }
 ```
