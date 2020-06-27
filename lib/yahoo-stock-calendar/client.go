@@ -27,6 +27,7 @@ type EarningsCall struct {
 	EPSActual          *float64
 	EPSSurprisePercent *float64
 	QuoteType          string
+	Date               string
 }
 
 type IPO struct {
@@ -37,6 +38,7 @@ type IPO struct {
 	PriceTo   *float64
 	Currency  string
 	QuoteType string
+	Date      string
 }
 
 type Client struct {
@@ -50,6 +52,7 @@ func NewClient(httpClient *http.Client) *Client {
 }
 
 func (c *Client) GetEarningsCall(date time.Time) (earnings []EarningsCall, err error) {
+	formattedDate := formatISO(date)
 	rows, err := c.getEvents("earnings", date)
 	if err != nil {
 		return earnings, err
@@ -64,6 +67,7 @@ func (c *Client) GetEarningsCall(date time.Time) (earnings []EarningsCall, err e
 			EPSActual:          getFloat64(record["epsactual"]),
 			EPSSurprisePercent: getFloat64(record["epssurprisepct"]),
 			QuoteType:          record["quoteType"].(string),
+			Date:               formattedDate,
 		}
 		earnings = append(earnings, earningsCall)
 	}
@@ -71,6 +75,7 @@ func (c *Client) GetEarningsCall(date time.Time) (earnings []EarningsCall, err e
 }
 
 func (c *Client) GetIPOs(date time.Time) (ipos []IPO, err error) {
+	formattedDate := formatISO(date)
 	rows, err := c.getEvents("ipo", date)
 	if err != nil {
 		return ipos, err
@@ -85,6 +90,7 @@ func (c *Client) GetIPOs(date time.Time) (ipos []IPO, err error) {
 			PriceTo:   getFloat64(record["priceto"]),
 			Currency:  record["currencyname"].(string),
 			QuoteType: record["quoteType"].(string),
+			Date:      formattedDate,
 		}
 		ipos = append(ipos, ipo)
 	}

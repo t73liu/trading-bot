@@ -62,6 +62,8 @@ func (c *Client) GetTickers(params TickersQueryParams) (result TickersResponse, 
 	return result, nil
 }
 
+// News articles have stopped updating since 2020-03-26
+// https://github.com/polygon-io/issues/issues/25
 func (c *Client) GetTickerNews(ticker string, perPage int, page int) (articles []Article, err error) {
 	url := polygonHost + "/v1/meta/symbols/" + ticker + "/news"
 	req, err := http.NewRequest("GET", url, nil)
@@ -108,4 +110,30 @@ func (c *Client) GetTickerDetails(ticker string) (detail TickerDetails, err erro
 		return detail, err
 	}
 	return detail, nil
+}
+
+// TODO Implement GetTickerBars
+func (c *Client) GetTickerBars(ticker string) (bars interface{}, err error) {
+	url := polygonHost + "/v2/aggs/ticker/" + ticker + "/range/1/hour/2020-06-25/2020-06-26"
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return bars, err
+	}
+	queryParams := req.URL.Query()
+	queryParams.Add("apiKey", c.apiKey)
+	queryParams.Add("unadjusted", "true")
+	queryParams.Add("sort", "asc")
+	req.URL.RawQuery = queryParams.Encode()
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return bars, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return bars, errors.New("Response failed with status code: " + resp.Status)
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&bars); err != nil {
+		return bars, err
+	}
+	return bars, nil
 }
