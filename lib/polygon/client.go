@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 const polygonHost = "https://api.polygon.io"
@@ -47,6 +48,14 @@ type TickersQueryParams struct {
 	Sort    string
 }
 
+type Article struct {
+	Title     string    `json:"title"`
+	URL       string    `json:"url"`
+	Source    string    `json:"source"`
+	Summary   string    `json:"summary"`
+	Timestamp time.Time `json:"timestamp"`
+}
+
 func (c *Client) GetTickers(params TickersQueryParams) (result TickersResponse, err error) {
 	req, err := http.NewRequest("GET", polygonHost+"/v2/reference/tickers", nil)
 	if err != nil {
@@ -75,4 +84,29 @@ func (c *Client) GetTickers(params TickersQueryParams) (result TickersResponse, 
 		return result, err
 	}
 	return result, nil
+}
+
+func (c *Client) GetTickerNews(ticker string, perPage int, page int) (articles []Article, err error) {
+	url := polygonHost + "/v1/meta/symbols/" + ticker + "/news"
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return articles, err
+	}
+	queryParams := req.URL.Query()
+	queryParams.Add("apiKey", c.apiKey)
+	queryParams.Add("perpage", strconv.Itoa(perPage))
+	queryParams.Add("page", strconv.Itoa(page))
+	req.URL.RawQuery = queryParams.Encode()
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return articles, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return articles, errors.New("Response failed with status code: " + resp.Status)
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&articles); err != nil {
+		return articles, err
+	}
+	return articles, nil
 }
