@@ -29,6 +29,7 @@ func (h *Handlers) getTopHeadlines(w http.ResponseWriter, r *http.Request, _ htt
 	data, err := h.client.GetTopHeadlinesBySources(
 		queryValues.Get("q"),
 		queryValues.Get("sources"),
+		50,
 	)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
