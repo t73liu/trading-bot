@@ -2,6 +2,8 @@
 
 Go client for [Polygon](https://polygon.io/).
 
+Refer to the following repo to track ongoing issues: https://github.com/polygon-io/issues/issues
+
 **Note:** API key is provided by Alpaca.
 
 ## Usage

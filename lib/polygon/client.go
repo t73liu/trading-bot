@@ -32,6 +32,19 @@ type TickersQueryParams struct {
 	Sort    string
 }
 
+func DefaultTickersQueryParams() TickersQueryParams {
+	return TickersQueryParams{
+		PerPage: 50,
+		Page:    1,
+		Active:  true,
+		Type:    "",
+		Market:  "stocks",
+		Locale:  "us",
+		Search:  "",
+		Sort:    "ticker",
+	}
+}
+
 func (c *Client) GetTickers(params TickersQueryParams) (result TickersResponse, err error) {
 	req, err := http.NewRequest("GET", polygonHost+"/v2/reference/tickers", nil)
 	if err != nil {
@@ -39,13 +52,27 @@ func (c *Client) GetTickers(params TickersQueryParams) (result TickersResponse, 
 	}
 	queryParams := req.URL.Query()
 	queryParams.Add("apiKey", c.apiKey)
-	queryParams.Add("sort", params.Sort)
-	queryParams.Add("type", params.Type)
-	queryParams.Add("market", params.Market)
-	queryParams.Add("locale", params.Locale)
-	queryParams.Add("search", params.Search)
-	queryParams.Add("perpage", strconv.Itoa(params.PerPage))
-	queryParams.Add("page", strconv.Itoa(params.Page))
+	if params.Sort != "" {
+		queryParams.Add("sort", params.Sort)
+	}
+	if params.Type != "" {
+		queryParams.Add("type", params.Type)
+	}
+	if params.Market != "" {
+		queryParams.Add("market", params.Market)
+	}
+	if params.Locale != "" {
+		queryParams.Add("locale", params.Locale)
+	}
+	if params.Search != "" {
+		queryParams.Add("search", params.Search)
+	}
+	if params.PerPage > 0 {
+		queryParams.Add("perpage", strconv.Itoa(params.PerPage))
+	}
+	if params.Page > 0 {
+		queryParams.Add("page", strconv.Itoa(params.Page))
+	}
 	queryParams.Add("active", strconv.FormatBool(params.Active))
 	req.URL.RawQuery = queryParams.Encode()
 
@@ -89,6 +116,8 @@ func (c *Client) GetTickerNews(ticker string, perPage int, page int) (articles [
 	return articles, nil
 }
 
+// Some tickers return 404 despite being listed as active with bars
+// https://github.com/polygon-io/issues/issues/40
 func (c *Client) GetTickerDetails(ticker string) (detail TickerDetails, err error) {
 	url := polygonHost + "/v1/meta/symbols/" + ticker + "/company"
 	req, err := http.NewRequest("GET", url, nil)
