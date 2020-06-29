@@ -13,14 +13,14 @@ import (
 type Handlers struct {
 	logger *log.Logger
 	client *newsapi.Client
-	dbPool *pgxpool.Pool
+	db     *pgxpool.Pool
 }
 
-func NewHandlers(logger *log.Logger, client *newsapi.Client, dbPool *pgxpool.Pool) *Handlers {
+func NewHandlers(logger *log.Logger, client *newsapi.Client, db *pgxpool.Pool) *Handlers {
 	return &Handlers{
 		logger: logger,
 		client: client,
-		dbPool: dbPool,
+		db:     db,
 	}
 }
 

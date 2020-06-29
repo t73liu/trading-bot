@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/julienschmidt/httprouter"
 	"github.com/t73liu/trading-bot/lib/newsapi"
+	"github.com/t73liu/trading-bot/trader/account"
 	"github.com/t73liu/trading-bot/trader/news"
 	"github.com/t73liu/trading-bot/trader/stock"
 	"github.com/t73liu/trading-bot/trader/utils"
@@ -68,7 +69,7 @@ func main() {
 	logger.Fatalln(server.ListenAndServe())
 }
 
-func initApp(logger *log.Logger, client *http.Client, dbPool *pgxpool.Pool) http.Handler {
+func initApp(logger *log.Logger, client *http.Client, db *pgxpool.Pool) http.Handler {
 	router := httprouter.New()
 
 	router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -77,11 +78,14 @@ func initApp(logger *log.Logger, client *http.Client, dbPool *pgxpool.Pool) http
 	router.ServeFiles("/assets/*filepath", http.Dir("assets/"))
 
 	newsClient := newsapi.NewClient(client, os.Getenv("NEWS_API_KEY"))
-	newsHandlers := news.NewHandlers(logger, newsClient, dbPool)
+	newsHandlers := news.NewHandlers(logger, newsClient, db)
 	newsHandlers.AddRoutes(router)
 
 	stockHandlers := stock.NewHandlers(logger)
-	stockHandlers.AddRoutes(router)
+	stockHandlers.AddRoutes()
+
+	accountHandlers := account.NewHandlers(logger, db)
+	accountHandlers.AddRoutes(router)
 
 	return router
 }
