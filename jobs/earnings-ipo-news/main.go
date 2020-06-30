@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"github.com/t73liu/trading-bot/lib/polygon"
 	"github.com/t73liu/trading-bot/lib/yahoo-stock-calendar"
 	"html/template"
 	"net/http"
@@ -15,9 +14,8 @@ import (
 )
 
 type EmailParams struct {
-	NewsByTicker map[string][]polygon.Article
-	Earnings     []yahoo.EarningsCall
-	IPOs         []yahoo.IPO
+	Earnings []yahoo.EarningsCall
+	IPOs     []yahoo.IPO
 }
 
 func main() {
@@ -40,11 +38,6 @@ func main() {
 		fmt.Println("GMAIL_PASSWORD environment variable is required")
 		os.Exit(1)
 	}
-	apiKey := strings.TrimSpace(os.Getenv("ALPACA_API_KEY"))
-	if apiKey == "" {
-		fmt.Println("ALPACA_API_KEY environment variable is required")
-		os.Exit(1)
-	}
 
 	emailTemplate, err := template.ParseFiles("email-template.html")
 	if err != nil {
@@ -55,16 +48,15 @@ func main() {
 	now := time.Now()
 	httpClient := &http.Client{Timeout: 15 * time.Second}
 	yahooClient := yahoo.NewClient(httpClient)
-	polygonClient := polygon.NewClient(httpClient, apiKey)
 
-	emailParams, err := getEmailParams(yahooClient, polygonClient, now)
+	emailParams, err := getEmailParams(yahooClient, now)
 	if err != nil {
 		fmt.Println("Failed to fetch news items:", err)
 		os.Exit(1)
 	}
 
 	var body bytes.Buffer
-	subject := "Subject: Stock News " + now.Format("Jan 02") + "\n"
+	subject := "Subject: Earnings/IPO News " + now.Format("Jan 02") + "\n"
 	headers := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
 	body.WriteString(subject + headers)
 	err = emailTemplate.Execute(&body, emailParams)
@@ -89,7 +81,6 @@ func main() {
 
 func getEmailParams(
 	yahooClient *yahoo.Client,
-	polygonClient *polygon.Client,
 	now time.Time,
 ) (params EmailParams, err error) {
 	earnings, err := getEarnings(yahooClient, now)
@@ -120,35 +111,16 @@ func getEmailParams(
 		}
 	}
 
-	location, err := time.LoadLocation("EST")
-	if err != nil {
-		return params, err
-	}
-
-	newsByTicker := make(map[string][]polygon.Article)
-	tickers := []string{"TSLA", "AAPL"}
-	for _, ticker := range tickers {
-		articles, err := polygonClient.GetTickerNews(ticker, 10, 1)
-		if err != nil {
-			return params, err
-		}
-		for index := range articles {
-			articles[index].Timestamp = articles[index].Timestamp.In(location)
-		}
-		newsByTicker[ticker] = articles
-	}
-
 	params = EmailParams{
-		NewsByTicker: newsByTicker,
-		Earnings:     filteredEarnings,
-		IPOs:         filteredIPOs,
+		Earnings: filteredEarnings,
+		IPOs:     filteredIPOs,
 	}
 	return params, nil
 }
 
 func getEarnings(client *yahoo.Client, current time.Time) (earnings []yahoo.EarningsCall, err error) {
-	for days := 0; days < 1; days++ {
-		date := current.AddDate(0, 0, 5)
+	for days := 0; days < 14; days++ {
+		date := current.AddDate(0, 0, days)
 		earningsForDate, err := client.GetEarningsCall(date)
 		if err != nil {
 			return earnings, err
@@ -159,8 +131,8 @@ func getEarnings(client *yahoo.Client, current time.Time) (earnings []yahoo.Earn
 }
 
 func getIPOs(client *yahoo.Client, current time.Time) (ipos []yahoo.IPO, err error) {
-	for days := 0; days < 1; days++ {
-		date := current.AddDate(0, 0, 5)
+	for days := 0; days < 14; days++ {
+		date := current.AddDate(0, 0, days)
 		iposForDate, err := client.GetIPOs(date)
 		if err != nil {
 			return ipos, err

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Daily Stock News</title>
+  <style>
+    h2 {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h2>Watchlist News</h2>
+  <div>
+    {{range $symbol, $articles := .NewsByTicker}}
+      <h3>{{$symbol}}</h3>
+      <ul>
+        {{range $articles}}
+          <li>
+            <strong>{{.Title}}</strong>
+            <ul>
+              <li>{{.Summary}}</li>
+              <li>URL: {{.URL}}</li>
+              <li>Timestamp: {{.Timestamp.Format "2006-01-02 15:04:05"}}</li>
+            </ul>
+          </li>
+        {{end}}
+      </ul>
+    {{end}}
+  </div>
+</body>
+</html>

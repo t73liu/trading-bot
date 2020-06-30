@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Daily Stock News</title>
+  <title>Weekly Stock News</title>
   <style>
     h2 {
       text-decoration: underline;
@@ -11,6 +11,11 @@
 </head>
 <body>
   <h2>Earnings</h2>
+  <p>
+    <strong>TAS/TNS</strong>: Time not specified.
+    <strong>BMO</strong>: Before market open.
+    <strong>AMC</strong>: After market close.
+  </p>
   <ul>
     {{range .Earnings}}
       <li>
@@ -23,11 +28,6 @@
       </li>
     {{end}}
   </ul>
-  <p>
-    <strong>TAS/TNS</strong>: Time not specified.
-    <strong>BMO</strong>: Before market open.
-    <strong>AMC</strong>: After market close.
-  </p>
   <h2>IPOs</h2>
   <ul>
     {{range .IPOs}}
@@ -41,23 +41,5 @@
       </li>
     {{end}}
   </ul>
-  <h2>Watchlist News</h2>
-  <div>
-    {{range $symbol, $articles := .NewsByTicker}}
-      <h3>{{$symbol}}</h3>
-      <ul>
-        {{range $articles}}
-          <li>
-            <strong>{{.Title}}</strong>
-            <ul>
-              <li>{{.Summary}}</li>
-              <li>URL: {{.URL}}</li>
-              <li>Timestamp: {{.Timestamp.Format "2006-01-02 15:04:05"}}</li>
-            </ul>
-          </li>
-        {{end}}
-      </ul>
-    {{end}}
-  </div>
 </body>
 </html>
