@@ -16,11 +16,11 @@ This repository is divided into the following sections:
 
 - `adhoc`: Useful ad hoc scripts and experiments
 - `dash`: UI for visualizing trades and account balances
-- `db`: Database containing financial, ML and user info
 - `jobs`: Periodically scheduled jobs
 - `lib`: Shared Go libraries
 - `quant`: Machine learning models and trading strategies
 - `trader`: Backend server for UI and makes periodic trades
+- `traderdb`: Database containing financial, ML and user info
 
 This directory will be referred to by the `TRADING_BOT_REPO` environment variable.
 
