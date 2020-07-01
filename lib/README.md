@@ -1,3 +1,10 @@
 ## Libraries
 
 Shared Go libraries for usage across scripts and jobs.
+
+- `alpaca`: REST/WS API client for Alpaca
+- `binance`: REST/WS API client for Binance
+- `newsapi`: REST API client for News API
+- `polygon`: REST/WS API client for Polygon
+- `traderdb`: Library for common traderdb queries
+- `yahoo-stock-calendar`: Scrapes Yahoo Finance for stock events (Earnings/IPOs)
