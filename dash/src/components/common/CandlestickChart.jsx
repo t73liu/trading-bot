@@ -6,6 +6,7 @@ import {
   VictoryLine,
   VictoryZoomContainer,
 } from "victory";
+import PropTypes from "prop-types";
 
 const fakeData = [
   { x: new Date(2016, 6, 1), open: 9, close: 30, high: 56, low: 7 },
@@ -60,6 +61,18 @@ const CandlestickChart = ({ data = fakeData }) => {
       </VictoryChart>
     </div>
   );
+};
+
+CandlestickChart.propTypes = {
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      x: PropTypes.object.isRequired,
+      open: PropTypes.number.isRequired,
+      close: PropTypes.number.isRequired,
+      high: PropTypes.number.isRequired,
+      low: PropTypes.number.isRequired,
+    })
+  ).isRequired,
 };
 
 export default CandlestickChart;

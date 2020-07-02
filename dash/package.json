@@ -18,10 +18,15 @@
     "@testing-library/jest-dom": "^5.11.0",
     "@testing-library/react": "^10.4.3",
     "@testing-library/user-event": "^12.0.11",
+    "eslint-config-airbnb": "^18.2.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
+    "eslint-plugin-prettier": "^3.1.4",
     "husky": "^4.2.5",
     "lint-staged": "^10.2.11",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.0.5",
+    "prop-types": "^15.7.2",
     "source-map-explorer": "^2.4.2"
   },
   "scripts": {
@@ -29,6 +34,7 @@
     "build": "react-scripts build",
     "build:analyze": "npm-run-all build analyze",
     "format": "prettier --write **/*.{js,jsx,scss,md,json}",
+    "lint": "eslint --fix ./src/**/*.{js,jsx}",
     "start": "react-scripts start",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -43,6 +49,7 @@
     }
   },
   "lint-staged": {
+    "src/**/*.{js,jsx}": "eslint --fix",
     "src/**/*.{js,jsx,json,css}": "prettier --write"
   },
   "browserslist": {

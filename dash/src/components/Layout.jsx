@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { useState } from "react";
 import clsx from "clsx";
 import { makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
@@ -13,8 +13,9 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import { Helmet } from "react-helmet-async";
-import { useTitleContext } from "../state/title-context";
 import { Link } from "react-router-dom";
+import PropTypes from "prop-types";
+import { useTitleContext } from "../state/title-context";
 
 const drawerWidth = 240;
 
@@ -77,14 +78,14 @@ const useStyles = makeStyles((theme) => ({
 const Title = () => {
   const { title } = useTitleContext();
   return (
-    <Fragment>
+    <>
       <Helmet>
         <title>{title}</title>
       </Helmet>
       <Typography variant="h6" noWrap>
         {title}
       </Typography>
-    </Fragment>
+    </>
   );
 };
 
@@ -197,6 +198,10 @@ const Layout = ({ children }) => {
       </main>
     </div>
   );
+};
+
+Layout.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export default Layout;
