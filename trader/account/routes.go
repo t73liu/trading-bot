@@ -7,6 +7,7 @@ import (
 	"github.com/t73liu/trading-bot/lib/traderdb"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 type Handlers struct {
@@ -21,19 +22,108 @@ func NewHandlers(logger *log.Logger, db *pgxpool.Pool) *Handlers {
 	}
 }
 
+type WatchlistRequestBody struct {
+	Name     string `json:"name"`
+	StockIds []int  `json:"stockIds"`
+}
+
+const userId = 1
+
 func (h *Handlers) handleGetWatchlists(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
-	watchlists, err := traderdb.GetWatchlistsByUserId(h.db, 1)
+	watchlists, err := traderdb.GetWatchlistsByUserId(h.db, userId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-	} else {
-		w.Header().Set("Content-Type", "application/json")
-		if err = json.NewEncoder(w).Encode(watchlists); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err = json.NewEncoder(w).Encode(watchlists); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func (h *Handlers) handleDeleteWatchlist(w http.ResponseWriter, _ *http.Request, params httprouter.Params) {
+	watchlistId, err := strconv.Atoi(params.ByName("id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	exists, err := traderdb.HasWatchlistWithIdAndUserId(h.db, watchlistId, userId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if !exists {
+		http.Error(w, "Watchlist does not exist", http.StatusNotFound)
+		return
+	}
+
+	err = traderdb.DeleteWatchlistById(h.db, watchlistId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *Handlers) handleUpdateWatchlist(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	watchlistId, err := strconv.Atoi(params.ByName("id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	exists, err := traderdb.HasWatchlistWithIdAndUserId(h.db, watchlistId, userId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if !exists {
+		http.Error(w, "Watchlist does not exist", http.StatusNotFound)
+		return
+	}
+
+	var body WatchlistRequestBody
+	err = json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = traderdb.UpdateWatchlistById(h.db, watchlistId, body.Name, body.StockIds)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *Handlers) handleCreateWatchlist(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	var body WatchlistRequestBody
+	err := json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	id, err := traderdb.CreateWatchlist(h.db, userId, body.Name, body.StockIds)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	watchlist, err := traderdb.GetWatchlistById(h.db, id)
+	w.Header().Set("Content-Type", "application/json")
+	if err = json.NewEncoder(w).Encode(watchlist); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
 func (h *Handlers) AddRoutes(router *httprouter.Router) {
 	router.GET("/api/account/watchlists", h.handleGetWatchlists)
-	//router.POST("/api/account/watchlists", h.handleUpdateWatchlists)
+	router.PUT("/api/account/watchlists/:id", h.handleUpdateWatchlist)
+	router.DELETE("/api/account/watchlists/:id", h.handleDeleteWatchlist)
+	router.POST("/api/account/watchlists", h.handleCreateWatchlist)
 }
