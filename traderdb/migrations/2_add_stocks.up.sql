@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS stocks (
   exchange text NOT NULL,
   is_tradable BOOLEAN NOT NULL DEFAULT TRUE,
   price_micros BIGINT,
-  market_cap_micros BIGINT,
+  market_cap BIGINT,
   updated_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

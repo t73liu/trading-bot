@@ -2,13 +2,14 @@ package yahoo
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
 )
 
-const baseURL = "https://finance.yahoo.com/calendar/"
+const baseURL = "https://finance.yahoo.com/"
 
 type EarningsCallTime string
 
@@ -39,6 +40,14 @@ type IPO struct {
 	Currency  string
 	QuoteType string
 	Date      string
+}
+
+type Stock struct {
+	Symbol    string
+	Company   string
+	Exchange  string
+	MarketCap int64
+	Price     float64
 }
 
 type Client struct {
@@ -98,7 +107,7 @@ func (c *Client) GetIPOs(date time.Time) (ipos []IPO, err error) {
 }
 
 func (c *Client) getEvents(eventType string, date time.Time) ([]interface{}, error) {
-	req, err := http.NewRequest("GET", baseURL+eventType, nil)
+	req, err := http.NewRequest("GET", baseURL+"calendar/"+eventType, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +145,47 @@ func (c *Client) getEvents(eventType string, date time.Time) ([]interface{}, err
 			return rows, nil
 		}
 	}
-	return nil, nil
+	return nil, errors.New("could not parse Yahoo Finance response")
+}
+
+func (c *Client) GetStock(symbol string) (stock Stock, err error) {
+	response, err := http.Get(baseURL + "quote/" + symbol)
+	if err != nil {
+		return stock, err
+	}
+	defer response.Body.Close()
+
+	bodyBytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return stock, err
+	}
+
+	bodyString := string(bodyBytes)
+	for _, str := range strings.Split(bodyString, "\n") {
+		length := len(str)
+		if length > 16 && str[:16] == "root.App.main = " {
+			var data map[string]interface{}
+			if err = json.Unmarshal([]byte(str[16:length-1]), &data); err != nil {
+				return stock, err
+			}
+			context := data["context"].(map[string]interface{})
+			dispatcher := context["dispatcher"].(map[string]interface{})
+			stores := dispatcher["stores"].(map[string]interface{})
+			quoteStore := stores["QuoteSummaryStore"].(map[string]interface{})
+			stockDetail := quoteStore["price"].(map[string]interface{})
+			marketCap := stockDetail["marketCap"].(map[string]interface{})
+			price := stockDetail["regularMarketPrice"].(map[string]interface{})
+
+			stock.Symbol = stockDetail["symbol"].(string)
+			stock.Company = stockDetail["longName"].(string)
+			stock.Exchange = stockDetail["exchangeName"].(string)
+			stock.MarketCap = int64(marketCap["raw"].(float64))
+			stock.Price = price["raw"].(float64)
+
+			return stock, err
+		}
+	}
+	return stock, errors.New("could not parse Yahoo Finance response")
 }
 
 func formatISO(date time.Time) string {
