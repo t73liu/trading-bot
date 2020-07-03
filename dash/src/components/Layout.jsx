@@ -149,14 +149,6 @@ const Layout = ({ children }) => {
               <ListItemText primary="Stocks" />
             </ListItem>
           </Link>
-          <Link to="/crypto">
-            <ListItem button>
-              <ListItemIcon>
-                <Inbox />
-              </ListItemIcon>
-              <ListItemText primary="Crypto" />
-            </ListItem>
-          </Link>
         </List>
       </Drawer>
       <main

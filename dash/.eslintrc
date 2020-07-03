@@ -6,5 +6,14 @@
     "prettier",
     "prettier/react"
   ],
-  "plugins": ["jsx-a11y", "prettier"]
+  "plugins": ["jsx-a11y", "prettier"],
+  "rules": {
+    "no-param-reassign": [
+      "error",
+      {
+        "props": true,
+        "ignorePropertyModificationsFor": ["draft"]
+      }
+    ]
+  }
 }

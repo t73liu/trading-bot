@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useTitleContext } from "../../state/title-context";
+import Watchlists from "./Watchlists";
 
 const Overview = () => {
   const { setTitle } = useTitleContext();
-  setTitle("Overview");
+  useEffect(() => setTitle("Overview"), [setTitle]);
   return (
     <div>
       <h2>Overview</h2>
+      <Watchlists />
     </div>
   );
 };

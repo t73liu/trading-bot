@@ -2,14 +2,13 @@ import React from "react";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { CssBaseline } from "@material-ui/core";
-import Overview from "./overview/Overview";
+import Overview from "./account/Overview";
 import Stocks from "./stocks/Stocks";
 import StockInfo from "./stocks/StockInfo";
-import Crypto from "./crypto/Crypto";
-import CryptoInfo from "./crypto/CryptoInfo";
 import Layout from "./Layout";
 import NotFound from "./NotFound";
 import { TitleProvider } from "../state/title-context";
+import Watchlists from "./account/Watchlists";
 
 const App = () => (
   <HelmetProvider>
@@ -24,11 +23,8 @@ const App = () => (
             <Route exact path="/stocks">
               <Stocks />
             </Route>
-            <Route exact path="/crypto/:symbol">
-              <CryptoInfo />
-            </Route>
-            <Route exact path="/crypto">
-              <Crypto />
+            <Route exact path="/watchlists">
+              <Watchlists />
             </Route>
             <Route exact path="/">
               <Overview />

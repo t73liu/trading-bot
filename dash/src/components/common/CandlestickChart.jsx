@@ -23,7 +23,7 @@ function getCandleVolume(candle) {
   return candle.volume;
 }
 
-const CandlestickChart = ({ data = fakeData }) => {
+const CandlestickChart = ({ data }) => {
   const [domain, setDomain] = useState(fakeDomain);
   return (
     <div>
@@ -66,13 +66,18 @@ const CandlestickChart = ({ data = fakeData }) => {
 CandlestickChart.propTypes = {
   data: PropTypes.arrayOf(
     PropTypes.shape({
-      x: PropTypes.object.isRequired,
+      time: PropTypes.object.isRequired,
       open: PropTypes.number.isRequired,
       close: PropTypes.number.isRequired,
       high: PropTypes.number.isRequired,
       low: PropTypes.number.isRequired,
+      volume: PropTypes.number.isRequired,
     })
-  ).isRequired,
+  ),
+};
+
+CandlestickChart.defaultProps = {
+  data: fakeData,
 };
 
 export default CandlestickChart;
