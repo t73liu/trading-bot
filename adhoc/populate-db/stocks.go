@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/csv"
 	"fmt"
 	"github.com/jackc/pgx/v4"
 	"github.com/t73liu/trading-bot/lib/alpaca"
@@ -34,42 +35,50 @@ func main() {
 		os.Exit(1)
 	}
 
-	client := alpaca.NewClient(
-		&http.Client{
-			Timeout: 15 * time.Second,
-		},
+	httpClient := &http.Client{Timeout: 15 * time.Second}
+	alpacaClient := alpaca.NewClient(
+		httpClient,
 		apiKey,
 		apiSecretKey,
 		false,
 	)
 
-	assets, err := client.GetAssets("active", "")
+	// Provides sensible company names courtesy of IEXCloud
+	companyByTicker, err := getCompanyNamesByTicker()
+	if err != nil {
+		fmt.Println("Failed to read symbols.csv:", err)
+		os.Exit(1)
+	}
+
+	assets, err := alpacaClient.GetAssets("active", "")
 	if err != nil {
 		fmt.Println("Failed to fetch Alpaca supported stocks:", err)
 		os.Exit(1)
 	}
 
-	err = bulkInsertStocks(conn, assets)
+	err = bulkInsertStocks(conn, assets, companyByTicker)
 	if err != nil {
 		fmt.Println("Failed to populate DB with stocks:", err)
 		os.Exit(1)
 	}
 }
 
-func bulkInsertStocks(conn *pgx.Conn, assets []alpaca.Asset) error {
+func bulkInsertStocks(conn *pgx.Conn, assets []alpaca.Asset, companyByTicker map[string]string) error {
 	tx, err := conn.Begin(context.Background())
 	if err != nil {
 		return err
 	}
-	// Rollback is safe to call even if the tx is already closed, so if
-	// the tx commits successfully, this is a no-op
 	defer tx.Rollback(context.Background())
 
 	rows := make([][]interface{}, 0, len(assets))
 	for _, asset := range assets {
+		name := asset.Name
+		if company, ok := companyByTicker[asset.Symbol]; ok {
+			name = company
+		}
 		rows = append(rows, []interface{}{
 			asset.Symbol,
-			asset.Name,
+			name,
 			asset.Exchange,
 			asset.Tradable,
 		})
@@ -91,4 +100,31 @@ func bulkInsertStocks(conn *pgx.Conn, assets []alpaca.Asset) error {
 	}
 
 	return nil
+}
+
+func getCompanyNamesByTicker() (map[string]string, error) {
+	file, err := os.Open("symbols.csv")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+
+	// Skip column headers
+	if _, err = reader.Read(); err != nil {
+		return nil, err
+	}
+	lines, err := reader.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+
+	companyBySymbol := make(map[string]string)
+	for _, line := range lines {
+		symbol := line[0]
+		company := line[1]
+		companyBySymbol[symbol] = company
+	}
+	return companyBySymbol, nil
 }
