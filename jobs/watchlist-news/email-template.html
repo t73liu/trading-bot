@@ -12,16 +12,16 @@
 <body>
   <h2>Watchlist News</h2>
   <div>
-    {{range $symbol, $articles := .NewsByTicker}}
-      <h3>{{$symbol}}</h3>
+    {{range $company, $articles := .GeneralNewsByCompany}}
+      <h3>{{$company}}</h3>
       <ul>
         {{range $articles}}
           <li>
             <strong>{{.Title}}</strong>
             <ul>
-              <li>{{.Summary}}</li>
-              <li>URL: {{.URL}}</li>
-              <li>Timestamp: {{.Timestamp.Format "2006-01-02 15:04:05"}}</li>
+              <li>{{.Content}}</li>
+              <li>URL: {{.Url}}</li>
+              <li>Timestamp: {{.PublishedAt.Format "2006-01-02 15:04:05"}}</li>
             </ul>
           </li>
         {{end}}

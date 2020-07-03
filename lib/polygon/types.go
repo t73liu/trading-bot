@@ -19,7 +19,7 @@ type Ticker struct {
 
 type Article struct {
 	Title     string    `json:"title"`
-	URL       string    `json:"url"`
+	Url       string    `json:"url"`
 	Source    string    `json:"source"`
 	Summary   string    `json:"summary"`
 	Timestamp time.Time `json:"timestamp"`

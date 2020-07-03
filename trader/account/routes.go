@@ -29,7 +29,7 @@ type WatchlistRequestBody struct {
 
 const userId = 1
 
-func (h *Handlers) handleGetWatchlists(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+func (h *Handlers) getWatchlists(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 	watchlists, err := traderdb.GetWatchlistsByUserId(h.db, userId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -42,7 +42,7 @@ func (h *Handlers) handleGetWatchlists(w http.ResponseWriter, _ *http.Request, _
 	}
 }
 
-func (h *Handlers) handleDeleteWatchlist(w http.ResponseWriter, _ *http.Request, params httprouter.Params) {
+func (h *Handlers) deleteWatchlist(w http.ResponseWriter, _ *http.Request, params httprouter.Params) {
 	watchlistId, err := strconv.Atoi(params.ByName("id"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -67,7 +67,7 @@ func (h *Handlers) handleDeleteWatchlist(w http.ResponseWriter, _ *http.Request,
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (h *Handlers) handleUpdateWatchlist(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+func (h *Handlers) updateWatchlist(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	watchlistId, err := strconv.Atoi(params.ByName("id"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -100,7 +100,7 @@ func (h *Handlers) handleUpdateWatchlist(w http.ResponseWriter, r *http.Request,
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (h *Handlers) handleCreateWatchlist(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (h *Handlers) createWatchlist(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	var body WatchlistRequestBody
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
@@ -122,8 +122,8 @@ func (h *Handlers) handleCreateWatchlist(w http.ResponseWriter, r *http.Request,
 }
 
 func (h *Handlers) AddRoutes(router *httprouter.Router) {
-	router.GET("/api/account/watchlists", h.handleGetWatchlists)
-	router.PUT("/api/account/watchlists/:id", h.handleUpdateWatchlist)
-	router.DELETE("/api/account/watchlists/:id", h.handleDeleteWatchlist)
-	router.POST("/api/account/watchlists", h.handleCreateWatchlist)
+	router.GET("/api/account/watchlists", h.getWatchlists)
+	router.PUT("/api/account/watchlists/:id", h.updateWatchlist)
+	router.DELETE("/api/account/watchlists/:id", h.deleteWatchlist)
+	router.POST("/api/account/watchlists", h.createWatchlist)
 }

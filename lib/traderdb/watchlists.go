@@ -7,8 +7,9 @@ import (
 )
 
 type StockSymbol struct {
-	Id     int    `json:"id"`
-	Symbol string `json:"symbol"`
+	Id      int    `json:"id"`
+	Symbol  string `json:"symbol"`
+	Company string `json:"company"`
 }
 
 type Watchlist struct {
@@ -18,7 +19,7 @@ type Watchlist struct {
 }
 
 const watchlistsQuery = `
-SELECT wl.id, wl.name, s.id as stock_id, s.symbol FROM watchlists wl
+SELECT wl.id, wl.name, s.id as stock_id, s.symbol, s.company FROM watchlists wl
 INNER JOIN watchlist_stocks wls ON wl.id = wls.watchlist_id
 INNER JOIN stocks s ON wls.stock_id = s.id
 WHERE wl.user_id = $1
@@ -37,8 +38,8 @@ func GetWatchlistsByUserId(db *pgxpool.Pool, userId int) (watchlists []Watchlist
 		var name string
 		var stockId int
 		var symbol string
-		err = rows.Scan(&watchlistId, &name, &stockId, &symbol)
-		if err != nil {
+		var company string
+		if err = rows.Scan(&watchlistId, &name, &stockId, &symbol, &company); err != nil {
 			return watchlists, err
 		}
 		_, ok := watchlistsById[watchlistId]
@@ -53,8 +54,9 @@ func GetWatchlistsByUserId(db *pgxpool.Pool, userId int) (watchlists []Watchlist
 		watchlist.Stocks = append(
 			watchlist.Stocks,
 			StockSymbol{
-				Id:     stockId,
-				Symbol: symbol,
+				Id:      stockId,
+				Symbol:  symbol,
+				Company: company,
 			},
 		)
 		watchlistsById[watchlistId] = watchlist
@@ -101,7 +103,7 @@ func HasWatchlistWithIdAndUserId(db *pgxpool.Pool, watchlistId int, userId int) 
 }
 
 const watchlistStocksQuery = `
-SELECT s.id, s.symbol FROM watchlist_stocks wls
+SELECT s.id, s.symbol, s.company FROM watchlist_stocks wls
 INNER JOIN stocks s ON s.id = wls.stock_id
 WHERE wls.watchlist_id = $1
 `
@@ -121,17 +123,20 @@ func GetWatchlistById(db *pgxpool.Pool, watchlistId int) (watchlist Watchlist, e
 	if err != nil {
 		return watchlist, err
 	}
+	defer rows.Close()
 
 	stocks := make([]StockSymbol, 0)
 	for rows.Next() {
 		var stockId int
 		var symbol string
-		if err = rows.Scan(&stockId, &symbol); err != nil {
+		var company string
+		if err = rows.Scan(&stockId, &symbol, &company); err != nil {
 			return watchlist, err
 		}
 		stocks = append(stocks, StockSymbol{
-			Id:     stockId,
-			Symbol: symbol,
+			Id:      stockId,
+			Symbol:  symbol,
+			Company: company,
 		})
 	}
 

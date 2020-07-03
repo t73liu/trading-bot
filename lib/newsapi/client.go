@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -65,32 +66,98 @@ func (e *RequestError) Error() string {
 	return fmt.Sprintf("%s - %s - %s", e.Status, e.Code, e.Message)
 }
 
-func (c *Client) GetTopHeadlinesBySources(query, sources string, pageSize int) (ArticlesResponse, error) {
-	return c.getHeadlines("/v2/top-headlines", query, sources, pageSize)
+type ArticlesQueryParams struct {
+	Query    string
+	Sources  []string
+	PageSize int
+	Page     int
+	Country  string
+	Category string
 }
 
-func (c *Client) GetAllHeadlinesBySources(query, sources string, pageSize int) (ArticlesResponse, error) {
-	return c.getHeadlines("/v2/everything", query, sources, pageSize)
+type SortArticlesBy string
+
+const (
+	Relevancy   SortArticlesBy = "relevancy"
+	Popularity  SortArticlesBy = "popularity"
+	PublishedAt SortArticlesBy = "publishedAt"
+)
+
+type AllArticlesQueryParams struct {
+	Query     string
+	Sources   []string
+	Domains   []string
+	PageSize  int
+	Page      int
+	StartTime time.Time
+	EndTime   time.Time
+	Language  string
+	SortBy    SortArticlesBy
 }
 
-func (c *Client) getHeadlines(path, query, sources string, pageSize int) (result ArticlesResponse, err error) {
-	req, err := http.NewRequest("GET", newsAPIHost+path, nil)
+func (c *Client) GetTopHeadlinesBySources(params ArticlesQueryParams) (result ArticlesResponse, err error) {
+	req, err := http.NewRequest("GET", newsAPIHost+"/v2/top-headlines", nil)
 	if err != nil {
 		return result, err
 	}
+
 	c.setHeaders(req)
 	queryParams := req.URL.Query()
-	if query != "" {
-		queryParams.Add("q", query)
+	if params.Query != "" {
+		queryParams.Add("q", params.Query)
 	}
-	if sources != "" {
-		queryParams.Add("sources", sources)
+	if len(params.Sources) > 0 {
+		queryParams.Add("sources", strings.Join(params.Sources, ","))
 	}
-	if pageSize > 0 {
-		queryParams.Add("pageSize", strconv.Itoa(pageSize))
+	if params.PageSize > 0 {
+		queryParams.Add("pageSize", strconv.Itoa(params.PageSize))
+	}
+	if params.Page > 1 {
+		queryParams.Add("page", strconv.Itoa(params.Page))
 	}
 	req.URL.RawQuery = queryParams.Encode()
 
+	return c.getArticlesResponse(req)
+}
+
+func (c *Client) GetAllHeadlinesBySources(params AllArticlesQueryParams) (result ArticlesResponse, err error) {
+	req, err := http.NewRequest("GET", newsAPIHost+"/v2/everything", nil)
+	if err != nil {
+		return result, err
+	}
+
+	c.setHeaders(req)
+	queryParams := req.URL.Query()
+	if params.Query != "" {
+		queryParams.Add("q", params.Query)
+	}
+	if len(params.Sources) > 0 {
+		queryParams.Add("sources", strings.Join(params.Sources, ","))
+	}
+	if len(params.Domains) > 0 {
+		queryParams.Add("domains", strings.Join(params.Domains, ","))
+	}
+	if params.PageSize > 0 {
+		queryParams.Add("pageSize", strconv.Itoa(params.PageSize))
+	}
+	if params.Page > 1 {
+		queryParams.Add("page", strconv.Itoa(params.Page))
+	}
+	if params.SortBy != "" {
+		queryParams.Add("sortBy", string(params.SortBy))
+	}
+	if !params.StartTime.IsZero() {
+		queryParams.Add("from", formatTime(params.StartTime))
+	}
+	if !params.EndTime.IsZero() {
+		queryParams.Add("to", formatTime(params.EndTime))
+	}
+	req.URL.RawQuery = queryParams.Encode()
+
+	return c.getArticlesResponse(req)
+}
+
+func (c *Client) getArticlesResponse(req *http.Request) (result ArticlesResponse, err error) {
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return result, err
@@ -142,4 +209,8 @@ func (c *Client) GetSources(category, language, country string) (sources []Sourc
 
 func (c *Client) setHeaders(request *http.Request) {
 	request.Header.Set("X-Api-Key", c.apiKey)
+}
+
+func formatTime(time time.Time) string {
+	return time.Format("2006-01-02T15:04:05")
 }

@@ -2,9 +2,13 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"flag"
 	"fmt"
+	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/t73liu/trading-bot/lib/newsapi"
 	"github.com/t73liu/trading-bot/lib/polygon"
+	"github.com/t73liu/trading-bot/lib/traderdb"
 	"html/template"
 	"net/http"
 	"net/smtp"
@@ -14,7 +18,19 @@ import (
 )
 
 type EmailParams struct {
-	NewsByTicker map[string][]polygon.Article
+	NewsByTicker         map[string][]polygon.Article
+	GeneralNewsByCompany map[string][]newsapi.Article
+}
+
+const userId = 1
+
+var domains = []string{
+	"finance.yahoo.com",
+	"investors.com",
+	"seekingalpha.com",
+	"fool.com",
+	"reuters.com",
+	"bloomberg.com",
 }
 
 func main() {
@@ -27,6 +43,21 @@ func main() {
 		os.Exit(1)
 	}
 
+	databaseUrl := strings.TrimSpace(os.Getenv("DATABASE_URL"))
+	if databaseUrl == "" {
+		fmt.Println("DATABASE_URL environment variable is required")
+		os.Exit(1)
+	}
+	newsAPIKey := strings.TrimSpace(os.Getenv("NEWS_API_KEY"))
+	if newsAPIKey == "" {
+		fmt.Println("NEWS_API_KEY environment variable is required")
+		os.Exit(1)
+	}
+	alpacaAPIKey := strings.TrimSpace(os.Getenv("ALPACA_API_KEY"))
+	if alpacaAPIKey == "" {
+		fmt.Println("ALPACA_API_KEY environment variable is required")
+		os.Exit(1)
+	}
 	email := strings.TrimSpace(os.Getenv("GMAIL_USERNAME"))
 	if email == "" {
 		fmt.Println("GMAIL_USERNAME environment variable is required")
@@ -35,11 +66,6 @@ func main() {
 	password := strings.TrimSpace(os.Getenv("GMAIL_PASSWORD"))
 	if password == "" {
 		fmt.Println("GMAIL_PASSWORD environment variable is required")
-		os.Exit(1)
-	}
-	apiKey := strings.TrimSpace(os.Getenv("ALPACA_API_KEY"))
-	if apiKey == "" {
-		fmt.Println("ALPACA_API_KEY environment variable is required")
 		os.Exit(1)
 	}
 
@@ -51,9 +77,16 @@ func main() {
 
 	now := time.Now()
 	httpClient := &http.Client{Timeout: 15 * time.Second}
-	polygonClient := polygon.NewClient(httpClient, apiKey)
+	polygonClient := polygon.NewClient(httpClient, alpacaAPIKey)
+	newsClient := newsapi.NewClient(httpClient, newsAPIKey)
 
-	emailParams, err := getEmailParams(polygonClient)
+	pool, err := pgxpool.Connect(context.Background(), databaseUrl)
+	if err != nil {
+		fmt.Println("Failed to connect to DB:", err)
+		os.Exit(1)
+	}
+
+	emailParams, err := getEmailParams(pool, polygonClient, newsClient, now)
 	if err != nil {
 		fmt.Println("Failed to fetch news items:", err)
 		os.Exit(1)
@@ -83,27 +116,73 @@ func main() {
 	}
 }
 
-func getEmailParams(polygonClient *polygon.Client) (params EmailParams, err error) {
+func getEmailParams(
+	db *pgxpool.Pool,
+	_ *polygon.Client,
+	newsClient *newsapi.Client,
+	now time.Time,
+) (params EmailParams, err error) {
 	location, err := time.LoadLocation("EST")
 	if err != nil {
 		return params, err
 	}
 
-	newsByTicker := make(map[string][]polygon.Article)
-	tickers := []string{"TSLA", "AAPL", "MSFT"}
-	for _, ticker := range tickers {
-		articles, err := polygonClient.GetTickerNews(ticker, 10, 1)
+	stocks, err := traderdb.GetWatchlistStocksByUserId(db, userId)
+	if err != nil {
+		return params, err
+	}
+
+	startTime := getLastWeekday(now)
+
+	generalNewsByCompany := make(map[string][]newsapi.Article)
+	for _, stock := range stocks {
+		// Using domains because some news sources are missing from /sources
+		// (e.g. seekingalpha.com, yahoo.finance.com)
+		response, err := newsClient.GetAllHeadlinesBySources(newsapi.AllArticlesQueryParams{
+			Query:     trimCompanyName(stock.Company) + " OR " + stock.Symbol + " Stock",
+			StartTime: startTime,
+			Domains:   domains,
+			PageSize:  20,
+		})
 		if err != nil {
 			return params, err
 		}
-		for index := range articles {
-			articles[index].Timestamp = articles[index].Timestamp.In(location)
+		for index := range response.Articles {
+			response.Articles[index].PublishedAt = response.Articles[index].PublishedAt.In(location)
 		}
-		newsByTicker[ticker] = articles
+		generalNewsByCompany[stock.Symbol] = response.Articles
 	}
 
+	// TODO Enable after https://github.com/polygon-io/issues/issues/25
+	//newsByTicker := make(map[string][]polygon.Article)
+	//for _, stock := range stocks {
+	//	articles, err := polygonClient.GetTickerNews(stock.Symbol, 10, 1)
+	//	if err != nil {
+	//		return params, err
+	//	}
+	//	for index := range articles {
+	//		articles[index].Timestamp = articles[index].Timestamp.In(location)
+	//	}
+	//	newsByTicker[stock.Symbol] = articles
+	//}
+
 	params = EmailParams{
-		NewsByTicker: newsByTicker,
+		GeneralNewsByCompany: generalNewsByCompany,
+		//NewsByTicker:         newsByTicker,
 	}
 	return params, nil
+}
+
+func getLastWeekday(now time.Time) time.Time {
+	prevDay := now.AddDate(0, 0, -1)
+	for prevDay.Weekday() == time.Saturday || prevDay.Weekday() == time.Sunday {
+		prevDay = prevDay.AddDate(0, 0, -1)
+	}
+	return prevDay
+}
+
+func trimCompanyName(company string) string {
+	trimmedName := strings.TrimSpace(strings.Split(company, " Class ")[0])
+	//trimmedName = strings.TrimSpace(strings.Split(company, " Inc.")[0])
+	return trimmedName
 }
