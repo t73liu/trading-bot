@@ -7,4 +7,4 @@ Shared Go libraries for usage across scripts and jobs.
 - `newsapi`: REST API client for News API
 - `polygon`: REST/WS API client for Polygon
 - `traderdb`: Library for common traderdb queries
-- `yahoo-stock-calendar`: Scrapes Yahoo Finance for stock events (Earnings/IPOs)
+- `yahoo-finance`: Scrapes Yahoo Finance for events (Earnings/IPOs) and stock details

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"github.com/t73liu/trading-bot/lib/yahoo-stock-calendar"
+	"github.com/t73liu/trading-bot/lib/yahoo-finance"
 	"html/template"
 	"net/http"
 	"net/smtp"
