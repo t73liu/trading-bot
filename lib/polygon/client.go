@@ -3,8 +3,10 @@ package polygon
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 const polygonHost = "https://api.polygon.io"
@@ -141,17 +143,46 @@ func (c *Client) GetTickerDetails(ticker string) (detail TickerDetails, err erro
 	return detail, nil
 }
 
-// TODO Implement GetTickerBars
-func (c *Client) GetTickerBars(ticker string) (bars interface{}, err error) {
-	url := polygonHost + "/v2/aggs/ticker/" + ticker + "/range/1/hour/2020-06-25/2020-06-26"
+type TickerBarsQueryParams struct {
+	Ticker       string
+	TimeInterval int
+	TimeUnit     string
+	StartDate    time.Time
+	EndDate      time.Time
+	Unadjusted   bool
+	Sort         string
+}
+
+// Maxed number of bars returned is 5000
+// https://github.com/polygon-io/issues/issues/45
+func (c *Client) GetTickerBars(params TickerBarsQueryParams) (bars []TickerBar, err error) {
+	if params.TimeInterval < 1 {
+		return bars, errors.New("TimeInterval must be at least 1")
+	}
+	if !params.EndDate.After(params.StartDate) {
+		return bars, errors.New("EndDate must be after StartDate")
+	}
+	url := fmt.Sprintf(
+		"%s/v2/aggs/ticker/%s/range/%d/%s/%s/%s",
+		polygonHost,
+		params.Ticker,
+		params.TimeInterval,
+		params.TimeUnit,
+		formatDate(params.StartDate),
+		formatDate(params.EndDate),
+	)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return bars, err
 	}
 	queryParams := req.URL.Query()
 	queryParams.Add("apiKey", c.apiKey)
-	queryParams.Add("unadjusted", "true")
-	queryParams.Add("sort", "asc")
+	if params.Unadjusted {
+		queryParams.Add("unadjusted", "true")
+	}
+	if params.Sort != "" {
+		queryParams.Add("sort", params.Sort)
+	}
 	req.URL.RawQuery = queryParams.Encode()
 
 	resp, err := c.client.Do(req)
@@ -161,8 +192,13 @@ func (c *Client) GetTickerBars(ticker string) (bars interface{}, err error) {
 	if resp.StatusCode != http.StatusOK {
 		return bars, errors.New("Response failed with status code: " + resp.Status)
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&bars); err != nil {
+	var barsResponse TickerBarsResponse
+	if err := json.NewDecoder(resp.Body).Decode(&barsResponse); err != nil {
 		return bars, err
 	}
-	return bars, nil
+	return barsResponse.Results, nil
+}
+
+func formatDate(date time.Time) string {
+	return date.Format("2006-01-02")
 }

@@ -38,3 +38,22 @@ type TickerDetails struct {
 	Similar     []string `json:"similar"`
 	Tags        []string `json:"tags"`
 }
+
+type TickerBarsResponse struct {
+	Ticker       string      `json:"ticker"`
+	Status       string      `json:"status"`
+	Adjusted     bool        `json:"adjusted"`
+	QueryCount   int         `json:"queryCount"`
+	ResultsCount int         `json:"resultsCount"`
+	Results      []TickerBar `json:"results"`
+}
+
+type TickerBar struct {
+	Ticker            string  `json:"T"`
+	Volume            float64 `json:"v"`
+	Open              float32 `json:"o"`
+	High              float32 `json:"h"`
+	Low               float32 `json:"l"`
+	Close             float32 `json:"c"`
+	StartAtUnixMillis int64   `json:"t"`
+}

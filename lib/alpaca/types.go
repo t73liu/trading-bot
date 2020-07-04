@@ -14,12 +14,12 @@ type Asset struct {
 }
 
 type Candle struct {
-	Time   int64   `json:"t"`
-	Open   float32 `json:"o"`
-	High   float32 `json:"h"`
-	Low    float32 `json:"l"`
-	Close  float32 `json:"c"`
-	Volume int32   `json:"v"`
+	StartAtUnixSec int64   `json:"t"`
+	Open           float32 `json:"o"`
+	High           float32 `json:"h"`
+	Low            float32 `json:"l"`
+	Close          float32 `json:"c"`
+	Volume         int32   `json:"v"`
 }
 
 type CandleSize string

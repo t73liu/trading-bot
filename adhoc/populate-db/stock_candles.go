@@ -83,11 +83,10 @@ func bulkInsertStockCandles(
 	rows := make([][]interface{}, 0, len(stocks))
 	for _, stock := range stocks {
 		if candles, ok := candlesBySymbol[stock.Symbol]; ok {
-			fmt.Println(len(candles))
 			for _, candle := range candles {
 				rows = append(rows, []interface{}{
 					stock.Id,
-					convertUnixSecondsToTime(candle.Time),
+					convertUnixSecondsToTime(candle.StartAtUnixSec),
 					convertFloatToMicros(candle.Open),
 					convertFloatToMicros(candle.High),
 					convertFloatToMicros(candle.Low),
