@@ -12,3 +12,5 @@ This directory contains machine learning models and trading strategies.
 - [ ] News sentiment
 - [ ] Scalping
 - [ ] Volatility trading
+- [ ] Dividend stocks
+- [ ] Reinforcement learning
