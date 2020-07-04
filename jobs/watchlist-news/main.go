@@ -122,7 +122,7 @@ func getEmailParams(
 	newsClient *newsapi.Client,
 	now time.Time,
 ) (params EmailParams, err error) {
-	location, err := time.LoadLocation("EST")
+	location, err := time.LoadLocation("America/New_York")
 	if err != nil {
 		return params, err
 	}

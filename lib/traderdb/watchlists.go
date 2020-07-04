@@ -6,16 +6,16 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-type StockSymbol struct {
+type Stock struct {
 	Id      int    `json:"id"`
 	Symbol  string `json:"symbol"`
 	Company string `json:"company"`
 }
 
 type Watchlist struct {
-	Id     int           `json:"id"`
-	Name   string        `json:"name"`
-	Stocks []StockSymbol `json:"stocks"`
+	Id     int     `json:"id"`
+	Name   string  `json:"name"`
+	Stocks []Stock `json:"stocks"`
 }
 
 const watchlistsQuery = `
@@ -47,13 +47,13 @@ func GetWatchlistsByUserId(db *pgxpool.Pool, userId int) (watchlists []Watchlist
 			watchlistsById[watchlistId] = Watchlist{
 				Id:     watchlistId,
 				Name:   name,
-				Stocks: make([]StockSymbol, 0),
+				Stocks: make([]Stock, 0),
 			}
 		}
 		watchlist := watchlistsById[watchlistId]
 		watchlist.Stocks = append(
 			watchlist.Stocks,
-			StockSymbol{
+			Stock{
 				Id:      stockId,
 				Symbol:  symbol,
 				Company: company,
@@ -72,7 +72,7 @@ func GetWatchlistsByUserId(db *pgxpool.Pool, userId int) (watchlists []Watchlist
 	return watchlists, nil
 }
 
-func GetWatchlistStocksByUserId(db *pgxpool.Pool, userId int) (stocks []StockSymbol, err error) {
+func GetWatchlistStocksByUserId(db *pgxpool.Pool, userId int) (stocks []Stock, err error) {
 	watchlists, err := GetWatchlistsByUserId(db, userId)
 	if err != nil {
 		return stocks, err
@@ -95,7 +95,12 @@ SELECT EXISTS(SELECT 1 FROM watchlists WHERE id = $1 AND user_id = $2)
 
 func HasWatchlistWithIdAndUserId(db *pgxpool.Pool, watchlistId int, userId int) (bool, error) {
 	var exists bool
-	err := db.QueryRow(context.Background(), watchlistExistsQuery, watchlistId, userId).Scan(&exists)
+	err := db.QueryRow(
+		context.Background(),
+		watchlistExistsQuery,
+		watchlistId,
+		userId,
+	).Scan(&exists)
 	if err != nil {
 		return exists, err
 	}
@@ -125,7 +130,7 @@ func GetWatchlistById(db *pgxpool.Pool, watchlistId int) (watchlist Watchlist, e
 	}
 	defer rows.Close()
 
-	stocks := make([]StockSymbol, 0)
+	stocks := make([]Stock, 0)
 	for rows.Next() {
 		var stockId int
 		var symbol string
@@ -133,7 +138,7 @@ func GetWatchlistById(db *pgxpool.Pool, watchlistId int) (watchlist Watchlist, e
 		if err = rows.Scan(&stockId, &symbol, &company); err != nil {
 			return watchlist, err
 		}
-		stocks = append(stocks, StockSymbol{
+		stocks = append(stocks, Stock{
 			Id:      stockId,
 			Symbol:  symbol,
 			Company: company,

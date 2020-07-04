@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const baseURL = "https://finance.yahoo.com/"
+const baseURL = "https://finance.yahoo.com"
 
 type EarningsCallTime string
 
@@ -107,7 +107,7 @@ func (c *Client) GetIPOs(date time.Time) (ipos []IPO, err error) {
 }
 
 func (c *Client) getEvents(eventType string, date time.Time) ([]interface{}, error) {
-	req, err := http.NewRequest("GET", baseURL+"calendar/"+eventType, nil)
+	req, err := http.NewRequest("GET", baseURL+"/calendar/"+eventType, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +149,7 @@ func (c *Client) getEvents(eventType string, date time.Time) ([]interface{}, err
 }
 
 func (c *Client) GetStock(symbol string) (stock Stock, err error) {
-	response, err := http.Get(baseURL + "quote/" + symbol)
+	response, err := http.Get(baseURL + "/quote/" + symbol)
 	if err != nil {
 		return stock, err
 	}

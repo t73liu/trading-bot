@@ -30,9 +30,7 @@ func main() {
 	}
 
 	client := newsapi.NewClient(
-		&http.Client{
-			Timeout: 15 * time.Second,
-		},
+		&http.Client{Timeout: 15 * time.Second},
 		apiKey,
 	)
 
@@ -42,8 +40,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = bulkInsertNewsSources(conn, sources)
-	if err != nil {
+	if err = bulkInsertNewsSources(conn, sources); err != nil {
 		fmt.Println("Failed to populate DB with news sources:", err)
 		os.Exit(1)
 	}
@@ -71,8 +68,7 @@ func bulkInsertNewsSources(conn *pgx.Conn, sources []newsapi.Source) error {
 		return err
 	}
 
-	err = tx.Commit(context.Background())
-	if err != nil {
+	if err = tx.Commit(context.Background()); err != nil {
 		return err
 	}
 

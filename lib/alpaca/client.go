@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const liveAPIPath = "https://api.alpaca.markets/v2"
@@ -63,29 +64,45 @@ func (c *Client) GetAssets(status, assetClass string) (assets []Asset, err error
 	return assets, nil
 }
 
-func (c *Client) GetCandles(candleSize CandleSize, symbols []string, limit int) (candles map[string][]Candle, err error) {
-	if len(symbols) == 0 || len(symbols) > 200 {
+type CandleQueryParams struct {
+	Symbols    []string
+	Limit      int
+	CandleSize CandleSize
+	StartTime  time.Time
+	EndTime    time.Time
+}
+
+func (c *Client) GetCandles(params CandleQueryParams) (candles map[string][]Candle, err error) {
+	if len(params.Symbols) == 0 || len(params.Symbols) > 200 {
 		return candles, errors.New("symbols must be between 1 to 200")
 	}
-	if limit > 1000 {
+	if params.Limit > 1000 {
 		return candles, errors.New("limit must be between 1 to 1000")
 	}
-	switch candleSize {
+	switch params.CandleSize {
 	case OneMin, FiveMin, FifteenMin, OneDay:
 		break
 	default:
 		return candles, errors.New("candleSize must be supported CandleSize")
 	}
 
-	req, err := http.NewRequest("GET", marketDataApiPath+"/bars"+string(candleSize), nil)
+	url := marketDataApiPath + "/bars/" + string(params.CandleSize)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return candles, err
 	}
+
 	c.setHeaders(req)
 	queryParams := req.URL.Query()
-	queryParams.Add("symbols", strings.Join(symbols, ","))
-	if limit != 0 {
-		queryParams.Add("limit", strconv.Itoa(limit))
+	queryParams.Add("symbols", strings.Join(params.Symbols, ","))
+	if params.Limit > 0 {
+		queryParams.Add("limit", strconv.Itoa(params.Limit))
+	}
+	if !params.StartTime.IsZero() {
+		queryParams.Add("start", formatTime(params.StartTime))
+	}
+	if !params.EndTime.IsZero() {
+		queryParams.Add("end", formatTime(params.EndTime))
 	}
 	req.URL.RawQuery = queryParams.Encode()
 
@@ -105,4 +122,8 @@ func (c *Client) GetCandles(candleSize CandleSize, symbols []string, limit int) 
 func (c *Client) setHeaders(request *http.Request) {
 	request.Header.Set("APCA-API-KEY-ID", c.apiKey)
 	request.Header.Set("APCA-API-SECRET-KEY", c.apiSecretKey)
+}
+
+func formatTime(date time.Time) string {
+	return date.Format("2006-01-02T15:04:05-07:00")
 }

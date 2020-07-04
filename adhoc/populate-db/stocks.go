@@ -35,9 +35,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	httpClient := &http.Client{Timeout: 15 * time.Second}
 	alpacaClient := alpaca.NewClient(
-		httpClient,
+		&http.Client{Timeout: 15 * time.Second},
 		apiKey,
 		apiSecretKey,
 		false,
@@ -56,8 +55,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = bulkInsertStocks(conn, assets, companyByTicker)
-	if err != nil {
+	if err = bulkInsertStocks(conn, assets, companyByTicker); err != nil {
 		fmt.Println("Failed to populate DB with stocks:", err)
 		os.Exit(1)
 	}
@@ -94,8 +92,7 @@ func bulkInsertStocks(conn *pgx.Conn, assets []alpaca.Asset, companyByTicker map
 		return err
 	}
 
-	err = tx.Commit(context.Background())
-	if err != nil {
+	if err = tx.Commit(context.Background()); err != nil {
 		return err
 	}
 
