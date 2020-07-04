@@ -72,6 +72,9 @@ type CandleQueryParams struct {
 	EndTime    time.Time
 }
 
+// Alpaca data is currently limited to 5 US exchanges compared to Polygon which
+// consolidates from all exchanges in the US
+// https://alpaca.markets/docs/api-documentation/api-v2/market-data/#which-api-should-i-use
 func (c *Client) GetCandles(params CandleQueryParams) (candles map[string][]Candle, err error) {
 	if len(params.Symbols) == 0 || len(params.Symbols) > 200 {
 		return candles, errors.New("symbols must be between 1 to 200")
