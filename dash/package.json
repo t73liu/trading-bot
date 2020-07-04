@@ -15,7 +15,8 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
     "redux-logger": "^3.0.6",
-    "victory": "^35.0.2"
+    "victory": "^35.0.2",
+    "snyk": "^1.360.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.11.0",
@@ -40,7 +41,9 @@
     "lint": "eslint --fix ./src/**/*.{js,jsx}",
     "start": "react-scripts start",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "snyk-protect": "snyk protect",
+    "prepare": "yarn run snyk-protect"
   },
   "proxy": "http://localhost:8080",
   "eslintConfig": {
@@ -66,5 +69,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "snyk": true
 }
