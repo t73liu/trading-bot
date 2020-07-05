@@ -1,27 +1,24 @@
 package analyze
 
 // Simple Moving Average
-func SMA(candles []Candle, interval int) (results []ValidCalc) {
-	if len(candles) >= interval && interval > 1 {
-		results = make([]ValidCalc, interval-1)
+func SMA(values []int64, interval int) (results []ValidMicro) {
+	if len(values) >= interval && interval > 2 {
+		results = make([]ValidMicro, interval-1, len(values))
 		formattedInterval := int64(interval)
-		var sum int64
-		for i := 0; i < interval; i++ {
-			sum += candles[i].Close
-		}
-		value := sum / formattedInterval
-		results = append(results, genValidCalc(value))
+		sum := calcSum(values, 0, interval-1)
+		sma := sum / formattedInterval
+		results = append(results, genValidMicro(sma))
 		laggedIndex := 0
 		currentIndex := interval
-		for currentIndex < len(candles) {
-			sum = sum + candles[currentIndex].Close - candles[laggedIndex].Close
-			value = sum / formattedInterval
-			results = append(results, genValidCalc(value))
+		for currentIndex < len(values) {
+			sum = sum + values[currentIndex] - values[laggedIndex]
+			sma = sum / formattedInterval
+			results = append(results, genValidMicro(sma))
 			laggedIndex++
 			currentIndex++
 		}
 	} else {
-		results = make([]ValidCalc, len(candles))
+		results = make([]ValidMicro, len(values))
 	}
 	return results
 }

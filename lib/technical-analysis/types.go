@@ -8,7 +8,12 @@ type Candle struct {
 	Close  int64
 }
 
-type ValidCalc struct {
-	Calc  int64
+type ValidMicro struct {
+	Micro int64
+	Valid bool
+}
+
+type ValidFloat struct {
+	Value float64
 	Valid bool
 }

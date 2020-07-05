@@ -1,13 +1,17 @@
 package analyze
 
-func genValidCalc(value int64) ValidCalc {
-	return ValidCalc{
-		Calc:  value,
+import "math"
+
+const million = 1000000
+
+func genValidMicro(value int64) ValidMicro {
+	return ValidMicro{
+		Micro: value,
 		Valid: true,
 	}
 }
 
-func eqValidCalcSlice(expected, actual []ValidCalc) bool {
+func eqValidCalcSlice(expected, actual []ValidMicro) bool {
 	if len(expected) != len(actual) {
 		return false
 	}
@@ -19,12 +23,44 @@ func eqValidCalcSlice(expected, actual []ValidCalc) bool {
 	return true
 }
 
-const million = 1000000
+func genValidFloat(value float64) ValidFloat {
+	return ValidFloat{
+		Value: value,
+		Valid: true,
+	}
+}
 
-func dollarsToMicros(dollars float64) int64 {
+func eqValidFloatSlice(expected, actual []ValidFloat) bool {
+	if len(expected) != len(actual) {
+		return false
+	}
+	for i := range expected {
+		if expected[i] != actual[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func DollarsToMicros(dollars float64) int64 {
 	return int64(dollars * million)
 }
 
-func microsToDollars(micros int64) float64 {
-	return float64(micros / million)
+func MicrosToDollars(micros int64) float64 {
+	return float64(micros) / million
+}
+
+func calcSum(values []int64, startIndex, endIndex int) (sum int64) {
+	for i := startIndex; i < len(values) && i <= endIndex; i++ {
+		sum += values[i]
+	}
+	return sum
+}
+
+func calcAverage(values []int64, startIndex, endIndex int) (sum int64) {
+	return calcSum(values, startIndex, endIndex) / int64(endIndex-startIndex+1)
+}
+
+func roundToTwoDecimals(value float64) float64 {
+	return math.Round(value*100) / 100
 }
