@@ -28,7 +28,7 @@ func main() {
 - [x] Simple Moving Average (SMA)
 - [x] Exponential Moving Average (EMA)
 - [x] Relative Strength Index (RSI)
-- [ ] Moving Average Convergence Divergence (MACD)
+- [x] Moving Average Convergence Divergence (MACD)
 - [ ] Stochastic Oscillator
 - [ ] Commodity Channel Index (CCI)
 
