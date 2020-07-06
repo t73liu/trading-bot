@@ -61,7 +61,7 @@ func calcAverage(values []int64, startIndex, endIndex int) (sum int64) {
 	return calcSum(values, startIndex, endIndex) / int64(endIndex-startIndex+1)
 }
 
-func roundToTwoDecimals(value float64) float64 {
+func RoundToTwoDecimals(value float64) float64 {
 	return math.Round(value*100) / 100
 }
 

@@ -30,6 +30,5 @@ func main() {
 - [x] Relative Strength Index (RSI)
 - [x] Moving Average Convergence Divergence (MACD)
 - [ ] Stochastic Oscillator
+- [ ] Volume Weighted Average Price (VWAP)
 - [ ] Commodity Channel Index (CCI)
-
-

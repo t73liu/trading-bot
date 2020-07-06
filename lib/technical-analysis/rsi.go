@@ -56,5 +56,5 @@ func calcRSI(averageGain, averageLoss int64) float64 {
 	}
 	relativeStrength := MicrosToDollars(averageGain) / MicrosToDollars(averageLoss)
 	rsi := 100 - (100 / (1 + relativeStrength))
-	return roundToTwoDecimals(rsi)
+	return RoundToTwoDecimals(rsi)
 }
