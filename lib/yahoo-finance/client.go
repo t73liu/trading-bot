@@ -60,6 +60,7 @@ func NewClient(httpClient *http.Client) *Client {
 	}
 }
 
+// TODO missing tickers when results greater than 100
 func (c *Client) GetEarningsCall(date time.Time) (earnings []EarningsCall, err error) {
 	formattedDate := formatISO(date)
 	rows, err := c.getEvents("earnings", date)
