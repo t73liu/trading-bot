@@ -10,6 +10,7 @@ type Stock struct {
 	Id      int    `json:"id"`
 	Symbol  string `json:"symbol"`
 	Company string `json:"company"`
+	Exchange string `json:"exchange,omitempty"`
 }
 
 type Watchlist struct {

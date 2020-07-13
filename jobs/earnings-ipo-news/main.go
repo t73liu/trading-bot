@@ -2,8 +2,11 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"flag"
 	"fmt"
+	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/t73liu/trading-bot/lib/traderdb"
 	"github.com/t73liu/trading-bot/lib/yahoo-finance"
 	"html/template"
 	"net/http"
@@ -19,7 +22,11 @@ type EmailParams struct {
 }
 
 func main() {
-	recipientsFlag := flag.String("recipients", "", "Email addresses delimited by commas")
+	recipientsFlag := flag.String(
+		"recipients",
+		"",
+		"Email addresses delimited by commas",
+	)
 	flag.Parse()
 
 	recipients := strings.TrimSpace(*recipientsFlag)
@@ -28,6 +35,11 @@ func main() {
 		os.Exit(1)
 	}
 
+	databaseUrl := strings.TrimSpace(os.Getenv("DATABASE_URL"))
+	if databaseUrl == "" {
+		fmt.Println("DATABASE_URL environment variable is required")
+		os.Exit(1)
+	}
 	email := strings.TrimSpace(os.Getenv("GMAIL_USERNAME"))
 	if email == "" {
 		fmt.Println("GMAIL_USERNAME environment variable is required")
@@ -46,17 +58,29 @@ func main() {
 	}
 
 	now := time.Now()
+	startTime := now.AddDate(0, 0, 7)
+	endTime := now.AddDate(0, 0, 21)
 	httpClient := &http.Client{Timeout: 15 * time.Second}
 	yahooClient := yahoo.NewClient(httpClient)
 
-	emailParams, err := getEmailParams(yahooClient, now)
+	pool, err := pgxpool.Connect(context.Background(), databaseUrl)
+	if err != nil {
+		fmt.Println("Failed to connect to DB:", err)
+		os.Exit(1)
+	}
+
+	emailParams, err := getEmailParams(pool, yahooClient, startTime, endTime)
 	if err != nil {
 		fmt.Println("Failed to fetch news items:", err)
 		os.Exit(1)
 	}
 
 	var body bytes.Buffer
-	subject := "Subject: Earnings/IPO News " + now.Format("Jan 02") + "\n"
+	subject := fmt.Sprintf(
+		"Subject: Earnings/IPO News %s to %s\n",
+		formatTime(startTime),
+		formatTime(endTime),
+	)
 	headers := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
 	body.WriteString(subject + headers)
 	err = emailTemplate.Execute(&body, emailParams)
@@ -80,10 +104,21 @@ func main() {
 }
 
 func getEmailParams(
+	db *pgxpool.Pool,
 	yahooClient *yahoo.Client,
-	now time.Time,
+	startTime time.Time,
+	endTime time.Time,
 ) (params EmailParams, err error) {
-	earnings, err := getEarnings(yahooClient, now)
+	tradableSymbols := make(map[string]struct{})
+	stocks, err := traderdb.GetTradableStocks(db)
+	if err != nil {
+		return params, err
+	}
+	for _, stock := range stocks {
+		tradableSymbols[stock.Symbol] = struct{}{}
+	}
+
+	earnings, err := getEarnings(yahooClient, startTime, endTime)
 	if err != nil {
 		return params, err
 	}
@@ -93,11 +128,13 @@ func getEmailParams(
 		_, ok := earningTickers[earningsCall.Ticker]
 		if !ok {
 			earningTickers[earningsCall.Ticker] = struct{}{}
-			filteredEarnings = append(filteredEarnings, earningsCall)
+			if _, ok := tradableSymbols[earningsCall.Ticker]; ok {
+				filteredEarnings = append(filteredEarnings, earningsCall)
+			}
 		}
 	}
 
-	ipos, err := getIPOs(yahooClient, now)
+	ipos, err := getIPOs(yahooClient, startTime, endTime)
 	if err != nil {
 		return params, err
 	}
@@ -118,10 +155,15 @@ func getEmailParams(
 	return params, nil
 }
 
-func getEarnings(client *yahoo.Client, current time.Time) (earnings []yahoo.EarningsCall, err error) {
-	for days := 0; days < 14; days++ {
-		date := current.AddDate(0, 0, days)
-		earningsForDate, err := client.GetEarningsCall(date)
+func getEarnings(
+	client *yahoo.Client,
+	startTime,
+	endTime time.Time,
+) (earnings []yahoo.EarningsCall, err error) {
+	current := startTime
+	for !current.Equal(endTime) {
+		current = current.AddDate(0, 0, 1)
+		earningsForDate, err := client.GetEarningsCall(current)
 		if err != nil {
 			return earnings, err
 		}
@@ -130,14 +172,23 @@ func getEarnings(client *yahoo.Client, current time.Time) (earnings []yahoo.Earn
 	return earnings, nil
 }
 
-func getIPOs(client *yahoo.Client, current time.Time) (ipos []yahoo.IPO, err error) {
-	for days := 0; days < 14; days++ {
-		date := current.AddDate(0, 0, days)
-		iposForDate, err := client.GetIPOs(date)
+func getIPOs(
+	client *yahoo.Client,
+	startTime,
+	endTime time.Time,
+) (ipos []yahoo.IPO, err error) {
+	current := startTime
+	for !current.Equal(endTime) {
+		current = current.AddDate(0, 0, 1)
+		iposForDate, err := client.GetIPOs(current)
 		if err != nil {
 			return ipos, err
 		}
 		ipos = append(ipos, iposForDate...)
 	}
 	return ipos, nil
+}
+
+func formatTime(moment time.Time) string {
+	return moment.Format("2006-01-02")
 }
