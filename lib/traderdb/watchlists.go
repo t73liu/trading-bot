@@ -6,13 +6,6 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-type Stock struct {
-	Id      int    `json:"id"`
-	Symbol  string `json:"symbol"`
-	Company string `json:"company"`
-	Exchange string `json:"exchange,omitempty"`
-}
-
 type Watchlist struct {
 	Id     int     `json:"id"`
 	Name   string  `json:"name"`

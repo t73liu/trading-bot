@@ -5,6 +5,13 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
+type Stock struct {
+	Id       int    `json:"id"`
+	Symbol   string `json:"symbol"`
+	Company  string `json:"company"`
+	Exchange string `json:"exchange,omitempty"`
+}
+
 const tradableStocksQuery = `
 SELECT id, symbol, company, exchange FROM stocks WHERE is_tradable = true
 `

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v4"
 	analyze "github.com/t73liu/trading-bot/lib/technical-analysis"
+	"github.com/t73liu/trading-bot/lib/traderdb"
 	"os"
 	"strings"
-	"time"
 )
 
 func main() {
@@ -23,86 +23,35 @@ func main() {
 		os.Exit(1)
 	}
 
-	candles := getStockCandles(conn, "SHOP")
+	candles, err := traderdb.GetTradingHourStockCandles(conn, "SHOP")
+	if err != nil {
+		fmt.Println("Failed to fetch stock candles from DB:", err)
+		os.Exit(1)
+	}
+
 	applyStrategy(
 		analyze.CompressCandles(
-			analyze.FillMinuteCandles(candles),
+			analyze.FillMinuteCandles(convertCandles(candles)),
 			1,
 			"minute",
 		),
 	)
 }
 
-const stockCandlesQuery = `
-SELECT opened_at, open_micros, high_micros, low_micros, close_micros, volume FROM stock_candles
-WHERE stock_id = $1
-ORDER BY opened_at
-`
-
-func getStockCandles(conn *pgx.Conn, symbol string) (candles []analyze.Candle) {
-	var stockId int
-	err := conn.QueryRow(
-		context.Background(),
-		"SELECT id FROM stocks WHERE symbol = $1",
-		symbol,
-	).Scan(&stockId)
-	if err != nil {
-		fmt.Println("Failed to fetch stock with symbol:", symbol, err)
-		os.Exit(1)
+// TODO move to shared module
+func convertCandles(candles []traderdb.Candle) []analyze.Candle {
+	results := make([]analyze.Candle, 0, len(candles))
+	for _, candle := range candles {
+		results = append(results, analyze.Candle{
+			OpenedAt: candle.OpenedAt,
+			Volume:   candle.Volume,
+			Open:     candle.OpenMicros,
+			High:     candle.HighMicros,
+			Low:      candle.LowMicros,
+			Close:    candle.CloseMicros,
+		})
 	}
-
-	location, err := time.LoadLocation("America/New_York")
-	if err != nil {
-		fmt.Println("Failed to load time location:", err)
-		os.Exit(1)
-	}
-	rows, err := conn.Query(context.Background(), stockCandlesQuery, stockId)
-	if err != nil {
-		fmt.Println("Failed to fetch stock candles:", err)
-		os.Exit(1)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var openMicros int64
-		var highMicros int64
-		var lowMicros int64
-		var closeMicros int64
-		var volume int64
-		var openedAt time.Time
-		if err = rows.Scan(
-			&openedAt, &openMicros, &highMicros, &lowMicros, &closeMicros, &volume,
-		); err != nil {
-			fmt.Println("Failed to parse row:", err)
-			os.Exit(1)
-		}
-		openedAt = openedAt.In(location)
-		if isWithinTradingHours(openedAt) {
-			candles = append(candles, analyze.Candle{
-				OpenedAt: openedAt,
-				Open:     openMicros,
-				High:     highMicros,
-				Low:      lowMicros,
-				Close:    closeMicros,
-				Volume:   volume,
-			})
-		}
-	}
-
-	if err = rows.Err(); err != nil {
-		fmt.Println("Failed to parse rows:", err)
-		os.Exit(1)
-	}
-
-	return candles
-}
-
-func isWithinTradingHours(moment time.Time) bool {
-	hour, minute, _ := moment.Clock()
-	if hour == 9 {
-		return minute >= 30
-	}
-	return hour > 9 && hour < 16
+	return results
 }
 
 func applyStrategy(candles []analyze.Candle) {
