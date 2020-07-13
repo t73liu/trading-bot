@@ -23,6 +23,9 @@ type Client struct {
 	basePath     string
 }
 
+// Alpaca data is currently limited to 5 US exchanges compared to Polygon which
+// consolidates from all exchanges in the US
+// https://alpaca.markets/docs/api-documentation/api-v2/market-data/#which-api-should-i-use
 func NewClient(httpClient *http.Client, apiKey string, apiSecretKey string, isLive bool) *Client {
 	basePath := paperAPIPath
 	if isLive {
@@ -72,9 +75,6 @@ type CandleQueryParams struct {
 	EndTime    time.Time
 }
 
-// Alpaca data is currently limited to 5 US exchanges compared to Polygon which
-// consolidates from all exchanges in the US
-// https://alpaca.markets/docs/api-documentation/api-v2/market-data/#which-api-should-i-use
 func (c *Client) GetCandles(params CandleQueryParams) (candles map[string][]Candle, err error) {
 	if len(params.Symbols) == 0 || len(params.Symbols) > 200 {
 		return candles, errors.New("symbols must be between 1 to 200")
@@ -120,6 +120,62 @@ func (c *Client) GetCandles(params CandleQueryParams) (candles map[string][]Cand
 		return candles, err
 	}
 	return candles, nil
+}
+
+type TradeResponse struct {
+	Status string    `json:"status"`
+	Symbol string    `json:"symbol"`
+	Last   LastTrade `json:"last"`
+}
+
+func (c *Client) GetLastTrade(symbol string) (trade LastTrade, err error) {
+	url := marketDataApiPath + "/last/stocks/" + symbol
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return trade, err
+	}
+
+	c.setHeaders(req)
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return trade, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return trade, errors.New("Response failed with status code: " + resp.Status)
+	}
+	var tradeResp TradeResponse
+	if err := json.NewDecoder(resp.Body).Decode(&tradeResp); err != nil {
+		return trade, err
+	}
+	return tradeResp.Last, err
+}
+
+type QuoteResponse struct {
+	Status string    `json:"status"`
+	Symbol string    `json:"symbol"`
+	Last   LastQuote `json:"last"`
+}
+
+func (c *Client) GetLastQuote(symbol string) (quote LastQuote, err error) {
+	url := marketDataApiPath + "/last_quote/stocks/" + symbol
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return quote, err
+	}
+
+	c.setHeaders(req)
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return quote, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return quote, errors.New("Response failed with status code: " + resp.Status)
+	}
+	var quoteResp QuoteResponse
+	if err := json.NewDecoder(resp.Body).Decode(&quoteResp); err != nil {
+		return quote, err
+	}
+	return quoteResp.Last, err
 }
 
 func (c *Client) setHeaders(request *http.Request) {

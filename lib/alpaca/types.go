@@ -30,3 +30,17 @@ const (
 	FifteenMin CandleSize = "15Min"
 	OneDay     CandleSize = "1D"
 )
+
+type LastTrade struct {
+	Price             float32 `json:"price"`
+	Size              int     `json:"size"`
+	TimestampUnixNano int64   `json:"timestamp"`
+}
+
+type LastQuote struct {
+	AskPrice          float32 `json:"askprice"`
+	AskSize           int     `json:"asksize"`
+	BidPrice          float32 `json:"bidprice"`
+	BidSize           int     `json:"bidsize"`
+	TimestampUnixNano int64   `json:"timestamp"`
+}
