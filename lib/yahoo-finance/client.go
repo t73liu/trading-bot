@@ -5,11 +5,14 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
 
 const baseURL = "https://finance.yahoo.com"
+
+const maxEventsPerPage = 100
 
 type EarningsCallTime string
 
@@ -60,61 +63,80 @@ func NewClient(httpClient *http.Client) *Client {
 	}
 }
 
-// TODO missing tickers when results greater than 100
 func (c *Client) GetEarningsCall(date time.Time) (earnings []EarningsCall, err error) {
 	formattedDate := formatISO(date)
-	rows, err := c.getEvents("earnings", date)
-	if err != nil {
-		return earnings, err
-	}
-	for _, row := range rows {
-		record := row.(map[string]interface{})
-		earningsCall := EarningsCall{
-			Ticker:             record["ticker"].(string),
-			Company:            record["companyshortname"].(string),
-			StartTime:          EarningsCallTime(record["startdatetimetype"].(string)),
-			EPSEstimate:        getFloat64(record["epsestimate"]),
-			EPSActual:          getFloat64(record["epsactual"]),
-			EPSSurprisePercent: getFloat64(record["epssurprisepct"]),
-			QuoteType:          record["quoteType"].(string),
-			Date:               formattedDate,
+	offset := 0
+	for {
+		rows, err := c.getEvents("earnings", date, offset)
+		if err != nil {
+			return earnings, err
 		}
-		earnings = append(earnings, earningsCall)
+		for _, row := range rows {
+			record := row.(map[string]interface{})
+			earningsCall := EarningsCall{
+				Ticker:             record["ticker"].(string),
+				Company:            record["companyshortname"].(string),
+				StartTime:          EarningsCallTime(record["startdatetimetype"].(string)),
+				EPSEstimate:        getFloat64(record["epsestimate"]),
+				EPSActual:          getFloat64(record["epsactual"]),
+				EPSSurprisePercent: getFloat64(record["epssurprisepct"]),
+				QuoteType:          record["quoteType"].(string),
+				Date:               formattedDate,
+			}
+			earnings = append(earnings, earningsCall)
+		}
+		if len(rows) == maxEventsPerPage {
+			offset += maxEventsPerPage
+		} else {
+			break
+		}
 	}
 	return earnings, nil
 }
 
 func (c *Client) GetIPOs(date time.Time) (ipos []IPO, err error) {
 	formattedDate := formatISO(date)
-	rows, err := c.getEvents("ipo", date)
-	if err != nil {
-		return ipos, err
-	}
-	for _, row := range rows {
-		record := row.(map[string]interface{})
-		ipo := IPO{
-			Ticker:    record["ticker"].(string),
-			Company:   record["companyshortname"].(string),
-			Exchange:  record["exchange_short_name"].(string),
-			PriceFrom: getFloat64(record["pricefrom"]),
-			PriceTo:   getFloat64(record["priceto"]),
-			Currency:  record["currencyname"].(string),
-			QuoteType: record["quoteType"].(string),
-			Date:      formattedDate,
+	offset := 0
+	for {
+		rows, err := c.getEvents("ipo", date, offset)
+		if err != nil {
+			return ipos, err
 		}
-		ipos = append(ipos, ipo)
+		for _, row := range rows {
+			record := row.(map[string]interface{})
+			ipo := IPO{
+				Ticker:    record["ticker"].(string),
+				Company:   record["companyshortname"].(string),
+				Exchange:  record["exchange_short_name"].(string),
+				PriceFrom: getFloat64(record["pricefrom"]),
+				PriceTo:   getFloat64(record["priceto"]),
+				Currency:  record["currencyname"].(string),
+				QuoteType: record["quoteType"].(string),
+				Date:      formattedDate,
+			}
+			ipos = append(ipos, ipo)
+		}
+		if len(rows) == maxEventsPerPage {
+			offset += maxEventsPerPage
+		} else {
+			break
+		}
 	}
 	return ipos, err
 }
 
-func (c *Client) getEvents(eventType string, date time.Time) ([]interface{}, error) {
+func (c *Client) getEvents(eventType string, date time.Time, offset int) ([]interface{}, error) {
 	req, err := http.NewRequest("GET", baseURL+"/calendar/"+eventType, nil)
 	if err != nil {
 		return nil, err
 	}
 	queryParams := req.URL.Query()
+	queryParams.Add("size", "100")
 	if !date.IsZero() {
 		queryParams.Add("day", formatISO(date))
+	}
+	if offset > 0 {
+		queryParams.Add("offset", strconv.Itoa(offset))
 	}
 	req.URL.RawQuery = queryParams.Encode()
 
