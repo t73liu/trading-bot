@@ -1,6 +1,8 @@
 package analyze
 
-import "math"
+import (
+	"math"
+)
 
 const million = 1000000
 

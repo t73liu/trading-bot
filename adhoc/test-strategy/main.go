@@ -24,7 +24,13 @@ func main() {
 	}
 
 	candles := getStockCandles(conn, "SHOP")
-	applyStrategy(compressCandles(fillMissingCandles(candles), 1))
+	applyStrategy(
+		analyze.CompressCandles(
+			analyze.FillMinuteCandles(candles),
+			1,
+			"minute",
+		),
+	)
 }
 
 const stockCandlesQuery = `
@@ -97,37 +103,6 @@ func isWithinTradingHours(moment time.Time) bool {
 		return minute >= 30
 	}
 	return hour > 9 && hour < 16
-}
-
-func fillMissingCandles(candles []analyze.Candle) []analyze.Candle {
-	filledCandles := make([]analyze.Candle, 0, len(candles))
-	var prevCandle analyze.Candle
-	var prevTime time.Time
-	for i, candle := range candles {
-		currentTime := candle.OpenedAt
-		if i > 0 && prevTime.Day() == currentTime.Day() {
-			minutesDiff := int(currentTime.Sub(prevTime).Minutes())
-			for i := minutesDiff; i > 1; i-- {
-				backfilledTime := currentTime.Add(-1 * time.Minute * time.Duration(i-1))
-				filledCandles = append(filledCandles, genPlaceholderCandle(prevCandle, backfilledTime))
-			}
-		}
-		prevCandle = candle
-		prevTime = prevCandle.OpenedAt
-		filledCandles = append(filledCandles, candle)
-	}
-	return filledCandles
-}
-
-func genPlaceholderCandle(candle analyze.Candle, openedAt time.Time) analyze.Candle {
-	return analyze.Candle{
-		OpenedAt: openedAt,
-		Volume:   0,
-		Open:     candle.Close,
-		High:     candle.Close,
-		Low:      candle.Close,
-		Close:    candle.Close,
-	}
 }
 
 func applyStrategy(candles []analyze.Candle) {
@@ -208,24 +183,6 @@ func applyStrategy(candles []analyze.Candle) {
 		analyze.MicrosToDollars(buyPrice*numberOfShares+capital)/initialCapital*100,
 		trades,
 	)
-}
-
-// TODO need to respect day separation and non-zero starts
-func compressCandles(candles []analyze.Candle, interval int) []analyze.Candle {
-	if interval == 1 {
-		return candles
-	}
-	newCandles := make([]analyze.Candle, 0, len(candles)/interval)
-	count := 0
-	for _, candle := range candles {
-		if count == interval-1 {
-			newCandles = append(newCandles, candle)
-			count = 0
-		} else {
-			count++
-		}
-	}
-	return newCandles
 }
 
 func getClosingPrices(candles []analyze.Candle) (results []int64) {
