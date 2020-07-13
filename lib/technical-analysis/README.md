@@ -29,6 +29,7 @@ func main() {
 - [x] Exponential Moving Average (EMA)
 - [x] Relative Strength Index (RSI)
 - [x] Moving Average Convergence Divergence (MACD)
+- [x] Volume Weighted Average Price (VWAP)
 - [ ] Stochastic Oscillator
-- [ ] Volume Weighted Average Price (VWAP)
 - [ ] Commodity Channel Index (CCI)
+- [ ] Ehler's Roofing Filter
