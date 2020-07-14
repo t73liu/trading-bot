@@ -202,3 +202,40 @@ func (c *Client) GetTickerBars(params TickerBarsQueryParams) (bars []TickerBar, 
 func formatDate(date time.Time) string {
 	return date.Format("2006-01-02")
 }
+
+type TickerSnapshotResponse struct {
+	Status  string           `json:"status"`
+	Tickers []TickerSnapshot `json:"tickers"`
+}
+
+func (c *Client) GetMovers(isIncreasing bool) (snapshots []TickerSnapshot, err error) {
+	path := "gainers"
+	if !isIncreasing {
+		path = "losers"
+	}
+	url := fmt.Sprintf(
+		"%s/v2/snapshot/locale/us/markets/stocks/%s",
+		polygonHost,
+		path,
+	)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return snapshots, err
+	}
+	queryParams := req.URL.Query()
+	queryParams.Add("apiKey", c.apiKey)
+	req.URL.RawQuery = queryParams.Encode()
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return snapshots, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return snapshots, errors.New("Response failed with status code: " + resp.Status)
+	}
+	var snapshotsResponse TickerSnapshotResponse
+	if err := json.NewDecoder(resp.Body).Decode(&snapshotsResponse); err != nil {
+		return snapshots, err
+	}
+	return snapshotsResponse.Tickers, nil
+}

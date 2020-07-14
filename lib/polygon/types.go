@@ -57,3 +57,20 @@ type TickerBar struct {
 	Close             float32 `json:"c"`
 	StartAtUnixMillis int64   `json:"t"`
 }
+
+type TickerOHLC struct {
+	Volume float64 `json:"v"`
+	Open   float32 `json:"o"`
+	High   float32 `json:"h"`
+	Low    float32 `json:"l"`
+	Close  float32 `json:"c"`
+}
+
+type TickerSnapshot struct {
+	Ticker              string     `json:"ticker"`
+	Day                 TickerOHLC `json:"day"`
+	PrevDay             TickerOHLC `json:"prevDay"`
+	Change              float32    `json:"todaysChange"`
+	ChangePercent       float32    `json:"todaysChangePerc"`
+	UpdatedAtUnixMillis int64      `json:"updated"`
+}
