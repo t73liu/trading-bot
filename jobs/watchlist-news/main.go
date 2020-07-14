@@ -9,8 +9,8 @@ import (
 	"github.com/t73liu/trading-bot/lib/newsapi"
 	"github.com/t73liu/trading-bot/lib/polygon"
 	"github.com/t73liu/trading-bot/lib/traderdb"
+	"github.com/t73liu/trading-bot/lib/utils"
 	"html/template"
-	"net/http"
 	"net/smtp"
 	"os"
 	"strings"
@@ -76,7 +76,7 @@ func main() {
 	}
 
 	now := time.Now()
-	httpClient := &http.Client{Timeout: 15 * time.Second}
+	httpClient := utils.NewHttpClient()
 	polygonClient := polygon.NewClient(httpClient, alpacaAPIKey)
 	newsClient := newsapi.NewClient(httpClient, newsAPIKey)
 
@@ -132,7 +132,7 @@ func getEmailParams(
 		return params, err
 	}
 
-	startTime := getLastWeekday(now)
+	startTime := utils.GetLastWeekday(now)
 
 	generalNewsByCompany := make(map[string][]newsapi.Article)
 	for _, stock := range stocks {
@@ -171,14 +171,6 @@ func getEmailParams(
 		//NewsByTicker:         newsByTicker,
 	}
 	return params, nil
-}
-
-func getLastWeekday(now time.Time) time.Time {
-	prevDay := now.AddDate(0, 0, -1)
-	for prevDay.Weekday() == time.Saturday || prevDay.Weekday() == time.Sunday {
-		prevDay = prevDay.AddDate(0, 0, -1)
-	}
-	return prevDay
 }
 
 func trimCompanyName(company string) string {
