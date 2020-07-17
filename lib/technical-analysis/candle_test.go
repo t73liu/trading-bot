@@ -7,7 +7,7 @@ import (
 
 // TODO complete test
 func TestCompressCandles(t *testing.T) {
-	//now := time.Date(2020, 7, 1, 9, 1, 0, 0, time.UTC)
+	now := time.Date(2020, 7, 1, 9, 1, 0, 0, time.UTC)
 	//tomorrow := addMinutes(now.AddDate(0, 0, 1), 13)
 	//nextWeek := addMinutes(now.AddDate(0, 0, 7), 46)
 	t.Run(
@@ -26,6 +26,54 @@ func TestCompressCandles(t *testing.T) {
 		"nil provided (1-day)",
 		testCompressCandlesFunc(nil, 1, "day", nil),
 	)
+	t.Run(
+		"nil provided (1-day)",
+		testCompressCandlesFunc(
+			[]Candle{
+				{
+					OpenedAt: now,
+					Volume:   50,
+					Open:     11,
+					High:     33,
+					Low:      7,
+					Close:    34,
+				},
+				{
+					OpenedAt: addMinutes(now, 60),
+					Volume:   510,
+					Open:     344,
+					High:     588,
+					Low:      77,
+					Close:    2,
+				},
+			},
+			1,
+			"day",
+			[]Candle{
+				{
+					OpenedAt: time.Date(2020, 7, 1, 0, 0, 0, 0, time.UTC),
+					Open:     11,
+					High:     588,
+					Close:    2,
+					Low:      7,
+					Volume:   560,
+				},
+			},
+		),
+	)
+}
+
+func TestGetMidnight(t *testing.T) {
+	midnight := time.Date(2020, 7, 1, 0, 0, 0, 0, time.UTC)
+	midnightResult := GetMidnight(midnight, time.UTC)
+	if midnightResult != midnight {
+		t.Errorf("Midnight input failed, expected %s, got %s\n", midnight, midnightResult)
+	}
+	quarterPastNine := time.Date(2020, 7, 1, 9, 15, 0, 0, time.UTC)
+	quarterPastNineResult := GetMidnight(quarterPastNine, time.UTC)
+	if quarterPastNineResult != midnight {
+		t.Errorf("9:15 input failed, expected %s, got %s\n", midnight, quarterPastNineResult)
+	}
 }
 
 func TestGenPlaceholderCandle(t *testing.T) {
@@ -211,7 +259,7 @@ func testFillMinuteCandlesFunc(candles []Candle, expected []Candle) func(*testin
 
 func testCompressCandlesFunc(candles []Candle, timeInterval int, timeUnit string, expected []Candle) func(*testing.T) {
 	return func(t *testing.T) {
-		actual := CompressCandles(candles, timeInterval, timeUnit)
+		actual := CompressCandles(candles, timeInterval, timeUnit, time.UTC)
 		if !eqCandleSlice(expected, actual) {
 			t.Errorf("\nExpected: %v\nActual: %v", expected, actual)
 		}

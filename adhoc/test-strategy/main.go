@@ -8,6 +8,7 @@ import (
 	"github.com/t73liu/trading-bot/lib/traderdb"
 	"os"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -23,6 +24,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	location, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		fmt.Println("Failed to loading America/New_York timezone:", err)
+		os.Exit(1)
+	}
+
 	candles, err := traderdb.GetTradingHourStockCandles(conn, "SHOP")
 	if err != nil {
 		fmt.Println("Failed to fetch stock candles from DB:", err)
@@ -34,6 +41,7 @@ func main() {
 			analyze.FillMinuteCandles(convertCandles(candles)),
 			1,
 			"minute",
+			location,
 		),
 	)
 }

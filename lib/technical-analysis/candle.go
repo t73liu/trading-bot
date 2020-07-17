@@ -14,22 +14,80 @@ type Candle struct {
 }
 
 // Compress minute candles to hourly, daily, etc.
-func CompressCandles(candles []Candle, timeInterval int, timeUnit string) []Candle {
+func CompressCandles(candles []Candle, timeInterval int, timeUnit string, loc *time.Location) []Candle {
 	if len(candles) == 0 || timeInterval == 1 && timeUnit == "minute" {
 		return candles
 	}
 	newCandles := make([]Candle, 0, len(candles)/timeInterval)
-	count := 0
-	// TODO need to respect day separation and non-zero starts
+	var prevTimeBucket time.Time
 	for _, candle := range candles {
-		if count == timeInterval-1 {
+		currentTimeBucket := getKey(candle, timeInterval, timeUnit, loc)
+		if prevTimeBucket.IsZero() || currentTimeBucket != prevTimeBucket {
+			prevTimeBucket = currentTimeBucket
+			candle.OpenedAt = currentTimeBucket
 			newCandles = append(newCandles, candle)
-			count = 0
 		} else {
-			count++
+			lastIndex := len(newCandles) - 1
+			newCandles[lastIndex].Volume += candle.Volume
+			if candle.High > newCandles[lastIndex].High {
+				newCandles[lastIndex].High = candle.High
+			}
+			if candle.Low < newCandles[lastIndex].Low {
+				newCandles[lastIndex].Low = candle.Low
+			}
+			newCandles[lastIndex].Close = candle.Close
 		}
 	}
 	return newCandles
+}
+
+func getKey(candle Candle, timeInterval int, timeUnit string, loc *time.Location) time.Time {
+	openedAt := candle.OpenedAt
+	switch timeUnit {
+	case "minute":
+		return GetMinuteBucket(openedAt, loc, timeInterval)
+	case "hour":
+		return GetHourBucket(openedAt, loc, timeInterval)
+	case "day":
+		return GetMidnight(openedAt, loc)
+	case "week":
+		return GetStartOfWeek(openedAt, loc)
+	case "month":
+		return GetStartOfMonth(openedAt, loc)
+	default:
+		return openedAt
+	}
+}
+
+// TODO Move to utils package
+func GetMinuteBucket(moment time.Time, loc *time.Location, interval int) time.Time {
+	year, month, day := moment.Date()
+	hour, minute, _ := moment.Clock()
+	return time.Date(year, month, day, hour, minute/interval, 0, 0, loc)
+}
+
+func GetHourBucket(moment time.Time, loc *time.Location, interval int) time.Time {
+	year, month, day := moment.Date()
+	hour, _, _ := moment.Clock()
+	return time.Date(year, month, day, hour/interval, 0, 0, 0, loc)
+}
+
+func GetMidnight(moment time.Time, loc *time.Location) time.Time {
+	year, month, day := moment.Date()
+	return time.Date(year, month, day, 0, 0, 0, 0, loc)
+}
+
+func GetStartOfWeek(moment time.Time, loc *time.Location) time.Time {
+	current := moment
+	for current.Weekday() != time.Monday {
+		current = current.AddDate(0, 0, -1)
+	}
+	return GetMidnight(current, loc)
+}
+
+func GetStartOfMonth(moment time.Time, loc *time.Location) time.Time {
+	year, month, _ := moment.Date()
+	return time.Date(year, month, 1, 0, 0, 0, 0, loc)
 }
 
 // Fill in gaps for consecutive periods

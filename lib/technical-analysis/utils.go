@@ -67,7 +67,7 @@ func RoundToTwoDecimals(value float64) float64 {
 	return math.Round(value*100) / 100
 }
 
-func maxInt(nums ...int) int {
+func maxInt(nums ...int64) int64 {
 	if len(nums) == 0 {
 		return 0
 	}
