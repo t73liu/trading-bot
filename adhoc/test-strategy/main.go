@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"trading-bot/adhoc/test-strategy/strategy"
 )
 
 func main() {
@@ -46,7 +47,7 @@ func main() {
 		fmt.Println("Failed to format stock candles:", err)
 		os.Exit(1)
 	}
-	applyStrategy(formattedCandles)
+	applyStrategy(formattedCandles, 10000)
 }
 
 // TODO move to shared module
@@ -65,89 +66,10 @@ func convertCandles(candles []traderdb.Candle) []analyze.Candle {
 	return results
 }
 
-func applyStrategy(candles []analyze.Candle) {
-	if len(candles) == 0 {
-		return
+func applyStrategy(candles []analyze.Candle, capital float64) {
+	capitalMicros := analyze.DollarsToMicros(capital)
+	dailyPortfolios := strategy.Hold(candles, capitalMicros)
+	for _, portfolio := range dailyPortfolios {
+		strategy.PrintPortfolio(portfolio)
 	}
-
-	dates := make([]string, 0)
-	candlesByDay := make(map[string][]analyze.Candle)
-	for _, candle := range candles {
-		date := candle.OpenedAt.Format("2006-01-02")
-		groupedCandles, ok := candlesByDay[date]
-		if !ok {
-			dates = append(dates, date)
-		}
-		candlesByDay[date] = append(groupedCandles, candle)
-	}
-
-	capital := int64(0)
-	buyPrice := candles[0].Close
-	numberOfShares := int64(100)
-	hasLongPosition := true
-	initialCapital := analyze.MicrosToDollars(buyPrice * numberOfShares)
-	trades := 0
-	fmt.Println("INITIAL CAPITAL", initialCapital)
-	for _, date := range dates {
-		groupedCandles := candlesByDay[date]
-		fmt.Println("Trades on day:", date, len(groupedCandles))
-		closingPrices := getClosingPrices(groupedCandles)
-		//macds := analyze.StandardMACD(closingPrices)
-		fasts := analyze.EMA(closingPrices, 20)
-		//slows := analyze.SMA(closingPrices, 50)
-		//rsiValues := analyze.RSI(closingPrices, 14)
-		for i, candle := range groupedCandles {
-			//currentRSI := rsiValues[i]
-			fast := fasts[i]
-			if fast.Valid && candle.Close < fast.Micro {
-				if hasLongPosition {
-					fmt.Printf(
-						"Potential sell on %s at %f with RSI %f\n",
-						candle.OpenedAt.Format("15:04:05"),
-						analyze.MicrosToDollars(candle.Close),
-						fast.Micro,
-					)
-					capital += candle.Close * numberOfShares
-					numberOfShares = 0
-					hasLongPosition = false
-					fmt.Println(analyze.MicrosToDollars(capital))
-					trades++
-				}
-			}
-			if fast.Valid && candle.Close > fast.Micro {
-				if !hasLongPosition {
-					fmt.Printf(
-						"BUY: %s at %.2f with RSI %.2f\n",
-						candle.OpenedAt.Format("15:04:05"),
-						analyze.MicrosToDollars(candle.Close),
-						fast.Micro,
-					)
-					hasLongPosition = true
-					buyPrice = candle.Close
-					numberOfShares = capital / buyPrice
-					capital -= numberOfShares * buyPrice
-					fmt.Println(numberOfShares, "BOUGHT", analyze.MicrosToDollars(buyPrice))
-				}
-			}
-		}
-	}
-
-	fmt.Println(
-		"Hold",
-		analyze.MicrosToDollars(candles[len(candles)-1].Close*100),
-		analyze.MicrosToDollars(candles[len(candles)-1].Close*100)/initialCapital*100,
-	)
-	fmt.Println(
-		"END CAPITAL",
-		analyze.MicrosToDollars(buyPrice*numberOfShares+capital),
-		analyze.MicrosToDollars(buyPrice*numberOfShares+capital)/initialCapital*100,
-		trades,
-	)
-}
-
-func getClosingPrices(candles []analyze.Candle) (results []int64) {
-	for _, candle := range candles {
-		results = append(results, candle.Close)
-	}
-	return results
 }

@@ -137,6 +137,13 @@ func GenPlaceholderCandle(candle Candle, openedAt time.Time) Candle {
 	}
 }
 
+func GetClosingPrices(candles []Candle) (closes []int64) {
+	for _, candle := range candles {
+		closes = append(closes, candle.Close)
+	}
+	return closes
+}
+
 func eqCandleSlice(expected, actual []Candle) bool {
 	if len(expected) != len(actual) {
 		return false

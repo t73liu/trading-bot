@@ -59,7 +59,7 @@ func main() {
 	candlesBySymbol, err := alpacaClient.GetCandles(alpaca.CandleQueryParams{
 		Symbols:    stockSymbols,
 		CandleSize: alpaca.OneMin,
-		StartTime:  now.AddDate(0, -1, 0),
+		StartTime:  now.AddDate(-1, 0, 0),
 		EndTime:    now,
 	})
 
