@@ -67,10 +67,10 @@ type TickerOHLC struct {
 }
 
 type TickerSnapshot struct {
-	Ticker              string     `json:"ticker"`
-	Day                 TickerOHLC `json:"day"`
-	PrevDay             TickerOHLC `json:"prevDay"`
-	Change              float32    `json:"todaysChange"`
-	ChangePercent       float32    `json:"todaysChangePerc"`
-	UpdatedAtUnixMillis int64      `json:"updated"`
+	Ticker             string     `json:"ticker"`
+	Day                TickerOHLC `json:"day"`
+	PrevDay            TickerOHLC `json:"prevDay"`
+	Change             float32    `json:"todaysChange"`
+	ChangePercent      float32    `json:"todaysChangePerc"`
+	UpdatedAtUnixNanos int64      `json:"updated"`
 }
