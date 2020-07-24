@@ -9,29 +9,19 @@ func Hold(candles []analyze.Candle, capitalMicros int64) []Portfolio {
 		return nil
 	}
 	firstCandle := candles[0]
-	shares := capitalMicros / firstCandle.Open
 	dates, candlesByDate := groupCandlesByDate(candles)
 	dailySnapshots := make([]Portfolio, 0, len(dates)+1)
-	initialSnapshot := Portfolio{
-		Date:               "initial",
-		Cash:               capitalMicros - firstCandle.Open*shares,
-		SharesHeld:         shares,
-		EndOfDayValue:      capitalMicros,
-		DailyChange:        0,
-		DailyPercentChange: 0,
-		AllTimePerformance: 0,
-	}
-	prevSnapshot := initialSnapshot
-	dailySnapshots = append(dailySnapshots, initialSnapshot)
+	prevSnapshot := genInitialPortfolio(capitalMicros, firstCandle.Open)
+	dailySnapshots = append(dailySnapshots, prevSnapshot)
 	for _, date := range dates {
 		dailyCandles := candlesByDate[date]
 		closingPrice := dailyCandles[len(dailyCandles)-1].Close
-		marketValue := prevSnapshot.Cash + shares*closingPrice
+		marketValue := prevSnapshot.Cash + prevSnapshot.SharesHeld*closingPrice
 		snapshot := Portfolio{
 			Date:               date,
 			Cash:               prevSnapshot.Cash,
 			SharePrice:         closingPrice,
-			SharesHeld:         shares,
+			SharesHeld:         prevSnapshot.SharesHeld,
 			EndOfDayValue:      marketValue,
 			DailyChange:        marketValue - prevSnapshot.EndOfDayValue,
 			DailyPercentChange: calcPercentChange(prevSnapshot.EndOfDayValue, marketValue),

@@ -1,12 +1,16 @@
 package strategy
 
-import "time"
+import (
+	"fmt"
+	analyze "github.com/t73liu/trading-bot/lib/technical-analysis"
+	"time"
+)
 
 type TradeType string
 
 const (
-	Sale TradeType = "Sale"
 	Buy  TradeType = "Buy"
+	Sell TradeType = "Sell"
 )
 
 type Trade struct {
@@ -14,4 +18,14 @@ type Trade struct {
 	NumberOfShares int64
 	PriceMicros    int64
 	Timestamp      time.Time
+}
+
+func (trade Trade) String() string {
+	return fmt.Sprintf(
+		"%s %d shares at %.2f %s",
+		trade.Type,
+		trade.NumberOfShares,
+		analyze.MicrosToDollars(trade.PriceMicros),
+		trade.Timestamp,
+	)
 }

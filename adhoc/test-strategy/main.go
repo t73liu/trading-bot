@@ -68,7 +68,8 @@ func convertCandles(candles []traderdb.Candle) []analyze.Candle {
 
 func applyStrategy(candles []analyze.Candle, capital float64) {
 	capitalMicros := analyze.DollarsToMicros(capital)
-	dailyPortfolios := strategy.Hold(candles, capitalMicros)
+	//dailyPortfolios := strategy.Hold(candles, capitalMicros)
+	dailyPortfolios := strategy.TrailingStop(candles, capitalMicros, 0.95)
 	for _, portfolio := range dailyPortfolios {
 		strategy.PrintPortfolio(portfolio)
 	}

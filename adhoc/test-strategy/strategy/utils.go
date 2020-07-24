@@ -17,6 +17,19 @@ func groupCandlesByDate(candles []analyze.Candle) ([]string, map[string][]analyz
 	return dates, candlesByDate
 }
 
+func genInitialPortfolio(capitalMicros, priceMicros int64) Portfolio {
+	shares := capitalMicros / priceMicros
+	return Portfolio{
+		Date:               "initial",
+		Cash:               capitalMicros - priceMicros*shares,
+		SharesHeld:         shares,
+		EndOfDayValue:      capitalMicros,
+		DailyChange:        0,
+		DailyPercentChange: 0,
+		AllTimePerformance: 0,
+	}
+}
+
 func calcPercentChange(prevMicros int64, currentMicros int64) float64 {
 	ratio := analyze.MicrosToDollars(currentMicros) / analyze.MicrosToDollars(prevMicros)
 	return analyze.RoundToTwoDecimals(ratio*100 - 100)

@@ -30,4 +30,7 @@ func PrintPortfolio(portfolio Portfolio) {
 		portfolio.DailyPercentChange,
 		portfolio.AllTimePerformance,
 	)
+	for _, trade := range portfolio.Trades {
+		fmt.Println("  Trade:", trade)
+	}
 }
