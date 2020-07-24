@@ -8,8 +8,66 @@ import (
 // TODO complete test
 func TestCompressCandles(t *testing.T) {
 	now := time.Date(2020, 7, 1, 9, 1, 0, 0, time.UTC)
-	//tomorrow := addMinutes(now.AddDate(0, 0, 1), 13)
-	//nextWeek := addMinutes(now.AddDate(0, 0, 7), 46)
+	tomorrow := addMinutes(now.AddDate(0, 0, 1), 13)
+	nextWeek := addMinutes(now.AddDate(0, 0, 7), 46)
+	testCandles := []Candle{
+		{
+			OpenedAt: now,
+			Volume:   50,
+			Open:     11,
+			High:     34,
+			Low:      7,
+			Close:    33,
+		},
+		{
+			OpenedAt: addMinutes(now, 60),
+			Volume:   510,
+			Open:     344,
+			High:     588,
+			Low:      77,
+			Close:    79,
+		},
+		{
+			OpenedAt: addMinutes(now, 62),
+			Volume:   223,
+			Open:     321,
+			High:     455,
+			Low:      78,
+			Close:    79,
+		},
+		{
+			OpenedAt: addMinutes(now, 450),
+			Volume:   112,
+			Open:     34,
+			High:     88,
+			Low:      70,
+			Close:    72,
+		},
+		{
+			OpenedAt: tomorrow,
+			Volume:   85,
+			Open:     98,
+			High:     123,
+			Low:      98,
+			Close:    98,
+		},
+		{
+			OpenedAt: addMinutes(tomorrow, 360),
+			Volume:   775,
+			Open:     951,
+			High:     951,
+			Low:      515,
+			Close:    723,
+		},
+		{
+			OpenedAt: addMinutes(nextWeek, 25),
+			Volume:   975,
+			Open:     289,
+			High:     321,
+			Low:      77,
+			Close:    289,
+		},
+	}
 	t.Run(
 		"No candles provided (1-minute)",
 		testCompressCandlesFunc([]Candle{}, 1, "minute", []Candle{}),
@@ -27,16 +85,16 @@ func TestCompressCandles(t *testing.T) {
 		testCompressCandlesFunc(nil, 1, "day", nil),
 	)
 	t.Run(
-		"nil provided (1-day)",
+		"multiple candles for single day (1-day)",
 		testCompressCandlesFunc(
 			[]Candle{
 				{
 					OpenedAt: now,
 					Volume:   50,
 					Open:     11,
-					High:     33,
+					High:     34,
 					Low:      7,
-					Close:    34,
+					Close:    33,
 				},
 				{
 					OpenedAt: addMinutes(now, 60),
@@ -44,7 +102,15 @@ func TestCompressCandles(t *testing.T) {
 					Open:     344,
 					High:     588,
 					Low:      77,
-					Close:    2,
+					Close:    79,
+				},
+				{
+					OpenedAt: addMinutes(now, 450),
+					Volume:   112,
+					Open:     34,
+					High:     88,
+					Low:      70,
+					Close:    72,
 				},
 			},
 			1,
@@ -52,15 +118,402 @@ func TestCompressCandles(t *testing.T) {
 			[]Candle{
 				{
 					OpenedAt: time.Date(2020, 7, 1, 0, 0, 0, 0, time.UTC),
-					Open:     11,
-					High:     588,
-					Close:    2,
-					Low:      7,
-					Volume:   560,
+					// 50 + 510 + 112 = 672
+					Volume: 672,
+					Open:   11,
+					High:   588,
+					Low:    7,
+					Close:  72,
 				},
 			},
 		),
 	)
+	t.Run(
+		"multiple candles for multiple days provided (1-day)",
+		testCompressCandlesFunc(
+			testCandles,
+			1,
+			"day",
+			[]Candle{
+				{
+					OpenedAt: time.Date(2020, 7, 1, 0, 0, 0, 0, time.UTC),
+					// 50 + 510 + 223 + 112 = 895
+					Volume: 895,
+					Open:   11,
+					High:   588,
+					Low:    7,
+					Close:  72,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 2, 0, 0, 0, 0, time.UTC),
+					// 85 + 775 = 860
+					Volume: 860,
+					Open:   98,
+					High:   951,
+					Low:    98,
+					Close:  723,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 8, 0, 0, 0, 0, time.UTC),
+					Volume:   975,
+					Open:     289,
+					High:     321,
+					Low:      77,
+					Close:    289,
+				},
+			},
+		),
+	)
+	t.Run(
+		"multiple candles for multiple days provided (1-week)",
+		testCompressCandlesFunc(
+			testCandles,
+			1,
+			"week",
+			[]Candle{
+				{
+					OpenedAt: time.Date(2020, 6, 29, 0, 0, 0, 0, time.UTC),
+					// 50 + 510 + 223 + 112 + 85 + 775 = 1755
+					Volume: 1755,
+					Open:   11,
+					High:   951,
+					Low:    7,
+					Close:  723,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 6, 0, 0, 0, 0, time.UTC),
+					Volume:   975,
+					Open:     289,
+					High:     321,
+					Low:      77,
+					Close:    289,
+				},
+			},
+		),
+	)
+	t.Run(
+		"multiple candles for multiple days provided (1-month)",
+		testCompressCandlesFunc(
+			testCandles,
+			1,
+			"month",
+			[]Candle{
+				{
+					OpenedAt: time.Date(2020, 7, 1, 0, 0, 0, 0, time.UTC),
+					// 50 + 510 + 223 + 112 + 85 + 775 + 975 = 2730
+					Volume: 2730,
+					Open:   11,
+					High:   951,
+					Low:    7,
+					Close:  289,
+				},
+			},
+		),
+	)
+	t.Run(
+		"multiple candles for multiple days provided (5-minute)",
+		testCompressCandlesFunc(
+			testCandles,
+			5,
+			"minute",
+			[]Candle{
+				{
+					OpenedAt: time.Date(2020, 7, 1, 9, 0, 0, 0, time.UTC),
+					Volume:   50,
+					Open:     11,
+					High:     34,
+					Low:      7,
+					Close:    33,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 1, 10, 0, 0, 0, time.UTC),
+					// 510 + 223 = 733
+					Volume: 733,
+					Open:   344,
+					High:   588,
+					Low:    77,
+					Close:  79,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 1, 16, 30, 0, 0, time.UTC),
+					Volume:   112,
+					Open:     34,
+					High:     88,
+					Low:      70,
+					Close:    72,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 2, 9, 10, 0, 0, time.UTC),
+					Volume:   85,
+					Open:     98,
+					High:     123,
+					Low:      98,
+					Close:    98,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 2, 15, 10, 0, 0, time.UTC),
+					Volume:   775,
+					Open:     951,
+					High:     951,
+					Low:      515,
+					Close:    723,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 8, 10, 10, 0, 0, time.UTC),
+					Volume:   975,
+					Open:     289,
+					High:     321,
+					Low:      77,
+					Close:    289,
+				},
+			},
+		),
+	)
+	t.Run(
+		"multiple candles for multiple days provided (10-minute)",
+		testCompressCandlesFunc(
+			testCandles,
+			10,
+			"minute",
+			[]Candle{
+				{
+					OpenedAt: time.Date(2020, 7, 1, 9, 0, 0, 0, time.UTC),
+					Volume:   50,
+					Open:     11,
+					High:     34,
+					Low:      7,
+					Close:    33,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 1, 10, 0, 0, 0, time.UTC),
+					// 510 + 223 = 733
+					Volume: 733,
+					Open:   344,
+					High:   588,
+					Low:    77,
+					Close:  79,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 1, 16, 30, 0, 0, time.UTC),
+					Volume:   112,
+					Open:     34,
+					High:     88,
+					Low:      70,
+					Close:    72,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 2, 9, 10, 0, 0, time.UTC),
+					Volume:   85,
+					Open:     98,
+					High:     123,
+					Low:      98,
+					Close:    98,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 2, 15, 10, 0, 0, time.UTC),
+					Volume:   775,
+					Open:     951,
+					High:     951,
+					Low:      515,
+					Close:    723,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 8, 10, 10, 0, 0, time.UTC),
+					Volume:   975,
+					Open:     289,
+					High:     321,
+					Low:      77,
+					Close:    289,
+				},
+			},
+		),
+	)
+	t.Run(
+		"multiple candles for multiple days provided (15-minute)",
+		testCompressCandlesFunc(
+			testCandles,
+			15,
+			"minute",
+			[]Candle{
+				{
+					OpenedAt: time.Date(2020, 7, 1, 9, 0, 0, 0, time.UTC),
+					Volume:   50,
+					Open:     11,
+					High:     34,
+					Low:      7,
+					Close:    33,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 1, 10, 0, 0, 0, time.UTC),
+					// 510 + 223 = 733
+					Volume: 733,
+					Open:   344,
+					High:   588,
+					Low:    77,
+					Close:  79,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 1, 16, 30, 0, 0, time.UTC),
+					Volume:   112,
+					Open:     34,
+					High:     88,
+					Low:      70,
+					Close:    72,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 2, 9, 0, 0, 0, time.UTC),
+					Volume:   85,
+					Open:     98,
+					High:     123,
+					Low:      98,
+					Close:    98,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 2, 15, 0, 0, 0, time.UTC),
+					Volume:   775,
+					Open:     951,
+					High:     951,
+					Low:      515,
+					Close:    723,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 8, 10, 0, 0, 0, time.UTC),
+					Volume:   975,
+					Open:     289,
+					High:     321,
+					Low:      77,
+					Close:    289,
+				},
+			},
+		),
+	)
+	t.Run(
+		"multiple candles for multiple days provided (30-minute)",
+		testCompressCandlesFunc(
+			testCandles,
+			30,
+			"minute",
+			[]Candle{
+				{
+					OpenedAt: time.Date(2020, 7, 1, 9, 0, 0, 0, time.UTC),
+					Volume:   50,
+					Open:     11,
+					High:     34,
+					Low:      7,
+					Close:    33,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 1, 10, 0, 0, 0, time.UTC),
+					// 510 + 223 = 733
+					Volume: 733,
+					Open:   344,
+					High:   588,
+					Low:    77,
+					Close:  79,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 1, 16, 30, 0, 0, time.UTC),
+					Volume:   112,
+					Open:     34,
+					High:     88,
+					Low:      70,
+					Close:    72,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 2, 9, 0, 0, 0, time.UTC),
+					Volume:   85,
+					Open:     98,
+					High:     123,
+					Low:      98,
+					Close:    98,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 2, 15, 0, 0, 0, time.UTC),
+					Volume:   775,
+					Open:     951,
+					High:     951,
+					Low:      515,
+					Close:    723,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 8, 10, 0, 0, 0, time.UTC),
+					Volume:   975,
+					Open:     289,
+					High:     321,
+					Low:      77,
+					Close:    289,
+				},
+			},
+		),
+	)
+	t.Run(
+		"multiple candles for multiple days provided (1-hour)",
+		testCompressCandlesFunc(
+			testCandles,
+			1,
+			"hour",
+			[]Candle{
+				{
+					OpenedAt: time.Date(2020, 7, 1, 9, 0, 0, 0, time.UTC),
+					Volume:   50,
+					Open:     11,
+					High:     34,
+					Low:      7,
+					Close:    33,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 1, 10, 0, 0, 0, time.UTC),
+					// 510 + 223 = 733
+					Volume: 733,
+					Open:   344,
+					High:   588,
+					Low:    77,
+					Close:  79,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 1, 16, 0, 0, 0, time.UTC),
+					Volume:   112,
+					Open:     34,
+					High:     88,
+					Low:      70,
+					Close:    72,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 2, 9, 0, 0, 0, time.UTC),
+					Volume:   85,
+					Open:     98,
+					High:     123,
+					Low:      98,
+					Close:    98,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 2, 15, 0, 0, 0, time.UTC),
+					Volume:   775,
+					Open:     951,
+					High:     951,
+					Low:      515,
+					Close:    723,
+				},
+				{
+					OpenedAt: time.Date(2020, 7, 8, 10, 0, 0, 0, time.UTC),
+					Volume:   975,
+					Open:     289,
+					High:     321,
+					Low:      77,
+					Close:    289,
+				},
+			},
+		),
+	)
+}
+
+func testCompressCandlesFunc(candles []Candle, timeInterval uint, timeUnit string, expected []Candle) func(*testing.T) {
+	return func(t *testing.T) {
+		actual, err := CompressCandles(candles, timeInterval, timeUnit, time.UTC)
+		if err != nil || !eqCandleSlice(expected, actual) {
+			t.Errorf("\nExpected: %+v\nActual: %v", expected, actual)
+		}
+	}
 }
 
 func TestGetMidnight(t *testing.T) {
@@ -251,15 +704,6 @@ func TestFillMinuteCandles(t *testing.T) {
 func testFillMinuteCandlesFunc(candles []Candle, expected []Candle) func(*testing.T) {
 	return func(t *testing.T) {
 		actual := FillMinuteCandles(candles)
-		if !eqCandleSlice(expected, actual) {
-			t.Errorf("\nExpected: %v\nActual: %v", expected, actual)
-		}
-	}
-}
-
-func testCompressCandlesFunc(candles []Candle, timeInterval int, timeUnit string, expected []Candle) func(*testing.T) {
-	return func(t *testing.T) {
-		actual := CompressCandles(candles, timeInterval, timeUnit, time.UTC)
 		if !eqCandleSlice(expected, actual) {
 			t.Errorf("\nExpected: %v\nActual: %v", expected, actual)
 		}

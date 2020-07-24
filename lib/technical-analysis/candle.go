@@ -1,6 +1,7 @@
 package analyze
 
 import (
+	"errors"
 	"time"
 )
 
@@ -14,11 +15,20 @@ type Candle struct {
 }
 
 // Compress minute candles to hourly, daily, etc.
-func CompressCandles(candles []Candle, timeInterval int, timeUnit string, loc *time.Location) []Candle {
+func CompressCandles(candles []Candle, timeInterval uint, timeUnit string, loc *time.Location) ([]Candle, error) {
 	if len(candles) == 0 || timeInterval == 1 && timeUnit == "minute" {
-		return candles
+		return candles, nil
 	}
-	newCandles := make([]Candle, 0, len(candles)/timeInterval)
+	if timeInterval != 1 && timeUnit != "minute" && timeUnit != "hour" {
+		return nil, errors.New("only minute/hour can specify time interval greater than 1")
+	}
+	if timeInterval > 30 && timeUnit == "minute" {
+		return nil, errors.New("minute should have a max time interval of 30")
+	}
+	if timeInterval > 12 && timeUnit == "hour" {
+		return nil, errors.New("hour should have a max time interval of 12")
+	}
+	newCandles := make([]Candle, 0, len(candles)/int(timeInterval))
 	var prevTimeBucket time.Time
 	for _, candle := range candles {
 		currentTimeBucket := getKey(candle, timeInterval, timeUnit, loc)
@@ -38,10 +48,10 @@ func CompressCandles(candles []Candle, timeInterval int, timeUnit string, loc *t
 			newCandles[lastIndex].Close = candle.Close
 		}
 	}
-	return newCandles
+	return newCandles, nil
 }
 
-func getKey(candle Candle, timeInterval int, timeUnit string, loc *time.Location) time.Time {
+func getKey(candle Candle, timeInterval uint, timeUnit string, loc *time.Location) time.Time {
 	openedAt := candle.OpenedAt
 	switch timeUnit {
 	case "minute":
@@ -60,16 +70,18 @@ func getKey(candle Candle, timeInterval int, timeUnit string, loc *time.Location
 }
 
 // TODO Move to utils package
-func GetMinuteBucket(moment time.Time, loc *time.Location, interval int) time.Time {
+func GetMinuteBucket(moment time.Time, loc *time.Location, interval uint) time.Time {
 	year, month, day := moment.Date()
 	hour, minute, _ := moment.Clock()
-	return time.Date(year, month, day, hour, minute/interval, 0, 0, loc)
+	bucket := minute / int(interval) * int(interval)
+	return time.Date(year, month, day, hour, bucket, 0, 0, loc)
 }
 
-func GetHourBucket(moment time.Time, loc *time.Location, interval int) time.Time {
+func GetHourBucket(moment time.Time, loc *time.Location, interval uint) time.Time {
 	year, month, day := moment.Date()
 	hour, _, _ := moment.Clock()
-	return time.Date(year, month, day, hour/interval, 0, 0, 0, loc)
+	bucket := hour / int(interval) * int(interval)
+	return time.Date(year, month, day, bucket, 0, 0, 0, loc)
 }
 
 func GetMidnight(moment time.Time, loc *time.Location) time.Time {

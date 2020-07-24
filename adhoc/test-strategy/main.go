@@ -36,14 +36,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	applyStrategy(
-		analyze.CompressCandles(
-			analyze.FillMinuteCandles(convertCandles(candles)),
-			1,
-			"minute",
-			location,
-		),
+	formattedCandles, err := analyze.CompressCandles(
+		analyze.FillMinuteCandles(convertCandles(candles)),
+		1,
+		"minute",
+		location,
 	)
+	if err != nil {
+		fmt.Println("Failed to format stock candles:", err)
+		os.Exit(1)
+	}
+	applyStrategy(formattedCandles)
 }
 
 // TODO move to shared module
