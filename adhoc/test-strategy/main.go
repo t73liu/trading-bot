@@ -39,7 +39,7 @@ func main() {
 
 	formattedCandles, err := analyze.CompressCandles(
 		analyze.FillMinuteCandles(convertCandles(candles)),
-		1,
+		5,
 		"minute",
 		location,
 	)
@@ -69,7 +69,8 @@ func convertCandles(candles []traderdb.Candle) []analyze.Candle {
 func applyStrategy(candles []analyze.Candle, capital float64) {
 	capitalMicros := analyze.DollarsToMicros(capital)
 	//dailyPortfolios := strategy.Hold(candles, capitalMicros)
-	dailyPortfolios := strategy.TrailingStop(candles, capitalMicros, 0.95)
+	//dailyPortfolios := strategy.TrailingStop(candles, capitalMicros, 0.95)
+	dailyPortfolios := strategy.RSI(candles, capitalMicros, 70, 30)
 	for _, portfolio := range dailyPortfolios {
 		strategy.PrintPortfolio(portfolio)
 	}

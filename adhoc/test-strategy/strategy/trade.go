@@ -18,14 +18,16 @@ type Trade struct {
 	NumberOfShares int64
 	PriceMicros    int64
 	Timestamp      time.Time
+	Details        string
 }
 
 func (trade Trade) String() string {
 	return fmt.Sprintf(
-		"%s %d shares at %.2f %s",
+		"%s %d shares at %.2f - %s - %s",
 		trade.Type,
 		trade.NumberOfShares,
 		analyze.MicrosToDollars(trade.PriceMicros),
 		trade.Timestamp,
+		trade.Details,
 	)
 }

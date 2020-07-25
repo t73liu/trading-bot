@@ -23,13 +23,14 @@ func TrailingStop(candles []analyze.Candle, capitalMicros int64, stopLoss float6
 		// Buy at open if not currently holding any shares
 		if prevSnapshot.SharesHeld == 0 {
 			firstCandle = dailyCandles[0]
-			shares = prevSnapshot.Cash / firstCandle.Open
-			currentCash -= firstCandle.Open * shares
-			currentHigh = firstCandle.Open
+			openPrice := firstCandle.Open
+			shares = currentCash / openPrice
+			currentCash -= openPrice * shares
+			currentHigh = openPrice
 			trades = append(trades, Trade{
 				Type:           Buy,
 				NumberOfShares: shares,
-				PriceMicros:    firstCandle.Open,
+				PriceMicros:    openPrice,
 				Timestamp:      firstCandle.OpenedAt,
 			})
 		}
@@ -39,16 +40,17 @@ func TrailingStop(candles []analyze.Candle, capitalMicros int64, stopLoss float6
 			if currentHigh < candle.High {
 				currentHigh = candle.High
 			}
-			trailingStopLoss := float64(candle.Close) / float64(currentHigh)
+			sharePrice := candle.Close
+			trailingStopLoss := float64(sharePrice) / float64(currentHigh)
 			if trailingStopLoss <= stopLoss {
 				trades = append(trades, Trade{
 					Type:           Sell,
 					NumberOfShares: shares,
-					PriceMicros:    candle.Close,
+					PriceMicros:    sharePrice,
 					Timestamp:      candle.OpenedAt,
 				})
 				// Approximation of sale price
-				currentCash += shares * candle.Close
+				currentCash += shares * sharePrice
 				shares = 0
 				break
 			}
