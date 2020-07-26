@@ -5,6 +5,7 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/julienschmidt/httprouter"
 	"github.com/t73liu/trading-bot/lib/traderdb"
+	"github.com/t73liu/trading-bot/trader/middleware"
 	"log"
 	"net/http"
 	"strconv"
@@ -122,8 +123,20 @@ func (h *Handlers) createWatchlist(w http.ResponseWriter, r *http.Request, _ htt
 }
 
 func (h *Handlers) AddRoutes(router *httprouter.Router) {
-	router.GET("/api/account/watchlists", h.getWatchlists)
-	router.PUT("/api/account/watchlists/:id", h.updateWatchlist)
-	router.DELETE("/api/account/watchlists/:id", h.deleteWatchlist)
-	router.POST("/api/account/watchlists", h.createWatchlist)
+	router.GET(
+		"/api/account/watchlists",
+		middleware.LogResponseTime(h.getWatchlists, h.logger),
+	)
+	router.PUT(
+		"/api/account/watchlists/:id",
+		middleware.LogResponseTime(h.updateWatchlist, h.logger),
+	)
+	router.DELETE(
+		"/api/account/watchlists/:id",
+		middleware.LogResponseTime(h.deleteWatchlist, h.logger),
+	)
+	router.POST(
+		"/api/account/watchlists",
+		middleware.LogResponseTime(h.createWatchlist, h.logger),
+	)
 }

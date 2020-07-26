@@ -6,9 +6,9 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/t73liu/trading-bot/lib/newsapi"
 	"github.com/t73liu/trading-bot/lib/traderdb"
+	"github.com/t73liu/trading-bot/trader/middleware"
 	"log"
 	"net/http"
-	"time"
 )
 
 type Handlers struct {
@@ -60,23 +60,13 @@ func (h *Handlers) getUserNewsSources(w http.ResponseWriter, _ *http.Request, _ 
 	}
 }
 
-func (h *Handlers) logTime(next httprouter.Handle) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		startTime := time.Now()
-		h.logger.Printf("Starting: %s - %s\n", r.Method, r.URL)
-		defer func() {
-			h.logger.Printf(
-				"Completed (%dms): %s - %s\n",
-				time.Now().Sub(startTime).Milliseconds(),
-				r.Method,
-				r.URL.Path,
-			)
-		}()
-		next(w, r, p)
-	}
-}
-
 func (h *Handlers) AddRoutes(router *httprouter.Router) {
-	router.GET("/api/news/headlines", h.logTime(h.getTopHeadlines))
-	router.GET("/api/news/sources/active", h.logTime(h.getUserNewsSources))
+	router.GET(
+		"/api/news/headlines",
+		middleware.LogResponseTime(h.getTopHeadlines, h.logger),
+	)
+	router.GET(
+		"/api/news/sources/active",
+		middleware.LogResponseTime(h.getUserNewsSources, h.logger),
+	)
 }

@@ -82,7 +82,7 @@ func initApp(logger *log.Logger, client *http.Client, db *pgxpool.Pool) http.Han
 	newsHandlers.AddRoutes(router)
 
 	stockHandlers := stock.NewHandlers(logger)
-	stockHandlers.AddRoutes()
+	stockHandlers.AddRoutes(router)
 
 	accountHandlers := account.NewHandlers(logger, db)
 	accountHandlers.AddRoutes(router)
