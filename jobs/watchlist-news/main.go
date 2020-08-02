@@ -25,6 +25,7 @@ type EmailParams struct {
 const userId = 1
 
 var domains = []string{
+	"wsj.com",
 	"finance.yahoo.com",
 	"investors.com",
 	"seekingalpha.com",

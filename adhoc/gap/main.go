@@ -16,6 +16,7 @@ import (
 
 // TODO Dedupe
 var domains = []string{
+	"wsj.com",
 	"finance.yahoo.com",
 	"investors.com",
 	"seekingalpha.com",
