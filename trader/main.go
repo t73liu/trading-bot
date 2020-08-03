@@ -6,15 +6,15 @@ import (
 	"github.com/caddyserver/certmagic"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/julienschmidt/httprouter"
-	"github.com/t73liu/trading-bot/lib/newsapi"
-	"github.com/t73liu/trading-bot/lib/utils"
-	"github.com/t73liu/trading-bot/trader/account"
-	"github.com/t73liu/trading-bot/trader/news"
-	"github.com/t73liu/trading-bot/trader/stock"
 	"log"
 	"net/http"
 	"os"
 	"strings"
+	"tradingbot/lib/newsapi"
+	"tradingbot/lib/utils"
+	"tradingbot/trader/account"
+	"tradingbot/trader/news"
+	"tradingbot/trader/stock"
 )
 
 func main() {

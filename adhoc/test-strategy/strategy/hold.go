@@ -1,21 +1,21 @@
 package strategy
 
 import (
-	analyze "github.com/t73liu/trading-bot/lib/technical-analysis"
+	"tradingbot/lib/candle"
 )
 
-func Hold(candles []analyze.Candle, capitalMicros int64) []Portfolio {
+func Hold(candles []candle.Candle, capitalMicros int64) []Portfolio {
 	if len(candles) < 2 {
 		return nil
 	}
 	firstCandle := candles[0]
 	dates, candlesByDate := groupCandlesByDate(candles)
 	dailySnapshots := make([]Portfolio, 0, len(dates)+1)
-	prevSnapshot := genInitialPortfolio(capitalMicros, firstCandle.Open)
+	prevSnapshot := genInitialPortfolio(capitalMicros, firstCandle.OpenMicros)
 	dailySnapshots = append(dailySnapshots, prevSnapshot)
 	for _, date := range dates {
 		dailyCandles := candlesByDate[date]
-		closingPrice := dailyCandles[len(dailyCandles)-1].Close
+		closingPrice := dailyCandles[len(dailyCandles)-1].CloseMicros
 		marketValue := prevSnapshot.Cash + prevSnapshot.SharesHeld*closingPrice
 		snapshot := Portfolio{
 			Date:               date,

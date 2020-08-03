@@ -1,17 +1,20 @@
 package strategy
 
-import analyze "github.com/t73liu/trading-bot/lib/technical-analysis"
+import (
+	"tradingbot/lib/candle"
+	analyze "tradingbot/lib/technical-analysis"
+)
 
-func groupCandlesByDate(candles []analyze.Candle) ([]string, map[string][]analyze.Candle) {
+func groupCandlesByDate(candles []candle.Candle) ([]string, map[string][]candle.Candle) {
 	dates := make([]string, 0)
-	candlesByDate := make(map[string][]analyze.Candle)
-	for _, candle := range candles {
-		date := candle.OpenedAt.Format("2006-01-02")
+	candlesByDate := make(map[string][]candle.Candle)
+	for _, c := range candles {
+		date := c.OpenedAt.Format("2006-01-02")
 		groupedCandles, ok := candlesByDate[date]
 		if !ok {
 			dates = append(dates, date)
 		}
-		candlesByDate[date] = append(groupedCandles, candle)
+		candlesByDate[date] = append(groupedCandles, c)
 	}
 
 	return dates, candlesByDate

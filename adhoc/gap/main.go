@@ -4,26 +4,15 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/t73liu/trading-bot/lib/finviz"
-	"github.com/t73liu/trading-bot/lib/newsapi"
-	"github.com/t73liu/trading-bot/lib/polygon"
-	"github.com/t73liu/trading-bot/lib/traderdb"
-	"github.com/t73liu/trading-bot/lib/utils"
 	"os"
 	"strings"
 	"time"
+	"tradingbot/lib/finviz"
+	"tradingbot/lib/newsapi"
+	"tradingbot/lib/polygon"
+	"tradingbot/lib/traderdb"
+	"tradingbot/lib/utils"
 )
-
-// TODO Dedupe
-var domains = []string{
-	"wsj.com",
-	"finance.yahoo.com",
-	"investors.com",
-	"seekingalpha.com",
-	"fool.com",
-	"reuters.com",
-	"bloomberg.com",
-}
 
 func main() {
 	databaseUrl := strings.TrimSpace(os.Getenv("DATABASE_URL"))
@@ -101,9 +90,9 @@ func main() {
 	//for _, stock := range tradableMovers {
 	for _, stock := range tradableGapStocks {
 		response, err := newsClient.GetAllHeadlinesBySources(newsapi.AllArticlesQueryParams{
-			Query:     trimCompanyName(stock.Company) + " OR " + stock.Symbol + " Stock",
+			Query:     utils.TrimCompanyName(stock.Company) + " OR " + stock.Symbol + " Stock",
 			StartTime: startTime,
-			Domains:   domains,
+			Domains:   utils.NewsDomains,
 			PageSize:  10,
 		})
 		if err != nil {
@@ -116,11 +105,4 @@ func main() {
 			fmt.Println("Published At:", article.PublishedAt.In(location))
 		}
 	}
-}
-
-// TODO Dedupe
-func trimCompanyName(company string) string {
-	trimmedName := strings.TrimSpace(strings.Split(company, " Class ")[0])
-	//trimmedName = strings.TrimSpace(strings.Split(company, " Inc.")[0])
-	return trimmedName
 }

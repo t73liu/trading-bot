@@ -6,14 +6,14 @@ import (
 	"flag"
 	"fmt"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/t73liu/trading-bot/lib/traderdb"
-	"github.com/t73liu/trading-bot/lib/yahoo-finance"
 	"html/template"
 	"net/http"
 	"net/smtp"
 	"os"
 	"strings"
 	"time"
+	"tradingbot/lib/traderdb"
+	"tradingbot/lib/yahoo-finance"
 )
 
 type EmailParams struct {

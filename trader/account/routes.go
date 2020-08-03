@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/julienschmidt/httprouter"
-	"github.com/t73liu/trading-bot/lib/traderdb"
-	"github.com/t73liu/trading-bot/trader/middleware"
 	"log"
 	"net/http"
 	"strconv"
+	"tradingbot/lib/traderdb"
+	"tradingbot/trader/middleware"
 )
 
 type Handlers struct {

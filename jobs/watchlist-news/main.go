@@ -6,15 +6,15 @@ import (
 	"flag"
 	"fmt"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/t73liu/trading-bot/lib/newsapi"
-	"github.com/t73liu/trading-bot/lib/polygon"
-	"github.com/t73liu/trading-bot/lib/traderdb"
-	"github.com/t73liu/trading-bot/lib/utils"
 	"html/template"
 	"net/smtp"
 	"os"
 	"strings"
 	"time"
+	"tradingbot/lib/newsapi"
+	"tradingbot/lib/polygon"
+	"tradingbot/lib/traderdb"
+	"tradingbot/lib/utils"
 )
 
 type EmailParams struct {
@@ -23,16 +23,6 @@ type EmailParams struct {
 }
 
 const userId = 1
-
-var domains = []string{
-	"wsj.com",
-	"finance.yahoo.com",
-	"investors.com",
-	"seekingalpha.com",
-	"fool.com",
-	"reuters.com",
-	"bloomberg.com",
-}
 
 func main() {
 	recipientsFlag := flag.String("recipients", "", "Email addresses delimited by commas")
@@ -140,9 +130,9 @@ func getEmailParams(
 		// Using domains because some news sources are missing from /sources
 		// (e.g. seekingalpha.com, yahoo.finance.com)
 		response, err := newsClient.GetAllHeadlinesBySources(newsapi.AllArticlesQueryParams{
-			Query:     trimCompanyName(stock.Company) + " OR " + stock.Symbol + " Stock",
+			Query:     utils.TrimCompanyName(stock.Company) + " OR " + stock.Symbol + " Stock",
 			StartTime: startTime,
-			Domains:   domains,
+			Domains:   utils.NewsDomains,
 			PageSize:  20,
 		})
 		if err != nil {
@@ -172,10 +162,4 @@ func getEmailParams(
 		//NewsByTicker:         newsByTicker,
 	}
 	return params, nil
-}
-
-func trimCompanyName(company string) string {
-	trimmedName := strings.TrimSpace(strings.Split(company, " Class ")[0])
-	//trimmedName = strings.TrimSpace(strings.Split(company, " Inc.")[0])
-	return trimmedName
 }

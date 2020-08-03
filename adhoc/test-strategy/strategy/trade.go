@@ -2,8 +2,8 @@ package strategy
 
 import (
 	"fmt"
-	analyze "github.com/t73liu/trading-bot/lib/technical-analysis"
 	"time"
+	analyze "tradingbot/lib/technical-analysis"
 )
 
 type TradeType string

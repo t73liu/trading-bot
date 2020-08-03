@@ -2,18 +2,19 @@ package strategy
 
 import (
 	"fmt"
-	analyze "github.com/t73liu/trading-bot/lib/technical-analysis"
+	"tradingbot/lib/candle"
+	analyze "tradingbot/lib/technical-analysis"
 )
 
 // Buy when RSI crosses above lower limit and sell when RSI crosses below upper limit
-func RSI(candles []analyze.Candle, capitalMicros int64, upperLimit, lowerLimit float64) []Portfolio {
+func RSI(candles []candle.Candle, capitalMicros int64, upperLimit, lowerLimit float64) []Portfolio {
 	if len(candles) < 2 {
 		return nil
 	}
 	firstCandle := candles[0]
 	dates, candlesByDate := groupCandlesByDate(candles)
 	dailySnapshots := make([]Portfolio, 0, len(dates)+1)
-	prevSnapshot := genInitialPortfolio(capitalMicros, firstCandle.Open)
+	prevSnapshot := genInitialPortfolio(capitalMicros, firstCandle.OpenMicros)
 	dailySnapshots = append(dailySnapshots, prevSnapshot)
 	for _, date := range dates {
 		dailyCandles := candlesByDate[date]
@@ -22,12 +23,12 @@ func RSI(candles []analyze.Candle, capitalMicros int64, upperLimit, lowerLimit f
 		currentCash := prevSnapshot.Cash
 
 		// Check for RSI crossovers
-		rsiValues := analyze.RSI(analyze.GetClosingPrices(dailyCandles), 14)
-		for i, candle := range dailyCandles {
+		rsiValues := analyze.RSI(candle.GetClosingPrices(dailyCandles), 14)
+		for i, dailyCandle := range dailyCandles {
 			if prevIndex := i - 1; prevIndex > 0 && rsiValues[prevIndex].Valid && rsiValues[i].Valid {
 				prevRSIValue := rsiValues[prevIndex].Value
 				currRSIValue := rsiValues[i].Value
-				sharePrice := candle.Close
+				sharePrice := dailyCandle.CloseMicros
 				if shares == 0 {
 					// Buy if RSI increases above lower limit (i.e. oversold)
 					if prevRSIValue <= lowerLimit && currRSIValue > lowerLimit {
@@ -37,7 +38,7 @@ func RSI(candles []analyze.Candle, capitalMicros int64, upperLimit, lowerLimit f
 							Type:           Buy,
 							NumberOfShares: shares,
 							PriceMicros:    sharePrice,
-							Timestamp:      candle.OpenedAt,
+							Timestamp:      dailyCandle.OpenedAt,
 							Details:        fmt.Sprintf("RSI %.2f to %.2f", prevRSIValue, currRSIValue),
 						})
 					}
@@ -48,7 +49,7 @@ func RSI(candles []analyze.Candle, capitalMicros int64, upperLimit, lowerLimit f
 							Type:           Sell,
 							NumberOfShares: shares,
 							PriceMicros:    sharePrice,
-							Timestamp:      candle.OpenedAt,
+							Timestamp:      dailyCandle.OpenedAt,
 							Details:        fmt.Sprintf("RSI %.2f to %.2f", prevRSIValue, currRSIValue),
 						})
 						currentCash += sharePrice * shares
@@ -58,7 +59,7 @@ func RSI(candles []analyze.Candle, capitalMicros int64, upperLimit, lowerLimit f
 			}
 		}
 
-		closingPrice := dailyCandles[len(dailyCandles)-1].Close
+		closingPrice := dailyCandles[len(dailyCandles)-1].CloseMicros
 		marketValue := currentCash + shares*closingPrice
 		snapshot := Portfolio{
 			Date:               date,

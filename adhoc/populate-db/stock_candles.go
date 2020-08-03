@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/t73liu/trading-bot/lib/alpaca"
-	"github.com/t73liu/trading-bot/lib/traderdb"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+	"tradingbot/lib/alpaca"
+	"tradingbot/lib/traderdb"
 )
 
 const userId = 1

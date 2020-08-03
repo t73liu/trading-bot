@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v4"
-	"github.com/t73liu/trading-bot/lib/newsapi"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+	"tradingbot/lib/newsapi"
 )
 
 func main() {

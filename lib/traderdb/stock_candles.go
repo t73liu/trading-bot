@@ -3,16 +3,8 @@ package traderdb
 import (
 	"context"
 	"time"
+	"tradingbot/lib/candle"
 )
-
-type Candle struct {
-	OpenedAt    time.Time
-	OpenMicros  int64
-	HighMicros  int64
-	LowMicros   int64
-	CloseMicros int64
-	Volume      int64
-}
 
 const stockCandlesQuery = `
 SELECT opened_at, open_micros, high_micros, low_micros, close_micros, volume FROM stock_candles
@@ -20,7 +12,7 @@ WHERE stock_id = $1 AND opened_at BETWEEN $2 AND $3
 ORDER BY opened_at
 `
 
-func GetStockCandles(db PGConnection, symbol string, startTime time.Time, endTime time.Time) (candles []Candle, err error) {
+func GetStockCandles(db PGConnection, symbol string, startTime time.Time, endTime time.Time) (candles []candle.Candle, err error) {
 	var stockId int
 	err = db.QueryRow(
 		context.Background(),
@@ -55,7 +47,7 @@ func GetStockCandles(db PGConnection, symbol string, startTime time.Time, endTim
 			return candles, err
 		}
 		openedAt = openedAt.In(location)
-		candles = append(candles, Candle{
+		candles = append(candles, candle.Candle{
 			OpenedAt:    openedAt,
 			OpenMicros:  openMicros,
 			HighMicros:  highMicros,

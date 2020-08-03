@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v4"
-	analyze "github.com/t73liu/trading-bot/lib/technical-analysis"
-	"github.com/t73liu/trading-bot/lib/traderdb"
 	"os"
 	"strings"
 	"time"
-	"trading-bot/adhoc/test-strategy/strategy"
+	"tradingbot/adhoc/test-strategy/strategy"
+	"tradingbot/lib/candle"
+	analyze "tradingbot/lib/technical-analysis"
+	"tradingbot/lib/traderdb"
 )
 
 func main() {
@@ -39,8 +40,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	formattedCandles, err := analyze.CompressCandles(
-		analyze.FillMinuteCandles(convertCandles(candles)),
+	formattedCandles, err := candle.CompressCandles(
+		candle.FillMinuteCandles(candle.FilterTradingHourCandles(candles)),
 		5,
 		"minute",
 		location,
@@ -52,23 +53,7 @@ func main() {
 	applyStrategy(formattedCandles, 10000)
 }
 
-// TODO move to shared module
-func convertCandles(candles []traderdb.Candle) []analyze.Candle {
-	results := make([]analyze.Candle, 0, len(candles))
-	for _, candle := range candles {
-		results = append(results, analyze.Candle{
-			OpenedAt: candle.OpenedAt,
-			Volume:   candle.Volume,
-			Open:     candle.OpenMicros,
-			High:     candle.HighMicros,
-			Low:      candle.LowMicros,
-			Close:    candle.CloseMicros,
-		})
-	}
-	return results
-}
-
-func applyStrategy(candles []analyze.Candle, capital float64) {
+func applyStrategy(candles []candle.Candle, capital float64) {
 	capitalMicros := analyze.DollarsToMicros(capital)
 	//dailyPortfolios := strategy.Hold(candles, capitalMicros)
 	//dailyPortfolios := strategy.TrailingStop(candles, capitalMicros, 0.95)

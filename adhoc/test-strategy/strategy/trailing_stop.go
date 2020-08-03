@@ -1,18 +1,18 @@
 package strategy
 
 import (
-	analyze "github.com/t73liu/trading-bot/lib/technical-analysis"
+	"tradingbot/lib/candle"
 )
 
 // Sell when trailing loss percent is reached and buy back at beginning of the next day
-func TrailingStop(candles []analyze.Candle, capitalMicros int64, stopLoss float64) []Portfolio {
+func TrailingStop(candles []candle.Candle, capitalMicros int64, stopLoss float64) []Portfolio {
 	if len(candles) < 2 {
 		return nil
 	}
 	firstCandle := candles[0]
 	dates, candlesByDate := groupCandlesByDate(candles)
 	dailySnapshots := make([]Portfolio, 0, len(dates)+1)
-	prevSnapshot := genInitialPortfolio(capitalMicros, firstCandle.Open)
+	prevSnapshot := genInitialPortfolio(capitalMicros, firstCandle.OpenMicros)
 	dailySnapshots = append(dailySnapshots, prevSnapshot)
 	currentHigh := prevSnapshot.SharePrice
 	for _, date := range dates {
@@ -23,7 +23,7 @@ func TrailingStop(candles []analyze.Candle, capitalMicros int64, stopLoss float6
 		// Buy at open if not currently holding any shares
 		if prevSnapshot.SharesHeld == 0 {
 			firstCandle = dailyCandles[0]
-			openPrice := firstCandle.Open
+			openPrice := firstCandle.OpenMicros
 			shares = currentCash / openPrice
 			currentCash -= openPrice * shares
 			currentHigh = openPrice
@@ -36,18 +36,18 @@ func TrailingStop(candles []analyze.Candle, capitalMicros int64, stopLoss float6
 		}
 
 		// Check trailing stop loss percent
-		for _, candle := range dailyCandles {
-			if currentHigh < candle.High {
-				currentHigh = candle.High
+		for _, dailyCandle := range dailyCandles {
+			if currentHigh < dailyCandle.HighMicros {
+				currentHigh = dailyCandle.HighMicros
 			}
-			sharePrice := candle.Close
+			sharePrice := dailyCandle.CloseMicros
 			trailingStopLoss := float64(sharePrice) / float64(currentHigh)
 			if trailingStopLoss <= stopLoss {
 				trades = append(trades, Trade{
 					Type:           Sell,
 					NumberOfShares: shares,
 					PriceMicros:    sharePrice,
-					Timestamp:      candle.OpenedAt,
+					Timestamp:      dailyCandle.OpenedAt,
 				})
 				// Approximation of sale price
 				currentCash += shares * sharePrice
@@ -56,7 +56,7 @@ func TrailingStop(candles []analyze.Candle, capitalMicros int64, stopLoss float6
 			}
 		}
 
-		closingPrice := dailyCandles[len(dailyCandles)-1].Close
+		closingPrice := dailyCandles[len(dailyCandles)-1].CloseMicros
 		if shares == 0 {
 			closingPrice = 0
 		}

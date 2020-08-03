@@ -2,22 +2,23 @@ package analyze
 
 import (
 	"testing"
+	"tradingbot/lib/candle"
 )
 
 func TestVWAP(t *testing.T) {
 	t.Run(
 		"VWAP empty candles returns nil",
-		testVWAPFunc([]Candle{}, nil),
+		testVWAPFunc([]candle.Candle{}, nil),
 	)
 	t.Run(
 		"VWAP first value is average of high, low, close",
 		testVWAPFunc(
-			[]Candle{
+			[]candle.Candle{
 				{
-					Volume: 89329,
-					High:   DollarsToMicros(127.36),
-					Low:    DollarsToMicros(126.99),
-					Close:  DollarsToMicros(127.28),
+					Volume:      89329,
+					HighMicros:  DollarsToMicros(127.36),
+					LowMicros:   DollarsToMicros(126.99),
+					CloseMicros: DollarsToMicros(127.28),
 				},
 			},
 			// (127.36 + 126.99 + 127.28) / 3 = 11
@@ -27,42 +28,42 @@ func TestVWAP(t *testing.T) {
 	t.Run(
 		"VWAP multiple calculations",
 		testVWAPFunc(
-			[]Candle{
+			[]candle.Candle{
 				{
-					Volume: 89329,
-					High:   DollarsToMicros(127.36),
-					Low:    DollarsToMicros(126.99),
-					Close:  DollarsToMicros(127.28),
+					Volume:      89329,
+					HighMicros:  DollarsToMicros(127.36),
+					LowMicros:   DollarsToMicros(126.99),
+					CloseMicros: DollarsToMicros(127.28),
 				},
 				{
-					Volume: 16137,
-					High:   DollarsToMicros(127.31),
-					Low:    DollarsToMicros(127.10),
-					Close:  DollarsToMicros(127.11),
+					Volume:      16137,
+					HighMicros:  DollarsToMicros(127.31),
+					LowMicros:   DollarsToMicros(127.10),
+					CloseMicros: DollarsToMicros(127.11),
 				},
 				{
-					Volume: 23945,
-					High:   DollarsToMicros(127.21),
-					Low:    DollarsToMicros(127.11),
-					Close:  DollarsToMicros(127.15),
+					Volume:      23945,
+					HighMicros:  DollarsToMicros(127.21),
+					LowMicros:   DollarsToMicros(127.11),
+					CloseMicros: DollarsToMicros(127.15),
 				},
 				{
-					Volume: 20679,
-					High:   DollarsToMicros(127.15),
-					Low:    DollarsToMicros(126.93),
-					Close:  DollarsToMicros(127.04),
+					Volume:      20679,
+					HighMicros:  DollarsToMicros(127.15),
+					LowMicros:   DollarsToMicros(126.93),
+					CloseMicros: DollarsToMicros(127.04),
 				},
 				{
-					Volume: 27252,
-					High:   DollarsToMicros(127.08),
-					Low:    DollarsToMicros(126.98),
-					Close:  DollarsToMicros(126.98),
+					Volume:      27252,
+					HighMicros:  DollarsToMicros(127.08),
+					LowMicros:   DollarsToMicros(126.98),
+					CloseMicros: DollarsToMicros(126.98),
 				},
 				{
-					Volume: 20915,
-					High:   DollarsToMicros(127.19),
-					Low:    DollarsToMicros(126.99),
-					Close:  DollarsToMicros(127.07),
+					Volume:      20915,
+					HighMicros:  DollarsToMicros(127.19),
+					LowMicros:   DollarsToMicros(126.99),
+					CloseMicros: DollarsToMicros(127.07),
 				},
 			},
 			[]ValidMicro{
@@ -78,7 +79,7 @@ func TestVWAP(t *testing.T) {
 	)
 }
 
-func testVWAPFunc(candles []Candle, expected []ValidMicro) func(*testing.T) {
+func testVWAPFunc(candles []candle.Candle, expected []ValidMicro) func(*testing.T) {
 	return func(t *testing.T) {
 		actual := VWAP(candles)
 		if !eqValidCalcSlice(expected, actual) {

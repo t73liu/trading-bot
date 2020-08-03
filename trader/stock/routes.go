@@ -4,13 +4,12 @@ import (
 	"encoding/json"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/julienschmidt/httprouter"
-	analyze "github.com/t73liu/trading-bot/lib/technical-analysis"
-	"github.com/t73liu/trading-bot/lib/traderdb"
-	"github.com/t73liu/trading-bot/lib/utils"
-	"github.com/t73liu/trading-bot/trader/middleware"
 	"log"
 	"net/http"
 	"time"
+	"tradingbot/lib/traderdb"
+	"tradingbot/lib/utils"
+	"tradingbot/trader/middleware"
 )
 
 type Handlers struct {
@@ -35,7 +34,7 @@ func (h *Handlers) getStockCandles(w http.ResponseWriter, _ *http.Request, p htt
 	symbol := p.ByName("symbol")
 	location := utils.GetNYSELocation()
 	endTime := time.Now().In(location)
-	startTime := analyze.GetMidnight(endTime, location)
+	startTime := utils.GetMidnight(endTime, location)
 	candles, err := traderdb.GetStockCandles(h.db, symbol, startTime, endTime)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
