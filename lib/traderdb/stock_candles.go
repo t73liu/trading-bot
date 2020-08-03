@@ -16,11 +16,11 @@ type Candle struct {
 
 const stockCandlesQuery = `
 SELECT opened_at, open_micros, high_micros, low_micros, close_micros, volume FROM stock_candles
-WHERE stock_id = $1
+WHERE stock_id = $1 AND opened_at BETWEEN $2 AND $3
 ORDER BY opened_at
 `
 
-func GetTradingHourStockCandles(db PGConnection, symbol string) (candles []Candle, err error) {
+func GetStockCandles(db PGConnection, symbol string, startTime time.Time, endTime time.Time) (candles []Candle, err error) {
 	var stockId int
 	err = db.QueryRow(
 		context.Background(),
@@ -36,7 +36,7 @@ func GetTradingHourStockCandles(db PGConnection, symbol string) (candles []Candl
 		return candles, err
 	}
 
-	rows, err := db.Query(context.Background(), stockCandlesQuery, stockId)
+	rows, err := db.Query(context.Background(), stockCandlesQuery, stockId, startTime, endTime)
 	if err != nil {
 		return candles, err
 	}
@@ -55,16 +55,14 @@ func GetTradingHourStockCandles(db PGConnection, symbol string) (candles []Candl
 			return candles, err
 		}
 		openedAt = openedAt.In(location)
-		if IsWithinNATradingHours(openedAt) {
-			candles = append(candles, Candle{
-				OpenedAt:    openedAt,
-				OpenMicros:  openMicros,
-				HighMicros:  highMicros,
-				LowMicros:   lowMicros,
-				CloseMicros: closeMicros,
-				Volume:      volume,
-			})
-		}
+		candles = append(candles, Candle{
+			OpenedAt:    openedAt,
+			OpenMicros:  openMicros,
+			HighMicros:  highMicros,
+			LowMicros:   lowMicros,
+			CloseMicros: closeMicros,
+			Volume:      volume,
+		})
 	}
 
 	if err = rows.Err(); err != nil {
@@ -72,13 +70,4 @@ func GetTradingHourStockCandles(db PGConnection, symbol string) (candles []Candl
 	}
 
 	return candles, nil
-}
-
-// Assuming location = "America/New_York"
-func IsWithinNATradingHours(moment time.Time) bool {
-	hour, minute, _ := moment.Clock()
-	if hour == 9 {
-		return minute >= 30
-	}
-	return hour > 9 && hour < 16
 }

@@ -31,7 +31,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	candles, err := traderdb.GetTradingHourStockCandles(conn, "SHOP")
+	startTime := time.Date(2020, 1, 1, 0, 0, 0, 0, location)
+	endTime := time.Date(2020, 8, 1, 0, 0, 0, 0, location)
+	candles, err := traderdb.GetStockCandles(conn, "SHOP", startTime, endTime)
 	if err != nil {
 		fmt.Println("Failed to fetch stock candles from DB:", err)
 		os.Exit(1)
