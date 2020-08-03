@@ -3,7 +3,6 @@ package traderdb
 import (
 	"context"
 	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type Watchlist struct {
@@ -19,7 +18,7 @@ INNER JOIN stocks s ON wls.stock_id = s.id
 WHERE wl.user_id = $1
 `
 
-func GetWatchlistsByUserId(db *pgxpool.Pool, userId int) (watchlists []Watchlist, err error) {
+func GetWatchlistsByUserId(db PGConnection, userId int) (watchlists []Watchlist, err error) {
 	rows, err := db.Query(context.Background(), watchlistsQuery, userId)
 	if err != nil {
 		return watchlists, err
@@ -66,7 +65,7 @@ func GetWatchlistsByUserId(db *pgxpool.Pool, userId int) (watchlists []Watchlist
 	return watchlists, nil
 }
 
-func GetWatchlistStocksByUserId(db *pgxpool.Pool, userId int) (stocks []Stock, err error) {
+func GetWatchlistStocksByUserId(db PGConnection, userId int) (stocks []Stock, err error) {
 	watchlists, err := GetWatchlistsByUserId(db, userId)
 	if err != nil {
 		return stocks, err
@@ -87,7 +86,7 @@ const watchlistExistsQuery = `
 SELECT EXISTS(SELECT 1 FROM watchlists WHERE id = $1 AND user_id = $2)
 `
 
-func HasWatchlistWithIdAndUserId(db *pgxpool.Pool, watchlistId int, userId int) (bool, error) {
+func HasWatchlistWithIdAndUserId(db PGConnection, watchlistId int, userId int) (bool, error) {
 	var exists bool
 	err := db.QueryRow(
 		context.Background(),
@@ -107,7 +106,7 @@ INNER JOIN stocks s ON s.id = wls.stock_id
 WHERE wls.watchlist_id = $1
 `
 
-func GetWatchlistById(db *pgxpool.Pool, watchlistId int) (watchlist Watchlist, err error) {
+func GetWatchlistById(db PGConnection, watchlistId int) (watchlist Watchlist, err error) {
 	var watchlistName string
 	err = db.QueryRow(
 		context.Background(),
@@ -149,7 +148,7 @@ func GetWatchlistById(db *pgxpool.Pool, watchlistId int) (watchlist Watchlist, e
 	return watchlist, nil
 }
 
-func CreateWatchlist(db *pgxpool.Pool, userId int, watchlistName string, stockIds []int) (watchlistId int, err error) {
+func CreateWatchlist(db PGConnection, userId int, watchlistName string, stockIds []int) (watchlistId int, err error) {
 	tx, err := db.Begin(context.Background())
 	if err != nil {
 		return watchlistId, err
@@ -189,7 +188,7 @@ func CreateWatchlist(db *pgxpool.Pool, userId int, watchlistName string, stockId
 	return watchlistId, err
 }
 
-func UpdateWatchlistById(db *pgxpool.Pool, watchlistId int, watchlistName string, stockIds []int) error {
+func UpdateWatchlistById(db PGConnection, watchlistId int, watchlistName string, stockIds []int) error {
 	tx, err := db.Begin(context.Background())
 	if err != nil {
 		return err
@@ -238,7 +237,7 @@ func UpdateWatchlistById(db *pgxpool.Pool, watchlistId int, watchlistName string
 	return nil
 }
 
-func DeleteWatchlistById(db *pgxpool.Pool, watchlistId int) error {
+func DeleteWatchlistById(db PGConnection, watchlistId int) error {
 	tx, err := db.Begin(context.Background())
 	if err != nil {
 		return err

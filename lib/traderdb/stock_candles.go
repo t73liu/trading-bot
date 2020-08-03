@@ -2,7 +2,6 @@ package traderdb
 
 import (
 	"context"
-	"github.com/jackc/pgx/v4"
 	"time"
 )
 
@@ -21,9 +20,9 @@ WHERE stock_id = $1
 ORDER BY opened_at
 `
 
-func GetTradingHourStockCandles(conn *pgx.Conn, symbol string) (candles []Candle, err error) {
+func GetTradingHourStockCandles(db PGConnection, symbol string) (candles []Candle, err error) {
 	var stockId int
-	err = conn.QueryRow(
+	err = db.QueryRow(
 		context.Background(),
 		"SELECT id FROM stocks WHERE symbol = $1",
 		symbol,
@@ -37,7 +36,7 @@ func GetTradingHourStockCandles(conn *pgx.Conn, symbol string) (candles []Candle
 		return candles, err
 	}
 
-	rows, err := conn.Query(context.Background(), stockCandlesQuery, stockId)
+	rows, err := db.Query(context.Background(), stockCandlesQuery, stockId)
 	if err != nil {
 		return candles, err
 	}

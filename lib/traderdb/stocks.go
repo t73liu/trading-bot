@@ -2,7 +2,6 @@ package traderdb
 
 import (
 	"context"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type Stock struct {
@@ -16,7 +15,7 @@ const tradableStocksQuery = `
 SELECT id, symbol, company, exchange FROM stocks WHERE is_tradable = true
 `
 
-func GetTradableStocks(db *pgxpool.Pool) (stocks []Stock, err error) {
+func GetTradableStocks(db PGConnection) (stocks []Stock, err error) {
 	rows, err := db.Query(context.Background(), tradableStocksQuery)
 	if err != nil {
 		return stocks, err

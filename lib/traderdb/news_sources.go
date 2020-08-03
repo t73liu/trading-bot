@@ -2,7 +2,6 @@ package traderdb
 
 import (
 	"context"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type NewsSource struct {
@@ -17,7 +16,7 @@ INNER JOIN news_sources ns ON ns.id = uns.news_source_id
 WHERE uns.user_id = $1
 `
 
-func GetNewsSourcesByUserId(db *pgxpool.Pool, userId int) (newsSources []NewsSource, err error) {
+func GetNewsSourcesByUserId(db PGConnection, userId int) (newsSources []NewsSource, err error) {
 	rows, err := db.Query(context.Background(), userNewsSourcesQuery, userId)
 	if err != nil {
 		return newsSources, err
@@ -44,7 +43,7 @@ func GetNewsSourcesByUserId(db *pgxpool.Pool, userId int) (newsSources []NewsSou
 	return newsSources, err
 }
 
-func GetNewsSourceIdsByUserId(db *pgxpool.Pool, userId int) (newsSourceIds []string, err error) {
+func GetNewsSourceIdsByUserId(db PGConnection, userId int) (newsSourceIds []string, err error) {
 	newsSources, err := GetNewsSourcesByUserId(db, userId)
 	if err != nil {
 		return newsSourceIds, err
