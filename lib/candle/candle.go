@@ -1,10 +1,21 @@
 package candle
 
 import (
+	"encoding/json"
 	"errors"
 	"time"
+	analyze "tradingbot/lib/technical-analysis"
 	"tradingbot/lib/utils"
 )
+
+type JSONCandle struct {
+	OpenedAt time.Time `json:"openedAt"`
+	Volume   int64     `json:"volume"`
+	Open     float64   `json:"open"`
+	High     float64   `json:"high"`
+	Low      float64   `json:"low"`
+	Close    float64   `json:"close"`
+}
 
 type Candle struct {
 	OpenedAt    time.Time
@@ -13,6 +24,17 @@ type Candle struct {
 	HighMicros  int64
 	LowMicros   int64
 	CloseMicros int64
+}
+
+func (c Candle) MarshalJson() ([]byte, error) {
+	return json.Marshal(JSONCandle{
+		OpenedAt: c.OpenedAt,
+		Volume:   c.Volume,
+		Open:     analyze.MicrosToDollars(c.OpenMicros),
+		High:     analyze.MicrosToDollars(c.HighMicros),
+		Low:      analyze.MicrosToDollars(c.LowMicros),
+		Close:    analyze.MicrosToDollars(c.CloseMicros),
+	})
 }
 
 // Assuming location = "America/New_York"

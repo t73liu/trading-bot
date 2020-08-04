@@ -11,6 +11,7 @@ import (
 	"os"
 	"strings"
 	"tradingbot/lib/newsapi"
+	"tradingbot/lib/polygon"
 	"tradingbot/lib/utils"
 	"tradingbot/trader/account"
 	"tradingbot/trader/news"
@@ -78,10 +79,11 @@ func initApp(logger *log.Logger, client *http.Client, db *pgxpool.Pool) http.Han
 	router.ServeFiles("/assets/*filepath", http.Dir("assets/"))
 
 	newsClient := newsapi.NewClient(client, os.Getenv("NEWS_API_KEY"))
-	newsHandlers := news.NewHandlers(logger, newsClient, db)
+	newsHandlers := news.NewHandlers(logger, db, newsClient)
 	newsHandlers.AddRoutes(router)
 
-	stockHandlers := stock.NewHandlers(logger, db)
+	polygonClient := polygon.NewClient(client, os.Getenv("ALPACA_API_KEY"))
+	stockHandlers := stock.NewHandlers(logger, db, polygonClient)
 	stockHandlers.AddRoutes(router)
 
 	accountHandlers := account.NewHandlers(logger, db)

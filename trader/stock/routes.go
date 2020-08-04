@@ -7,20 +7,23 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"tradingbot/lib/polygon"
 	"tradingbot/lib/traderdb"
 	"tradingbot/lib/utils"
 	"tradingbot/trader/middleware"
 )
 
 type Handlers struct {
-	logger *log.Logger
-	db     *pgxpool.Pool
+	logger        *log.Logger
+	db            *pgxpool.Pool
+	polygonClient *polygon.Client
 }
 
-func NewHandlers(logger *log.Logger, db *pgxpool.Pool) *Handlers {
+func NewHandlers(logger *log.Logger, db *pgxpool.Pool, polygonClient *polygon.Client) *Handlers {
 	return &Handlers{
-		logger: logger,
-		db:     db,
+		logger:        logger,
+		db:            db,
+		polygonClient: polygonClient,
 	}
 }
 
@@ -30,17 +33,36 @@ func (h *Handlers) getTradableStocks(w http.ResponseWriter, _ *http.Request, _ h
 func (h *Handlers) getStockInfo(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 }
 
-func (h *Handlers) getStockCandles(w http.ResponseWriter, _ *http.Request, p httprouter.Params) {
+func (h *Handlers) getStockCandles(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	symbol := p.ByName("symbol")
 	location := utils.GetNYSELocation()
 	endTime := time.Now().In(location)
 	startTime := utils.GetMidnight(endTime, location)
-	candles, err := traderdb.GetStockCandles(h.db, symbol, startTime, endTime)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-	if err = json.NewEncoder(w).Encode(candles); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	query := r.URL.Query()
+	if query.Get("interval") == "intraday" {
+		bars, err := h.polygonClient.GetTickerBars(polygon.TickerBarsQueryParams{
+			Ticker:       symbol,
+			TimeInterval: 1,
+			TimeUnit:     "minute",
+			StartDate:    startTime,
+			EndDate:      endTime,
+			Unadjusted:   false,
+			Sort:         "asc",
+		})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		if err = json.NewEncoder(w).Encode(bars); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	} else {
+		candles, err := traderdb.GetStockCandles(h.db, symbol, startTime, endTime)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		if err = json.NewEncoder(w).Encode(candles); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	}
 }
 

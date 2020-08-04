@@ -17,7 +17,7 @@ type Handlers struct {
 	db     *pgxpool.Pool
 }
 
-func NewHandlers(logger *log.Logger, client *newsapi.Client, db *pgxpool.Pool) *Handlers {
+func NewHandlers(logger *log.Logger, db *pgxpool.Pool, client *newsapi.Client) *Handlers {
 	return &Handlers{
 		logger: logger,
 		client: client,
