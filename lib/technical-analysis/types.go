@@ -1,15 +1,18 @@
 package analyze
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"tradingbot/lib/candle"
+)
 
 type ValidMicro struct {
 	Micro int64
 	Valid bool
 }
 
-func (vm ValidMicro) MarshalJson() ([]byte, error) {
+func (vm ValidMicro) MarshalJSON() ([]byte, error) {
 	if vm.Valid {
-		return json.Marshal(MicrosToDollars(vm.Micro))
+		return json.Marshal(candle.MicrosToDollars(vm.Micro))
 	}
 	return json.Marshal(nil)
 }
@@ -19,7 +22,7 @@ type ValidFloat struct {
 	Valid bool
 }
 
-func (vf ValidFloat) MarshalJson() ([]byte, error) {
+func (vf ValidFloat) MarshalJSON() ([]byte, error) {
 	if vf.Valid {
 		return json.Marshal(vf.Value)
 	}

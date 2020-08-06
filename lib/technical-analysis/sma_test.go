@@ -1,6 +1,9 @@
 package analyze
 
-import "testing"
+import (
+	"testing"
+	"tradingbot/lib/candle"
+)
 
 func TestSMA(t *testing.T) {
 	t.Run(
@@ -24,13 +27,13 @@ func TestSMA(t *testing.T) {
 		"SMA enough elements for multiple calculations",
 		testSMAFunc(
 			[]int64{
-				DollarsToMicros(13),
-				DollarsToMicros(17),
-				DollarsToMicros(14),
-				DollarsToMicros(16),
-				DollarsToMicros(15),
-				DollarsToMicros(20),
-				DollarsToMicros(123),
+				candle.DollarsToMicros(13),
+				candle.DollarsToMicros(17),
+				candle.DollarsToMicros(14),
+				candle.DollarsToMicros(16),
+				candle.DollarsToMicros(15),
+				candle.DollarsToMicros(20),
+				candle.DollarsToMicros(123),
 			},
 			5,
 			[]ValidMicro{

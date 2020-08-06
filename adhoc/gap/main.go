@@ -87,8 +87,7 @@ func main() {
 
 	startTime := utils.GetLastWeekday(now)
 
-	//for _, stock := range tradableMovers {
-	for _, stock := range tradableGapStocks {
+	for _, stock := range tradableMovers {
 		response, err := newsClient.GetAllHeadlinesBySources(newsapi.AllArticlesQueryParams{
 			Query:     utils.TrimCompanyName(stock.Company) + " OR " + stock.Symbol + " Stock",
 			StartTime: startTime,

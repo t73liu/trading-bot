@@ -1,6 +1,9 @@
 package analyze
 
-import "testing"
+import (
+	"testing"
+	"tradingbot/lib/candle"
+)
 
 func TestEMA(t *testing.T) {
 	t.Run(
@@ -24,13 +27,13 @@ func TestEMA(t *testing.T) {
 		"EMA enough elements for multiple calculations",
 		testEMAFunc(
 			[]int64{
-				DollarsToMicros(14),
-				DollarsToMicros(13),
-				DollarsToMicros(14),
-				DollarsToMicros(13),
-				DollarsToMicros(12),
-				DollarsToMicros(12),
-				DollarsToMicros(11),
+				candle.DollarsToMicros(14),
+				candle.DollarsToMicros(13),
+				candle.DollarsToMicros(14),
+				candle.DollarsToMicros(13),
+				candle.DollarsToMicros(12),
+				candle.DollarsToMicros(12),
+				candle.DollarsToMicros(11),
 			},
 			5,
 			[]ValidMicro{

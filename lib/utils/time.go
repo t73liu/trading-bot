@@ -58,3 +58,7 @@ func IsWithinNYSETradingHours(moment time.Time) bool {
 	}
 	return hour > 9 && hour < 16
 }
+
+func ConvertUnixSecondsToTime(unixSeconds int64) time.Time {
+	return time.Unix(unixSeconds, 0)
+}

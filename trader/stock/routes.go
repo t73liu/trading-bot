@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"tradingbot/lib/candle"
 	"tradingbot/lib/polygon"
 	"tradingbot/lib/traderdb"
 	"tradingbot/lib/utils"
@@ -52,7 +53,18 @@ func (h *Handlers) getStockCandles(w http.ResponseWriter, r *http.Request, p htt
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-		if err = json.NewEncoder(w).Encode(bars); err != nil {
+		candles := make([]candle.Candle, 0, len(bars))
+		for _, bar := range bars {
+			candles = append(candles, candle.Candle{
+				OpenedAt:    utils.ConvertUnixSecondsToTime(bar.StartAtUnixMillis / 1000),
+				Volume:      int64(bar.Volume),
+				OpenMicros:  candle.DollarsToMicros(bar.Open),
+				HighMicros:  candle.DollarsToMicros(bar.High),
+				LowMicros:   candle.DollarsToMicros(bar.Low),
+				CloseMicros: candle.DollarsToMicros(bar.Close),
+			})
+		}
+		if err = json.NewEncoder(w).Encode(candles); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	} else {

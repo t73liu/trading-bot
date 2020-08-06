@@ -11,6 +11,7 @@ import (
 	"time"
 	"tradingbot/lib/alpaca"
 	"tradingbot/lib/traderdb"
+	"tradingbot/lib/utils"
 )
 
 const userId = 1
@@ -86,7 +87,7 @@ func bulkInsertStockCandles(
 			for _, candle := range candles {
 				rows = append(rows, []interface{}{
 					stock.Id,
-					convertUnixSecondsToTime(candle.StartAtUnixSec),
+					utils.ConvertUnixSecondsToTime(candle.StartAtUnixSec),
 					convertFloatToMicros(candle.Open),
 					convertFloatToMicros(candle.High),
 					convertFloatToMicros(candle.Low),
@@ -119,10 +120,6 @@ func bulkInsertStockCandles(
 	}
 
 	return nil
-}
-
-func convertUnixSecondsToTime(unixSeconds int64) time.Time {
-	return time.Unix(unixSeconds, 0)
 }
 
 func convertFloatToMicros(number float32) int64 {

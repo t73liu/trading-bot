@@ -1,5 +1,7 @@
 package analyze
 
+import "tradingbot/lib/candle"
+
 func getGains(values []int64) []int64 {
 	gains := make([]int64, len(values))
 	for i := 1; i < len(values); i++ {
@@ -54,7 +56,7 @@ func calcRSI(averageGain, averageLoss int64) float64 {
 	if averageLoss == 0 {
 		return 100
 	}
-	relativeStrength := MicrosToDollars(averageGain) / MicrosToDollars(averageLoss)
+	relativeStrength := candle.MicrosToDollars(averageGain) / candle.MicrosToDollars(averageLoss)
 	rsi := 100 - (100 / (1 + relativeStrength))
 	return RoundToTwoDecimals(rsi)
 }

@@ -34,6 +34,6 @@ func genInitialPortfolio(capitalMicros, priceMicros int64) Portfolio {
 }
 
 func calcPercentChange(prevMicros int64, currentMicros int64) float64 {
-	ratio := analyze.MicrosToDollars(currentMicros) / analyze.MicrosToDollars(prevMicros)
+	ratio := candle.MicrosToDollars(currentMicros) / candle.MicrosToDollars(prevMicros)
 	return analyze.RoundToTwoDecimals(ratio*100 - 100)
 }

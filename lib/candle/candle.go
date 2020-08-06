@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"time"
-	analyze "tradingbot/lib/technical-analysis"
 	"tradingbot/lib/utils"
 )
 
@@ -26,15 +25,25 @@ type Candle struct {
 	CloseMicros int64
 }
 
-func (c Candle) MarshalJson() ([]byte, error) {
+func (c Candle) MarshalJSON() ([]byte, error) {
 	return json.Marshal(JSONCandle{
 		OpenedAt: c.OpenedAt,
 		Volume:   c.Volume,
-		Open:     analyze.MicrosToDollars(c.OpenMicros),
-		High:     analyze.MicrosToDollars(c.HighMicros),
-		Low:      analyze.MicrosToDollars(c.LowMicros),
-		Close:    analyze.MicrosToDollars(c.CloseMicros),
+		Open:     MicrosToDollars(c.OpenMicros),
+		High:     MicrosToDollars(c.HighMicros),
+		Low:      MicrosToDollars(c.LowMicros),
+		Close:    MicrosToDollars(c.CloseMicros),
 	})
+}
+
+const million = 1000000
+
+func DollarsToMicros(dollars float64) int64 {
+	return int64(dollars * million)
+}
+
+func MicrosToDollars(micros int64) float64 {
+	return float64(micros) / million
 }
 
 // Assuming location = "America/New_York"

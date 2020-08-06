@@ -9,7 +9,6 @@ import (
 	"time"
 	"tradingbot/adhoc/test-strategy/strategy"
 	"tradingbot/lib/candle"
-	analyze "tradingbot/lib/technical-analysis"
 	"tradingbot/lib/traderdb"
 )
 
@@ -54,7 +53,7 @@ func main() {
 }
 
 func applyStrategy(candles []candle.Candle, capital float64) {
-	capitalMicros := analyze.DollarsToMicros(capital)
+	capitalMicros := candle.DollarsToMicros(capital)
 	//dailyPortfolios := strategy.Hold(candles, capitalMicros)
 	//dailyPortfolios := strategy.TrailingStop(candles, capitalMicros, 0.95)
 	dailyPortfolios := strategy.RSI(candles, capitalMicros, 70, 30)

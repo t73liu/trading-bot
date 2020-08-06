@@ -2,7 +2,7 @@ package strategy
 
 import (
 	"fmt"
-	analyze "tradingbot/lib/technical-analysis"
+	"tradingbot/lib/candle"
 )
 
 type Portfolio struct {
@@ -22,11 +22,11 @@ func PrintPortfolio(portfolio Portfolio) {
 		"Date: %s, Cash: %.2f, Shares: %d, Share Price: %.2f, Value: %.2f,"+
 			" Daily Change: %.2f, Daily Percent Change: %.2f%%, All Time: %.2f%%\n",
 		portfolio.Date,
-		analyze.MicrosToDollars(portfolio.Cash),
+		candle.MicrosToDollars(portfolio.Cash),
 		portfolio.SharesHeld,
-		analyze.MicrosToDollars(portfolio.SharePrice),
-		analyze.MicrosToDollars(portfolio.EndOfDayValue),
-		analyze.MicrosToDollars(portfolio.DailyChange),
+		candle.MicrosToDollars(portfolio.SharePrice),
+		candle.MicrosToDollars(portfolio.EndOfDayValue),
+		candle.MicrosToDollars(portfolio.DailyChange),
 		portfolio.DailyPercentChange,
 		portfolio.AllTimePerformance,
 	)

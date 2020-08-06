@@ -51,10 +51,10 @@ type TickerBarsResponse struct {
 type TickerBar struct {
 	Ticker            string  `json:"T"`
 	Volume            float64 `json:"v"`
-	Open              float32 `json:"o"`
-	High              float32 `json:"h"`
-	Low               float32 `json:"l"`
-	Close             float32 `json:"c"`
+	Open              float64 `json:"o"`
+	High              float64 `json:"h"`
+	Low               float64 `json:"l"`
+	Close             float64 `json:"c"`
 	StartAtUnixMillis int64   `json:"t"`
 }
 

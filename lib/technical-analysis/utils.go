@@ -4,8 +4,6 @@ import (
 	"math"
 )
 
-const million = 1000000
-
 func genValidMicro(value int64) ValidMicro {
 	return ValidMicro{
 		Micro: value,
@@ -42,14 +40,6 @@ func eqValidFloatSlice(expected, actual []ValidFloat) bool {
 		}
 	}
 	return true
-}
-
-func DollarsToMicros(dollars float64) int64 {
-	return int64(dollars * million)
-}
-
-func MicrosToDollars(micros int64) float64 {
-	return float64(micros) / million
 }
 
 func calcSum(values []int64, startIndex, endIndex int) (sum int64) {
