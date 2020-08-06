@@ -63,12 +63,12 @@ func main() {
 	}
 
 	finvizClient := finviz.NewClient(httpClient)
-	gapStocks, err := finvizClient.ScreenStocks("v=111&f=ta_gap_u7&ft=4&o=-gap")
+	gapStocks, err := finvizClient.ScreenStocksOverview("v=111&f=ta_gap_u7&ft=4&o=-gap")
 	if err != nil {
 		fmt.Println("Failed to screen for gap stocks:", err)
 		os.Exit(1)
 	}
-	tradableGapStocks := make([]finviz.StockInfo, 0, len(gapStocks))
+	tradableGapStocks := make([]finviz.StockOverview, 0, len(gapStocks))
 	for _, gapStock := range gapStocks {
 		if _, ok := tradableSymbols[gapStock.Symbol]; ok {
 			tradableGapStocks = append(tradableGapStocks, gapStock)

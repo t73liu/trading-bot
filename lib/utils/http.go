@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"net"
 	"net/http"
 	"time"
@@ -34,4 +35,23 @@ func NewHttpClient() *http.Client {
 			ResponseHeaderTimeout: 10 * time.Second,
 		},
 	}
+}
+
+// Equivalent to http.Error but returns JSON instead of text/plain
+func JSONError(w http.ResponseWriter, err error) {
+	SetJSONHeader(w)
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(http.StatusInternalServerError)
+	_ = json.NewEncoder(w).Encode(err.Error())
+}
+
+func JSONResponse(w http.ResponseWriter, data interface{}) {
+	SetJSONHeader(w)
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		JSONError(w, err)
+	}
+}
+
+func SetJSONHeader(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 }

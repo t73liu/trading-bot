@@ -5,9 +5,12 @@
   "dependencies": {
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
+    "@material-ui/lab": "^4.0.0-alpha.56",
     "@reduxjs/toolkit": "^1.4.0",
     "clsx": "^1.1.1",
     "constate": "^2.0.0",
+    "dayjs": "^1.8.32",
+    "query-string": "^6.13.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-helmet-async": "^1.0.6",
@@ -19,8 +22,8 @@
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.11.2",
-    "@testing-library/react": "^10.4.7",
-    "@testing-library/user-event": "^12.1.0",
+    "@testing-library/react": "^10.4.8",
+    "@testing-library/user-event": "^12.1.1",
     "eslint-config-airbnb": "^18.2.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-jsx-a11y": "^6.3.1",

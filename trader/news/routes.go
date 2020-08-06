@@ -1,13 +1,13 @@
 package news
 
 import (
-	"encoding/json"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
 	"tradingbot/lib/newsapi"
 	"tradingbot/lib/traderdb"
+	"tradingbot/lib/utils"
 	"tradingbot/trader/middleware"
 )
 
@@ -31,7 +31,7 @@ func (h *Handlers) getTopHeadlines(w http.ResponseWriter, r *http.Request, _ htt
 	queryValues := r.URL.Query()
 	newsSourceIds, err := traderdb.GetNewsSourceIdsByUserId(h.db, userId)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.JSONError(w, err)
 		return
 	}
 	data, err := h.client.GetTopHeadlinesBySources(
@@ -41,23 +41,19 @@ func (h *Handlers) getTopHeadlines(w http.ResponseWriter, r *http.Request, _ htt
 		},
 	)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.JSONError(w, err)
 		return
 	}
-	if err := json.NewEncoder(w).Encode(data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	utils.JSONResponse(w, data)
 }
 
 func (h *Handlers) getUserNewsSources(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 	data, err := traderdb.GetNewsSourcesByUserId(h.db, userId)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.JSONError(w, err)
 		return
 	}
-	if err := json.NewEncoder(w).Encode(data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	utils.JSONResponse(w, data)
 }
 
 func (h *Handlers) AddRoutes(router *httprouter.Router) {

@@ -34,7 +34,7 @@ type TickerDetails struct {
 	Sector      string   `json:"sector"`
 	Description string   `json:"description"`
 	URL         string   `json:"url"`
-	MarketCap   int      `json:"marketcap"`
+	MarketCap   int64    `json:"marketcap"`
 	Similar     []string `json:"similar"`
 	Tags        []string `json:"tags"`
 }

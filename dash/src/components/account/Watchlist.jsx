@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import Button from "@material-ui/core/Button";
+import { Button } from "@material-ui/core";
 import PropTypes from "prop-types";
 import { updateWatchlist } from "../../data/account";
 

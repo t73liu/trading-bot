@@ -3,7 +3,9 @@ CREATE TABLE IF NOT EXISTS stocks (
   symbol text UNIQUE NOT NULL,
   company text NOT NULL,
   exchange text NOT NULL,
-  is_tradable BOOLEAN NOT NULL DEFAULT TRUE,
+  tradable BOOLEAN NOT NULL DEFAULT TRUE,
+  marginable BOOLEAN NOT NULL DEFAULT FALSE,
+  shortable BOOLEAN NOT NULL DEFAULT FALSE,
   price_micros BIGINT,
   market_cap BIGINT,
   updated_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP

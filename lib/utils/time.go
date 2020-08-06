@@ -2,9 +2,13 @@ package utils
 
 import "time"
 
-func GetLastWeekday(now time.Time) time.Time {
-	prevDay := now.AddDate(0, 0, -1)
-	for prevDay.Weekday() == time.Saturday || prevDay.Weekday() == time.Sunday {
+func IsWeekday(moment time.Time) bool {
+	return moment.Weekday() != time.Saturday && moment.Weekday() != time.Sunday
+}
+
+func GetLastWeekday(moment time.Time) time.Time {
+	prevDay := moment.AddDate(0, 0, -1)
+	for !IsWeekday(prevDay) {
 		prevDay = prevDay.AddDate(0, 0, -1)
 	}
 	return prevDay
@@ -61,4 +65,8 @@ func IsWithinNYSETradingHours(moment time.Time) bool {
 
 func ConvertUnixSecondsToTime(unixSeconds int64) time.Time {
 	return time.Unix(unixSeconds, 0)
+}
+
+func ConvertUnixMillisToTime(unixMillis int64) time.Time {
+	return ConvertUnixSecondsToTime(unixMillis / 1000)
 }

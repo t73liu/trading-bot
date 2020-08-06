@@ -5,14 +5,18 @@ import (
 )
 
 type Stock struct {
-	Id       int    `json:"id"`
-	Symbol   string `json:"symbol"`
-	Company  string `json:"company"`
-	Exchange string `json:"exchange,omitempty"`
+	Id         int    `json:"id"`
+	Symbol     string `json:"symbol"`
+	Company    string `json:"company"`
+	Exchange   string `json:"exchange,omitempty"`
+	Shortable  bool   `json:"shortable"`
+	Marginable bool   `json:"marginable"`
 }
 
 const tradableStocksQuery = `
-SELECT id, symbol, company, exchange FROM stocks WHERE is_tradable = true
+SELECT id, symbol, company, exchange
+FROM stocks
+WHERE tradable = true
 `
 
 func GetTradableStocks(db PGConnection) (stocks []Stock, err error) {
@@ -42,4 +46,32 @@ func GetTradableStocks(db PGConnection) (stocks []Stock, err error) {
 		return stocks, rows.Err()
 	}
 	return stocks, err
+}
+
+const tradableStockQuery = `
+SELECT id, company, exchange, shortable, marginable
+FROM stocks
+WHERE tradable = true AND symbol = $1
+`
+
+func GetTradableStock(db PGConnection, symbol string) (stock Stock, err error) {
+	row := db.QueryRow(context.Background(), tradableStockQuery, symbol)
+	var id int
+	var company string
+	var exchange string
+	var shortable bool
+	var marginable bool
+	if err = row.Scan(&id, &company, &exchange, &shortable, &marginable); err != nil {
+		return stock, err
+	}
+	stock = Stock{
+		Id:         id,
+		Symbol:     symbol,
+		Exchange:   exchange,
+		Company:    company,
+		Shortable:  shortable,
+		Marginable: marginable,
+	}
+
+	return stock, nil
 }

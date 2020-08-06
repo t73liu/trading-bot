@@ -18,7 +18,7 @@ func NewClient(httpClient *http.Client) *Client {
 	}
 }
 
-type StockInfo struct {
+type StockOverview struct {
 	Symbol        string
 	Company       string
 	Sector        string
@@ -30,7 +30,7 @@ type StockInfo struct {
 	Volume        int64
 }
 
-func (c *Client) ScreenStocks(query string) (stocks []StockInfo, err error) {
+func (c *Client) ScreenStocksOverview(query string) (stocks []StockOverview, err error) {
 	req, err := http.NewRequest("GET", "https://finviz.com/screener.ashx", nil)
 	if err != nil {
 		return stocks, err
@@ -77,7 +77,7 @@ func (c *Client) ScreenStocks(query string) (stocks []StockInfo, err error) {
 					if err != nil {
 						return false
 					}
-					stocks = append(stocks, StockInfo{
+					stocks = append(stocks, StockOverview{
 						Symbol:        contents[2],
 						Company:       contents[3],
 						Sector:        contents[4],

@@ -13,6 +13,7 @@ import (
 	"tradingbot/lib/newsapi"
 	"tradingbot/lib/polygon"
 	"tradingbot/lib/utils"
+	"tradingbot/lib/yahoo-finance"
 	"tradingbot/trader/account"
 	"tradingbot/trader/news"
 	"tradingbot/trader/stock"
@@ -83,7 +84,8 @@ func initApp(logger *log.Logger, client *http.Client, db *pgxpool.Pool) http.Han
 	newsHandlers.AddRoutes(router)
 
 	polygonClient := polygon.NewClient(client, os.Getenv("ALPACA_API_KEY"))
-	stockHandlers := stock.NewHandlers(logger, db, polygonClient)
+	yahooClient := yahoo.NewClient(client)
+	stockHandlers := stock.NewHandlers(logger, db, polygonClient, yahooClient)
 	stockHandlers.AddRoutes(router)
 
 	accountHandlers := account.NewHandlers(logger, db)

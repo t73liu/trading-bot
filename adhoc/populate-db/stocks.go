@@ -5,11 +5,10 @@ import (
 	"encoding/csv"
 	"fmt"
 	"github.com/jackc/pgx/v4"
-	"net/http"
 	"os"
 	"strings"
-	"time"
 	"tradingbot/lib/alpaca"
+	"tradingbot/lib/utils"
 )
 
 func main() {
@@ -35,8 +34,10 @@ func main() {
 		os.Exit(1)
 	}
 
+	httpClient := utils.NewHttpClient()
+
 	alpacaClient := alpaca.NewClient(
-		&http.Client{Timeout: 15 * time.Second},
+		httpClient,
 		apiKey,
 		apiSecretKey,
 		false,
@@ -79,13 +80,15 @@ func bulkInsertStocks(conn *pgx.Conn, assets []alpaca.Asset, companyByTicker map
 			name,
 			asset.Exchange,
 			asset.Tradable,
+			asset.Marginable,
+			asset.Shortable && asset.EasyToBorrow,
 		})
 	}
 
 	_, err = tx.CopyFrom(
 		context.Background(),
 		pgx.Identifier{"stocks"},
-		[]string{"symbol", "company", "exchange", "is_tradable"},
+		[]string{"symbol", "company", "exchange", "tradable", "marginable", "shortable"},
 		pgx.CopyFromRows(rows),
 	)
 	if err != nil {

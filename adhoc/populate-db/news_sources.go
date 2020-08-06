@@ -4,11 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v4"
-	"net/http"
 	"os"
 	"strings"
-	"time"
 	"tradingbot/lib/newsapi"
+	"tradingbot/lib/utils"
 )
 
 func main() {
@@ -29,10 +28,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	client := newsapi.NewClient(
-		&http.Client{Timeout: 15 * time.Second},
-		apiKey,
-	)
+	client := newsapi.NewClient(utils.NewHttpClient(), apiKey)
 
 	sources, err := client.GetSources("", "en", "")
 	if err != nil {

@@ -3,11 +3,13 @@ package yahoo
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+	"tradingbot/lib/utils"
 )
 
 const baseURL = "https://finance.yahoo.com"
@@ -46,11 +48,25 @@ type IPO struct {
 }
 
 type Stock struct {
-	Symbol    string
-	Company   string
-	Exchange  string
-	MarketCap int64
-	Price     float64
+	Symbol        string
+	Company       string
+	Exchange      string
+	MarketCap     int64
+	Price         float64
+	Sector        string
+	Industry      string
+	Description   string
+	Country       string
+	Website       string
+	AverageVolume int64
+	News          []Article
+}
+
+type Article struct {
+	URL         string    `json:"url"`
+	Title       string    `json:"title"`
+	Summary     string    `json:"summary"`
+	PublishedAt time.Time `json:"publishedAt"`
 }
 
 type Client struct {
@@ -172,6 +188,8 @@ func (c *Client) getEvents(eventType string, date time.Time, offset int) ([]inte
 }
 
 func (c *Client) GetStock(symbol string) (stock Stock, err error) {
+	location := utils.GetNYSELocation()
+
 	response, err := http.Get(baseURL + "/quote/" + symbol)
 	if err != nil {
 		return stock, err
@@ -195,15 +213,44 @@ func (c *Client) GetStock(symbol string) (stock Stock, err error) {
 			dispatcher := context["dispatcher"].(map[string]interface{})
 			stores := dispatcher["stores"].(map[string]interface{})
 			quoteStore := stores["QuoteSummaryStore"].(map[string]interface{})
+			// Price and volume details
 			stockDetail := quoteStore["price"].(map[string]interface{})
 			marketCap := stockDetail["marketCap"].(map[string]interface{})
 			price := stockDetail["regularMarketPrice"].(map[string]interface{})
-
+			volume := stockDetail["averageDailyVolume10Day"].(map[string]interface{})
 			stock.Symbol = stockDetail["symbol"].(string)
 			stock.Company = stockDetail["longName"].(string)
 			stock.Exchange = stockDetail["exchangeName"].(string)
 			stock.MarketCap = int64(marketCap["raw"].(float64))
 			stock.Price = price["raw"].(float64)
+			stock.AverageVolume = int64(volume["raw"].(float64))
+			// Company details
+			summary := quoteStore["summaryProfile"].(map[string]interface{})
+			stock.Sector = summary["sector"].(string)
+			stock.Industry = summary["industry"].(string)
+			stock.Website = summary["website"].(string)
+			stock.Country = summary["country"].(string)
+			stock.Description = summary["longBusinessSummary"].(string)
+
+			// News
+			streamStore := stores["StreamStore"].(map[string]interface{})
+			streams := streamStore["streams"].(map[string]interface{})
+			symbolStream := streams[fmt.Sprintf("YFINANCE:%s.mega", symbol)].(map[string]interface{})
+			symbolStreamData := symbolStream["data"].(map[string]interface{})
+			streamItems := symbolStreamData["stream_items"].([]interface{})
+
+			news := make([]Article, 0, len(streamItems))
+			for _, streamItem := range streamItems {
+				item := streamItem.(map[string]interface{})
+				publishedAt := utils.ConvertUnixMillisToTime(int64(item["pubtime"].(float64)))
+				news = append(news, Article{
+					URL:         item["url"].(string),
+					Title:       item["title"].(string),
+					Summary:     item["summary"].(string),
+					PublishedAt: publishedAt.In(location),
+				})
+			}
+			stock.News = news
 
 			return stock, err
 		}

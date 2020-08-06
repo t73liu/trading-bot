@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"html/template"
-	"net/http"
 	"net/smtp"
 	"os"
 	"strings"
 	"time"
 	"tradingbot/lib/traderdb"
+	"tradingbot/lib/utils"
 	"tradingbot/lib/yahoo-finance"
 )
 
@@ -60,7 +60,7 @@ func main() {
 	now := time.Now()
 	startTime := now.AddDate(0, 0, 7)
 	endTime := now.AddDate(0, 0, 21)
-	httpClient := &http.Client{Timeout: 15 * time.Second}
+	httpClient := utils.NewHttpClient()
 	yahooClient := yahoo.NewClient(httpClient)
 
 	pool, err := pgxpool.Connect(context.Background(), databaseUrl)

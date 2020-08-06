@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -40,7 +39,7 @@ func main() {
 	}
 
 	alpacaClient := alpaca.NewClient(
-		&http.Client{Timeout: 15 * time.Second},
+		utils.NewHttpClient(),
 		apiKey,
 		apiSecretKey,
 		false,
