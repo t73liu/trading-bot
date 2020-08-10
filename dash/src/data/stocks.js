@@ -5,10 +5,11 @@ export const fetchStockInfo = (symbol) => getJSON(`/api/stocks/${symbol}`);
 
 export const fetchStockNews = (symbol) => getJSON(`/api/stocks/${symbol}/news`);
 
-export const fetchStockCandles = (symbol, showExtendedHours) => {
+export const fetchStockCharts = (symbol, candleSize, showExtendedHours) => {
   const query = stringify({
     interval: "intraday",
+    candleSize,
     showExtendedHours,
   });
-  return getJSON(`/api/stocks/${symbol}/candles?${query}`);
+  return getJSON(`/api/stocks/${symbol}/charts?${query}`);
 };

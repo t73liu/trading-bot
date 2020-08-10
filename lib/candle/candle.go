@@ -154,6 +154,20 @@ func GetClosingPrices(candles []Candle) (closes []int64) {
 	return closes
 }
 
+func GetVolumes(candles []Candle) (volumes []int64) {
+	for _, candle := range candles {
+		volumes = append(volumes, candle.Volume)
+	}
+	return volumes
+}
+
+func GetOpenedAts(candles []Candle) (openedAts []time.Time) {
+	for _, candle := range candles {
+		openedAts = append(openedAts, candle.OpenedAt)
+	}
+	return openedAts
+}
+
 func eqCandleSlice(expected, actual []Candle) bool {
 	if len(expected) != len(actual) {
 		return false

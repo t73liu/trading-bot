@@ -3,6 +3,7 @@ package analyze
 import (
 	"encoding/json"
 	"tradingbot/lib/candle"
+	"tradingbot/lib/utils"
 )
 
 type ValidMicro struct {
@@ -12,7 +13,7 @@ type ValidMicro struct {
 
 func (vm ValidMicro) MarshalJSON() ([]byte, error) {
 	if vm.Valid {
-		return json.Marshal(candle.MicrosToDollars(vm.Micro))
+		return json.Marshal(utils.RoundToTwoDecimals(candle.MicrosToDollars(vm.Micro)))
 	}
 	return json.Marshal(nil)
 }

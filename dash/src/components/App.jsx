@@ -4,7 +4,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { CssBaseline } from "@material-ui/core";
 import Overview from "./account/Overview";
 import Stocks from "./stocks/Stocks";
-import StockInfo from "./stocks/StockInfo";
+import StockPage from "./stocks/StockPage";
 import Layout from "./Layout";
 import NotFound from "./NotFound";
 import { TitleProvider } from "../state/title-context";
@@ -18,7 +18,7 @@ const App = () => (
         <Layout>
           <Switch>
             <Route exact path="/stocks/:symbol">
-              <StockInfo />
+              <StockPage />
             </Route>
             <Route exact path="/stocks">
               <Stocks />

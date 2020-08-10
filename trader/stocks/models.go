@@ -1,6 +1,7 @@
-package stock
+package stocks
 
 type Detail struct {
+	Price         float64     `json:"price"`
 	Company       string      `json:"company"`
 	Website       string      `json:"website"`
 	Description   string      `json:"description"`

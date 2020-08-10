@@ -1,9 +1,5 @@
 package analyze
 
-import (
-	"math"
-)
-
 func genValidMicro(value int64) ValidMicro {
 	return ValidMicro{
 		Micro: value,
@@ -51,10 +47,6 @@ func calcSum(values []int64, startIndex, endIndex int) (sum int64) {
 
 func calcAverage(values []int64, startIndex, endIndex int) (sum int64) {
 	return calcSum(values, startIndex, endIndex) / int64(endIndex-startIndex+1)
-}
-
-func RoundToTwoDecimals(value float64) float64 {
-	return math.Round(value*100) / 100
 }
 
 func maxInt(nums ...int64) int64 {

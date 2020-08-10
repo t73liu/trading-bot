@@ -1,4 +1,4 @@
-package stock
+package stocks
 
 import (
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -6,9 +6,11 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 	"tradingbot/lib/candle"
 	"tradingbot/lib/polygon"
+	analyze "tradingbot/lib/technical-analysis"
 	"tradingbot/lib/traderdb"
 	"tradingbot/lib/utils"
 	"tradingbot/lib/yahoo-finance"
@@ -41,7 +43,7 @@ func (h *Handlers) getTradableStocks(w http.ResponseWriter, _ *http.Request, _ h
 }
 
 func (h *Handlers) getStockInfo(w http.ResponseWriter, _ *http.Request, p httprouter.Params) {
-	symbol := p.ByName("symbol")
+	symbol := getSymbol(p)
 	stock, err := traderdb.GetTradableStock(h.db, symbol)
 	if err != nil {
 		utils.JSONError(w, err)
@@ -55,6 +57,7 @@ func (h *Handlers) getStockInfo(w http.ResponseWriter, _ *http.Request, p httpro
 		return
 	}
 	utils.JSONResponse(w, Detail{
+		Price:         details.Price,
 		Company:       details.Company,
 		Website:       details.Website,
 		Description:   details.Description,
@@ -70,8 +73,8 @@ func (h *Handlers) getStockInfo(w http.ResponseWriter, _ *http.Request, p httpro
 	})
 }
 
-func (h *Handlers) getStockCandles(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	symbol := p.ByName("symbol")
+func (h *Handlers) getStockCharts(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	symbol := getSymbol(p)
 	location := utils.GetNYSELocation()
 	endTime := time.Now().In(location)
 	if !utils.IsWeekday(endTime) {
@@ -80,6 +83,7 @@ func (h *Handlers) getStockCandles(w http.ResponseWriter, r *http.Request, p htt
 	startTime := utils.GetMidnight(endTime, location)
 	query := r.URL.Query()
 	showExtendedHours, _ := strconv.ParseBool(query.Get("showExtendedHours"))
+	charts := make(map[string]interface{})
 	if query.Get("interval") == "intraday" {
 		bars, err := h.polygonClient.GetTickerBars(polygon.TickerBarsQueryParams{
 			Ticker:       symbol,
@@ -104,10 +108,36 @@ func (h *Handlers) getStockCandles(w http.ResponseWriter, r *http.Request, p htt
 				CloseMicros: candle.DollarsToMicros(bar.Close),
 			})
 		}
+
+		// Format Candles
 		if !showExtendedHours {
 			candles = candle.FilterTradingHourCandles(candles)
 		}
-		utils.JSONResponse(w, candle.FillMinuteCandles(candles))
+		candles = candle.FillMinuteCandles(candles)
+		candleSize := query.Get("candleSize")
+		switch candleSize {
+		case "5min":
+			candles, _ = candle.CompressCandles(candles, 5, "minute", location)
+			break
+		case "10min":
+			candles, _ = candle.CompressCandles(candles, 10, "minute", location)
+			break
+		case "30min":
+			candles, _ = candle.CompressCandles(candles, 30, "minute", location)
+			break
+		case "1hour":
+			candles, _ = candle.CompressCandles(candles, 1, "hour", location)
+			break
+		}
+
+		// Add candles and indicators to response
+		charts["candles"] = candles
+		charts["ema"] = analyze.EMA(candle.GetClosingPrices(candles), 9)
+		charts["vwap"] = analyze.VWAP(candles)
+		volumes := candle.GetVolumes(candles)
+		charts["volume"] = volumes
+		charts["currentVolume"] = utils.Sum(volumes...)
+		utils.JSONResponse(w, charts)
 	} else {
 		candles, err := traderdb.GetStockCandles(h.db, symbol, startTime, endTime)
 		if err != nil {
@@ -119,7 +149,7 @@ func (h *Handlers) getStockCandles(w http.ResponseWriter, r *http.Request, p htt
 
 // TODO Use once Polygon issues are resolved
 func (h *Handlers) getStockNews(w http.ResponseWriter, _ *http.Request, p httprouter.Params) {
-	symbol := p.ByName("symbol")
+	symbol := getSymbol(p)
 	news, err := h.polygonClient.GetTickerNews(symbol, 10, 1)
 	if err != nil {
 		utils.JSONError(w, err)
@@ -141,8 +171,8 @@ func (h *Handlers) AddRoutes(router *httprouter.Router) {
 		middleware.LogResponseTime(h.getStockInfo, h.logger),
 	)
 	router.GET(
-		"/api/stocks/:symbol/candles",
-		middleware.LogResponseTime(h.getStockCandles, h.logger),
+		"/api/stocks/:symbol/charts",
+		middleware.LogResponseTime(h.getStockCharts, h.logger),
 	)
 	router.GET(
 		"/api/stocks/:symbol/news",
@@ -152,4 +182,8 @@ func (h *Handlers) AddRoutes(router *httprouter.Router) {
 		"/api/stocks/:symbol/indicators",
 		middleware.LogResponseTime(h.getStockIndicators, h.logger),
 	)
+}
+
+func getSymbol(p httprouter.Params) string {
+	return strings.ToUpper(p.ByName("symbol"))
 }

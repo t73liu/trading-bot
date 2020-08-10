@@ -228,9 +228,9 @@ func (c *Client) GetStock(symbol string) (stock Stock, err error) {
 			summary := quoteStore["summaryProfile"].(map[string]interface{})
 			stock.Sector = summary["sector"].(string)
 			stock.Industry = summary["industry"].(string)
-			stock.Website = summary["website"].(string)
-			stock.Country = summary["country"].(string)
-			stock.Description = summary["longBusinessSummary"].(string)
+			stock.Website = CastToString(summary["website"])
+			stock.Country = CastToString(summary["country"])
+			stock.Description = CastToString(summary["longBusinessSummary"])
 
 			// News
 			streamStore := stores["StreamStore"].(map[string]interface{})
@@ -256,6 +256,13 @@ func (c *Client) GetStock(symbol string) (stock Stock, err error) {
 		}
 	}
 	return stock, errors.New("could not parse Yahoo Finance response")
+}
+
+func CastToString(any interface{}) string {
+	if any == nil {
+		return ""
+	}
+	return any.(string)
 }
 
 func formatISO(date time.Time) string {
