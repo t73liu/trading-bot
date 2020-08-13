@@ -13,3 +13,7 @@ export const fetchStockCharts = (symbol, candleSize, showExtendedHours) => {
   });
   return getJSON(`/api/stocks/${symbol}/charts?${query}`);
 };
+
+export const fetchGapStocks = () => {
+  return getJSON("/api/stocks/gaps");
+};

@@ -36,14 +36,12 @@ func (c Candle) MarshalJSON() ([]byte, error) {
 	})
 }
 
-const million = 1000000
-
 func DollarsToMicros(dollars float64) int64 {
-	return int64(dollars * million)
+	return int64(dollars * utils.Million)
 }
 
 func MicrosToDollars(micros int64) float64 {
-	return float64(micros) / million
+	return float64(micros) / utils.Million
 }
 
 // Assuming location = "America/New_York"

@@ -2,6 +2,8 @@ package utils
 
 import "math"
 
+const Million = 1000000
+
 func RoundToTwoDecimals(value float64) float64 {
 	return math.Round(value*100) / 100
 }

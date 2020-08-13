@@ -69,24 +69,9 @@ CandlestickChart.propTypes = {
         volume: PropTypes.number.isRequired,
       })
     ),
-    vwap: PropTypes.arrayOf(
-      PropTypes.shape({
-        x: PropTypes.string.isRequired,
-        value: PropTypes.number.isRequired,
-      })
-    ),
-    volume: PropTypes.arrayOf(
-      PropTypes.shape({
-        x: PropTypes.string.isRequired,
-        value: PropTypes.number.isRequired,
-      })
-    ),
-    ema: PropTypes.arrayOf(
-      PropTypes.shape({
-        x: PropTypes.string.isRequired,
-        value: PropTypes.number,
-      })
-    ),
+    vwap: PropTypes.arrayOf(PropTypes.number.isRequired),
+    volume: PropTypes.arrayOf(PropTypes.number.isRequired),
+    ema: PropTypes.arrayOf(PropTypes.number),
   }),
 };
 

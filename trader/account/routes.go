@@ -3,14 +3,13 @@ package account
 import (
 	"encoding/json"
 	"errors"
+	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
 	"strconv"
 	"tradingbot/lib/traderdb"
 	"tradingbot/lib/utils"
-	"tradingbot/trader/middleware"
 )
 
 type Handlers struct {
@@ -32,7 +31,7 @@ type WatchlistRequestBody struct {
 
 const userId = 1
 
-func (h *Handlers) getWatchlists(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+func (h *Handlers) getWatchlists(w http.ResponseWriter, _ *http.Request) {
 	watchlists, err := traderdb.GetWatchlistsByUserId(h.db, userId)
 	if err != nil {
 		utils.JSONError(w, err)
@@ -41,8 +40,8 @@ func (h *Handlers) getWatchlists(w http.ResponseWriter, _ *http.Request, _ httpr
 	utils.JSONResponse(w, watchlists)
 }
 
-func (h *Handlers) deleteWatchlist(w http.ResponseWriter, _ *http.Request, params httprouter.Params) {
-	watchlistId, err := strconv.Atoi(params.ByName("id"))
+func (h *Handlers) deleteWatchlist(w http.ResponseWriter, r *http.Request) {
+	watchlistId, err := getWatchlistID(r)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
@@ -66,8 +65,8 @@ func (h *Handlers) deleteWatchlist(w http.ResponseWriter, _ *http.Request, param
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (h *Handlers) updateWatchlist(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	watchlistId, err := strconv.Atoi(params.ByName("id"))
+func (h *Handlers) updateWatchlist(w http.ResponseWriter, r *http.Request) {
+	watchlistId, err := getWatchlistID(r)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
@@ -99,7 +98,7 @@ func (h *Handlers) updateWatchlist(w http.ResponseWriter, r *http.Request, param
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (h *Handlers) createWatchlist(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (h *Handlers) createWatchlist(w http.ResponseWriter, r *http.Request) {
 	var body WatchlistRequestBody
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
@@ -117,21 +116,14 @@ func (h *Handlers) createWatchlist(w http.ResponseWriter, r *http.Request, _ htt
 	utils.JSONResponse(w, watchlist)
 }
 
-func (h *Handlers) AddRoutes(router *httprouter.Router) {
-	router.GET(
-		"/api/account/watchlists",
-		middleware.LogResponseTime(h.getWatchlists, h.logger),
-	)
-	router.PUT(
-		"/api/account/watchlists/:id",
-		middleware.LogResponseTime(h.updateWatchlist, h.logger),
-	)
-	router.DELETE(
-		"/api/account/watchlists/:id",
-		middleware.LogResponseTime(h.deleteWatchlist, h.logger),
-	)
-	router.POST(
-		"/api/account/watchlists",
-		middleware.LogResponseTime(h.createWatchlist, h.logger),
-	)
+func (h *Handlers) AddRoutes(router *mux.Router) {
+	router.HandleFunc("/watchlists", h.getWatchlists).Methods("GET")
+	router.HandleFunc("/watchlists", h.createWatchlist).Methods("POST")
+	router.HandleFunc("/watchlists/{id}", h.updateWatchlist).Methods("PUT")
+	router.HandleFunc("/watchlists/{id}", h.deleteWatchlist).Methods("DELETE")
+}
+
+func getWatchlistID(r *http.Request) (int, error) {
+	vars := mux.Vars(r)
+	return strconv.Atoi(vars["id"])
 }

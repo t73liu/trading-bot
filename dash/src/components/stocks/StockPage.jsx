@@ -78,18 +78,19 @@ const StockPage = () => {
   ]);
   const handleRefresh = useCallback(() => {
     setIsLoading(true);
-    fetchStockCharts(symbol, showExtendedHours).then((response) => {
+    fetchStockCharts(symbol, candleSize, showExtendedHours).then((response) => {
       setIsLoading(false);
       if (response instanceof Error) {
         setErrors([response.message]);
       } else {
+        setErrors([]);
         setCharts({
           ...response,
           candles: response.candles?.map(formatCandle),
         });
       }
     });
-  }, [setCharts, symbol, showExtendedHours]);
+  }, [setCharts, symbol, showExtendedHours, candleSize]);
   if (isLoading) return <CircularProgress />;
   return (
     <>
@@ -106,6 +107,9 @@ const StockPage = () => {
           <StockInfo
             symbol={symbol}
             info={info}
+            lastCandlePrice={
+              charts.candles?.[charts.candles?.length - 1]?.close
+            }
             currentVolume={charts.currentVolume}
           />
         </Grid>

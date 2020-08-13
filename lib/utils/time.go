@@ -67,6 +67,10 @@ func ConvertUnixSecondsToTime(unixSeconds int64) time.Time {
 	return time.Unix(unixSeconds, 0)
 }
 
+func ConvertUnixNanosToTime(unixNanos int64) time.Time {
+	return time.Unix(0, unixNanos)
+}
+
 func ConvertUnixMillisToTime(unixMillis int64) time.Time {
-	return ConvertUnixSecondsToTime(unixMillis / 1000)
+	return ConvertUnixNanosToTime(unixMillis * Million)
 }

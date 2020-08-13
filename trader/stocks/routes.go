@@ -1,8 +1,8 @@
 package stocks
 
 import (
+	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
 	"strconv"
@@ -14,7 +14,6 @@ import (
 	"tradingbot/lib/traderdb"
 	"tradingbot/lib/utils"
 	"tradingbot/lib/yahoo-finance"
-	"tradingbot/trader/middleware"
 )
 
 type Handlers struct {
@@ -33,7 +32,7 @@ func NewHandlers(logger *log.Logger, db *pgxpool.Pool, polygonClient *polygon.Cl
 	}
 }
 
-func (h *Handlers) getTradableStocks(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+func (h *Handlers) getTradableStocks(w http.ResponseWriter, _ *http.Request) {
 	stocks, err := traderdb.GetTradableStocks(h.db)
 	if err != nil {
 		utils.JSONError(w, err)
@@ -42,8 +41,8 @@ func (h *Handlers) getTradableStocks(w http.ResponseWriter, _ *http.Request, _ h
 	utils.JSONResponse(w, stocks)
 }
 
-func (h *Handlers) getStockInfo(w http.ResponseWriter, _ *http.Request, p httprouter.Params) {
-	symbol := getSymbol(p)
+func (h *Handlers) getStockInfo(w http.ResponseWriter, r *http.Request) {
+	symbol := getSymbol(r)
 	stock, err := traderdb.GetTradableStock(h.db, symbol)
 	if err != nil {
 		utils.JSONError(w, err)
@@ -73,8 +72,8 @@ func (h *Handlers) getStockInfo(w http.ResponseWriter, _ *http.Request, p httpro
 	})
 }
 
-func (h *Handlers) getStockCharts(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	symbol := getSymbol(p)
+func (h *Handlers) getStockCharts(w http.ResponseWriter, r *http.Request) {
+	symbol := getSymbol(r)
 	location := utils.GetNYSELocation()
 	endTime := time.Now().In(location)
 	if !utils.IsWeekday(endTime) {
@@ -148,8 +147,8 @@ func (h *Handlers) getStockCharts(w http.ResponseWriter, r *http.Request, p http
 }
 
 // TODO Use once Polygon issues are resolved
-func (h *Handlers) getStockNews(w http.ResponseWriter, _ *http.Request, p httprouter.Params) {
-	symbol := getSymbol(p)
+func (h *Handlers) getStockNews(w http.ResponseWriter, r *http.Request) {
+	symbol := getSymbol(r)
 	news, err := h.polygonClient.GetTickerNews(symbol, 10, 1)
 	if err != nil {
 		utils.JSONError(w, err)
@@ -158,32 +157,69 @@ func (h *Handlers) getStockNews(w http.ResponseWriter, _ *http.Request, p httpro
 	utils.JSONResponse(w, news)
 }
 
-func (h *Handlers) getStockIndicators(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+func (h *Handlers) getGapStocks(w http.ResponseWriter, _ *http.Request) {
+	stocks, err := traderdb.GetTradableStocks(h.db)
+	if err != nil {
+		utils.JSONError(w, err)
+		return
+	}
+	companyBySymbol := make(map[string]string)
+	for _, stock := range stocks {
+		companyBySymbol[stock.Symbol] = stock.Company
+	}
+	snapshots := make(map[string][]Snapshot)
+	gains, err := h.polygonClient.GetMovers(true)
+	if err != nil {
+		utils.JSONError(w, err)
+		return
+	}
+	gapUpStocks := make([]Snapshot, 0, len(gains))
+	for _, gain := range gains {
+		if company, ok := companyBySymbol[gain.Ticker]; ok {
+			gapUpStocks = append(gapUpStocks, Snapshot{
+				Company:        company,
+				Symbol:         gain.Ticker,
+				Change:         gain.Change,
+				ChangePercent:  gain.ChangePercent,
+				PreviousVolume: int64(gain.PrevDay.Volume),
+				PreviousClose:  gain.PrevDay.Close,
+				UpdatedAt:      utils.ConvertUnixNanosToTime(gain.UpdatedAtUnixNanos),
+			})
+		}
+	}
+	snapshots["gapUp"] = gapUpStocks
+	losses, err := h.polygonClient.GetMovers(false)
+	if err != nil {
+		utils.JSONError(w, err)
+		return
+	}
+	gapDownStocks := make([]Snapshot, 0, len(losses))
+	for _, loss := range losses {
+		if company, ok := companyBySymbol[loss.Ticker]; ok {
+			gapDownStocks = append(gapDownStocks, Snapshot{
+				Company:        company,
+				Symbol:         loss.Ticker,
+				Change:         loss.Change,
+				ChangePercent:  loss.ChangePercent,
+				PreviousVolume: int64(loss.PrevDay.Volume),
+				PreviousClose:  loss.PrevDay.Close,
+				UpdatedAt:      utils.ConvertUnixNanosToTime(loss.UpdatedAtUnixNanos),
+			})
+		}
+	}
+	snapshots["gapDown"] = gapDownStocks
+	utils.JSONResponse(w, snapshots)
 }
 
-func (h *Handlers) AddRoutes(router *httprouter.Router) {
-	router.GET(
-		"/api/stocks",
-		middleware.LogResponseTime(h.getTradableStocks, h.logger),
-	)
-	router.GET(
-		"/api/stocks/:symbol",
-		middleware.LogResponseTime(h.getStockInfo, h.logger),
-	)
-	router.GET(
-		"/api/stocks/:symbol/charts",
-		middleware.LogResponseTime(h.getStockCharts, h.logger),
-	)
-	router.GET(
-		"/api/stocks/:symbol/news",
-		middleware.LogResponseTime(h.getStockNews, h.logger),
-	)
-	router.GET(
-		"/api/stocks/:symbol/indicators",
-		middleware.LogResponseTime(h.getStockIndicators, h.logger),
-	)
+func (h *Handlers) AddRoutes(router *mux.Router) {
+	router.HandleFunc("", h.getTradableStocks).Methods("GET")
+	router.HandleFunc("/gaps", h.getGapStocks).Methods("GET")
+	router.HandleFunc("/{symbol}", h.getStockInfo).Methods("GET")
+	router.HandleFunc("/{symbol}/charts", h.getStockCharts).Methods("GET")
+	router.HandleFunc("/{symbol}/news", h.getStockNews).Methods("GET")
 }
 
-func getSymbol(p httprouter.Params) string {
-	return strings.ToUpper(p.ByName("symbol"))
+func getSymbol(r *http.Request) string {
+	vars := mux.Vars(r)
+	return strings.ToUpper(vars["symbol"])
 }

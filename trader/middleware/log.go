@@ -1,24 +1,26 @@
 package middleware
 
 import (
-	"github.com/julienschmidt/httprouter"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"time"
 )
 
-func LogResponseTime(next httprouter.Handle, logger *log.Logger) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		startTime := time.Now()
-		logger.Printf("Starting: %s - %s\n", r.Method, r.URL)
-		defer func() {
-			logger.Printf(
-				"Completed (%dms): %s - %s\n",
-				time.Now().Sub(startTime).Milliseconds(),
-				r.Method,
-				r.URL.Path,
-			)
-		}()
-		next(w, r, p)
+func LogResponseTime(logger *log.Logger) mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			startTime := time.Now()
+			logger.Printf("Starting: %s - %s\n", r.Method, r.URL)
+			defer func() {
+				logger.Printf(
+					"Completed (%dms): %s - %s\n",
+					time.Now().Sub(startTime).Milliseconds(),
+					r.Method,
+					r.URL.Path,
+				)
+			}()
+			next.ServeHTTP(w, r)
+		})
 	}
 }

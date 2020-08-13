@@ -13,13 +13,15 @@ import { formatAsCurrency, formatWithCommas } from "../../utils/number";
 import ExternalLink from "../common/ExternalLink";
 import OverflowDiv from "../common/OverflowDiv";
 
-const StockInfo = ({ info, symbol, currentVolume }) => (
+const StockInfo = ({ info, symbol, currentVolume, lastCandlePrice }) => (
   <TableContainer>
     <Table>
       <TableBody>
         <TableRow>
           <TableCell>Price</TableCell>
-          <TableCell>{formatAsCurrency(info.price)}</TableCell>
+          <TableCell>
+            {formatAsCurrency(lastCandlePrice || info.price)}
+          </TableCell>
         </TableRow>
         <TableRow>
           <TableCell>Market Cap</TableCell>
@@ -99,6 +101,7 @@ const StockInfo = ({ info, symbol, currentVolume }) => (
 StockInfo.propTypes = {
   symbol: PropTypes.string.isRequired,
   currentVolume: PropTypes.number,
+  lastCandlePrice: PropTypes.number,
   info: PropTypes.shape({
     price: PropTypes.number,
     industry: PropTypes.string,
@@ -115,6 +118,7 @@ StockInfo.propTypes = {
 };
 
 StockInfo.defaultProps = {
+  lastCandlePrice: 0,
   currentVolume: 0,
 };
 
