@@ -14,3 +14,20 @@ func Sum(nums ...int64) (total int64) {
 	}
 	return total
 }
+
+func Abs(num int64) int64 {
+	if num < 0 {
+		return -1 * num
+	}
+	return num
+}
+
+func Max(nums ...int64) int64 {
+	max := nums[0]
+	for _, num := range nums {
+		if num > max {
+			max = num
+		}
+	}
+	return max
+}

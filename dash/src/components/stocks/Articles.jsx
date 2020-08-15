@@ -49,7 +49,11 @@ Articles.propTypes = {
       url: PropTypes.string.isRequired,
       publishedAt: PropTypes.string.isRequired,
     })
-  ).isRequired,
+  ),
+};
+
+Articles.defaultProps = {
+  articles: [],
 };
 
 export default Articles;

@@ -12,12 +12,12 @@ func MACD(values []int64, fastEmaInterval, slowEmaInterval, signalInterval int) 
 		slowEMAs := EMA(values, slowEmaInterval)
 		macdLine := make([]int64, 0, len(values)-slowEmaInterval)
 		for i := slowEmaInterval - 1; i < len(values); i++ {
-			macdLine = append(macdLine, fastEMAs[i].Micro-slowEMAs[i].Micro)
+			macdLine = append(macdLine, fastEMAs[i].Value-slowEMAs[i].Value)
 		}
 		signalEMAs := EMA(macdLine, 9)
 		for i, signal := range signalEMAs {
 			if signal.Valid {
-				results = append(results, genValidMicro(macdLine[i]-signal.Micro))
+				results = append(results, genValidMicro(macdLine[i]-signal.Value))
 			}
 		}
 	} else {

@@ -36,6 +36,10 @@ func (c Candle) MarshalJSON() ([]byte, error) {
 	})
 }
 
+func (c Candle) IsZero() bool {
+	return c == Candle{}
+}
+
 func DollarsToMicros(dollars float64) int64 {
 	return int64(dollars * utils.Million)
 }

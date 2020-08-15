@@ -18,11 +18,6 @@ import { fetchStockCharts, fetchStockInfo } from "../../data/stocks";
 import Articles from "./Articles";
 import StockInfo from "./StockInfo";
 
-const formatCandle = ({ openedAt, ...candle }) => ({
-  x: openedAt,
-  ...candle,
-});
-
 const StockPage = () => {
   const [candleSize, setCandleSize] = useState("1min");
   const handleCandleSizeChange = useCallback(
@@ -58,10 +53,7 @@ const StockPage = () => {
         if (chartsJSON instanceof Error) {
           apiErrors = [...apiErrors, chartsJSON.message];
         } else {
-          setCharts({
-            ...chartsJSON,
-            candles: chartsJSON.candles?.map(formatCandle),
-          });
+          setCharts(chartsJSON);
         }
         setErrors(apiErrors);
         setIsLoading(false);
@@ -84,10 +76,7 @@ const StockPage = () => {
         setErrors([response.message]);
       } else {
         setErrors([]);
-        setCharts({
-          ...response,
-          candles: response.candles?.map(formatCandle),
-        });
+        setCharts(response);
       }
     });
   }, [setCharts, symbol, showExtendedHours, candleSize]);
@@ -128,6 +117,7 @@ const StockPage = () => {
             <FormControl>
               <Select value={candleSize} onChange={handleCandleSizeChange}>
                 <MenuItem value="1min">1 minute</MenuItem>
+                <MenuItem value="3min">3 minute</MenuItem>
                 <MenuItem value="5min">5 minute</MenuItem>
                 <MenuItem value="10min">10 minute</MenuItem>
                 <MenuItem value="30min">30 minute</MenuItem>

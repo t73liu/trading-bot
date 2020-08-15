@@ -112,14 +112,15 @@ StockInfo.propTypes = {
     averageVolume: PropTypes.number,
     marketCap: PropTypes.number,
     similarStocks: PropTypes.arrayOf(PropTypes.string.isRequired),
-    shortable: PropTypes.bool.isRequired,
-    marginable: PropTypes.bool.isRequired,
-  }).isRequired,
+    shortable: PropTypes.bool,
+    marginable: PropTypes.bool,
+  }),
 };
 
 StockInfo.defaultProps = {
   lastCandlePrice: 0,
   currentVolume: 0,
+  info: {},
 };
 
 export default StockInfo;

@@ -82,7 +82,7 @@ func TestVWAP(t *testing.T) {
 func testVWAPFunc(candles []candle.Candle, expected []ValidMicro) func(*testing.T) {
 	return func(t *testing.T) {
 		actual := VWAP(candles)
-		if !eqValidCalcSlice(expected, actual) {
+		if !eqValidMicroSlice(expected, actual) {
 			t.Errorf("\nExpected: %v\nActual: %v", expected, actual)
 		}
 	}

@@ -12,10 +12,11 @@ is assumed (i.e. same price for open, high, low, close and volume is zero).
 ```golang
 package main
 
+import "github.com/t73liu/trading-bot/lib/candle"
 import "github.com/t73liu/trading-bot/lib/technical-analysis"
 
 func main() {
-	candles := []analyze.Candle{{Close: 12}, {Close: 15}}
+	candles := []candle.Candle{{Close: 12}, {Close: 15}}
 	// SMA 20-period
 	results := analyze.SMA(candles, 20)
 	// EMA 20-period
@@ -30,6 +31,11 @@ func main() {
 - [x] Relative Strength Index (RSI)
 - [x] Moving Average Convergence Divergence (MACD)
 - [x] Volume Weighted Average Price (VWAP)
+- [x] Average True Value (ATR)
+- [x] Keltner Channels
+- [x] Bollinger Bands
+- [x] TTM Squeeze
+- [ ] Ease of Movement (EMV)
 - [ ] Stochastic Oscillator
 - [ ] Commodity Channel Index (CCI)
 - [ ] Ehler's Roofing Filter

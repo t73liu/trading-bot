@@ -2,12 +2,36 @@ package analyze
 
 func genValidMicro(value int64) ValidMicro {
 	return ValidMicro{
-		Micro: value,
+		Value: value,
 		Valid: true,
 	}
 }
 
-func eqValidCalcSlice(expected, actual []ValidMicro) bool {
+func eqValidMicroSlice(expected, actual []ValidMicro) bool {
+	if len(expected) != len(actual) {
+		return false
+	}
+	for i := range expected {
+		if expected[i] != actual[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func eqValidBoolSlice(expected, actual []ValidBool) bool {
+	if len(expected) != len(actual) {
+		return false
+	}
+	for i := range expected {
+		if expected[i] != actual[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func eqValidMicroRangeSlice(expected, actual []ValidMicroRange) bool {
 	if len(expected) != len(actual) {
 		return false
 	}

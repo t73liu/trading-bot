@@ -55,7 +55,7 @@ func TestSMA(t *testing.T) {
 func testSMAFunc(closingPrices []int64, interval int, expected []ValidMicro) func(*testing.T) {
 	return func(t *testing.T) {
 		actual := SMA(closingPrices, interval)
-		if !eqValidCalcSlice(expected, actual) {
+		if !eqValidMicroSlice(expected, actual) {
 			t.Errorf("\nExpected: %v\nActual: %v", expected, actual)
 		}
 	}

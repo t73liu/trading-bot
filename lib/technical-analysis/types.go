@@ -7,20 +7,20 @@ import (
 )
 
 type ValidMicro struct {
-	Micro int64
 	Valid bool
+	Value int64
 }
 
 func (vm ValidMicro) MarshalJSON() ([]byte, error) {
 	if vm.Valid {
-		return json.Marshal(utils.RoundToTwoDecimals(candle.MicrosToDollars(vm.Micro)))
+		return json.Marshal(utils.RoundToTwoDecimals(candle.MicrosToDollars(vm.Value)))
 	}
 	return json.Marshal(nil)
 }
 
 type ValidFloat struct {
-	Value float64
 	Valid bool
+	Value float64
 }
 
 func (vf ValidFloat) MarshalJSON() ([]byte, error) {
@@ -28,4 +28,23 @@ func (vf ValidFloat) MarshalJSON() ([]byte, error) {
 		return json.Marshal(vf.Value)
 	}
 	return json.Marshal(nil)
+}
+
+type ValidBool struct {
+	Valid bool
+	Value bool
+}
+
+func (vb ValidBool) MarshalJSON() ([]byte, error) {
+	if vb.Valid {
+		return json.Marshal(vb.Value)
+	}
+	return json.Marshal(nil)
+}
+
+type ValidMicroRange struct {
+	Valid bool
+	High  int64
+	Mid   int64
+	Low   int64
 }

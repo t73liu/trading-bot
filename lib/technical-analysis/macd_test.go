@@ -53,16 +53,10 @@ func TestStandardMACD(t *testing.T) {
 				candle.DollarsToMicros(426.21),
 			},
 			// Same as SMA for initial calc: (10 + 10 + 10 + 10 + 15) / 5 = 11
-			[]ValidMicro{
-				{}, {}, {}, {}, {},
-				{}, {}, {}, {}, {},
-				{}, {}, {}, {}, {},
-				{}, {}, {}, {}, {},
-				{}, {}, {}, {}, {},
-				{}, {}, {}, {}, {},
-				{}, {}, {},
-				{-5108084, true},
-			},
+			append(
+				make([]ValidMicro, 33, 34),
+				genValidMicro(-5108084),
+			),
 		),
 	)
 	t.Run(
@@ -120,32 +114,26 @@ func TestStandardMACD(t *testing.T) {
 				candle.DollarsToMicros(430.12),
 				candle.DollarsToMicros(442.78),
 			},
-			[]ValidMicro{
-				{}, {}, {}, {}, {},
-				{}, {}, {}, {}, {},
-				{}, {}, {}, {}, {},
-				{}, {}, {}, {}, {},
-				{}, {}, {}, {}, {},
-				{}, {}, {}, {}, {},
-				{}, {}, {},
-				{-5108084, true},
-				{-4527496, true},
-				{-3387777, true},
-				{-2592274, true},
-				{-2250615, true},
-				{-2552088, true},
-				{-2192264, true},
-				{-3335498, true},
-				{-4543441, true},
-				{-5129228, true},
-				{-4666182, true},
-				{-3602783, true},
-				{-2729465, true},
-				{-1785740, true},
-				{-466764, true},
-				{1280988, true},
-				{3186354, true},
-			},
+			append(
+				make([]ValidMicro, 33, 50),
+				genValidMicro(-5108084),
+				genValidMicro(-4527496),
+				genValidMicro(-3387777),
+				genValidMicro(-2592274),
+				genValidMicro(-2250615),
+				genValidMicro(-2552088),
+				genValidMicro(-2192264),
+				genValidMicro(-3335498),
+				genValidMicro(-4543441),
+				genValidMicro(-5129228),
+				genValidMicro(-4666182),
+				genValidMicro(-3602783),
+				genValidMicro(-2729465),
+				genValidMicro(-1785740),
+				genValidMicro(-466764),
+				genValidMicro(1280988),
+				genValidMicro(3186354),
+			),
 		),
 	)
 }
@@ -153,7 +141,7 @@ func TestStandardMACD(t *testing.T) {
 func testStandardMACDFunc(closingPrices []int64, expected []ValidMicro) func(*testing.T) {
 	return func(t *testing.T) {
 		actual := StandardMACD(closingPrices)
-		if !eqValidCalcSlice(expected, actual) {
+		if !eqValidMicroSlice(expected, actual) {
 			t.Errorf("\nExpected: %v\nActual: %v", expected, actual)
 		}
 	}
