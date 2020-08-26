@@ -1,10 +1,12 @@
 import React from "react";
 import {
   VictoryAxis,
+  VictoryBar,
   VictoryCandlestick,
   VictoryChart,
+  VictoryLegend,
   VictoryLine,
-  VictoryBar,
+  VictoryScatter,
   VictoryTooltip,
 } from "victory";
 import PropTypes from "prop-types";
@@ -21,7 +23,7 @@ const formatDateStr = (dateStr) => {
 const TICK_LABEL_SIZE = { tickLabels: { fontSize: 8 } };
 
 const CandlestickChart = ({ data, className }) => {
-  const { candles, vwap, volume } = data;
+  const { candles, vwap, volume, ema, ttmSqueeze } = data;
   let min = 0;
   let max = 0;
   // eslint-disable-next-line no-unused-expressions
@@ -35,14 +37,25 @@ const CandlestickChart = ({ data, className }) => {
   });
   return (
     <div className={className}>
-      <VictoryChart scale={{ x: "time" }}>
+      <VictoryChart scale={{ x: "time" }} domain={{ y: [min, max] }}>
         <VictoryAxis
-          label="Time (min)"
           style={TICK_LABEL_SIZE}
           tickCount={8}
           tickFormat={formatDateStr}
         />
         <VictoryAxis dependentAxis style={TICK_LABEL_SIZE} />
+        <VictoryLegend
+          x={150}
+          y={50}
+          orientation="horizontal"
+          gutter={20}
+          style={{ border: { stroke: "black" }, labels: { fontSize: 8 } }}
+          data={[
+            { name: "VWAP", symbol: { fill: "#FF7700" } },
+            { name: "EMA", symbol: { fill: "#008080" } },
+            { name: "Squeeze", symbol: { fill: "purple" } },
+          ]}
+        />
         {candles?.length > 0 && (
           <VictoryCandlestick
             labelComponent={<VictoryTooltip />}
@@ -54,14 +67,35 @@ const CandlestickChart = ({ data, className }) => {
         )}
         {vwap?.length > 0 && (
           <VictoryLine
-            data={vwap}
-            style={{ data: { stroke: "gray", strokeWidth: 0.5 } }}
+            x="openedAt"
+            data={vwap?.map((y, i) => ({ openedAt: candles?.[i].openedAt, y }))}
+            style={{ data: { stroke: "#FF7700", strokeWidth: 0.8 } }}
           />
         )}
-        {/* TODO figure out multi-line chart */}
-        {/* {ema?.length > 0 && <VictoryLine data={ema} />} */}
+        {ema?.length > 0 && (
+          <VictoryLine
+            x="openedAt"
+            data={ema?.map((y, i) => ({ openedAt: candles?.[i].openedAt, y }))}
+            style={{ data: { stroke: "#003A80", strokeWidth: 0.8 } }}
+          />
+        )}
+        {ttmSqueeze?.length > 0 && (
+          <VictoryScatter
+            style={{
+              data: { fill: "purple" },
+            }}
+            size={2}
+            data={ttmSqueeze?.map((y, i) => {
+              const candle = candles[i];
+              return {
+                x: candle.openedAt,
+                y: y ? min : null,
+              };
+            })}
+          />
+        )}
       </VictoryChart>
-      <VictoryChart height={160} scale={{ x: "time" }}>
+      <VictoryChart height={150} scale={{ x: "time" }}>
         <VictoryAxis
           style={TICK_LABEL_SIZE}
           tickCount={8}
@@ -112,6 +146,7 @@ CandlestickChart.propTypes = {
     vwap: PropTypes.arrayOf(PropTypes.number.isRequired),
     volume: PropTypes.arrayOf(PropTypes.number.isRequired),
     ema: PropTypes.arrayOf(PropTypes.number),
+    ttmSqueeze: PropTypes.arrayOf(PropTypes.bool),
   }),
 };
 

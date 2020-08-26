@@ -81,72 +81,66 @@ func (h *Handlers) getStockCharts(w http.ResponseWriter, r *http.Request) {
 	}
 	startTime := utils.GetMidnight(endTime, location)
 	query := r.URL.Query()
-	showExtendedHours, _ := strconv.ParseBool(query.Get("showExtendedHours"))
+
 	charts := make(map[string]interface{})
-	if query.Get("interval") == "intraday" {
-		bars, err := h.polygonClient.GetTickerBars(polygon.TickerBarsQueryParams{
-			Ticker:       symbol,
-			TimeInterval: 1,
-			TimeUnit:     "minute",
-			StartDate:    startTime,
-			EndDate:      endTime,
-			Unadjusted:   false,
-			Sort:         "asc",
-		})
-		if err != nil {
-			utils.JSONError(w, err)
-		}
-		candles := make([]candle.Candle, 0, len(bars))
-		for _, bar := range bars {
-			candles = append(candles, candle.Candle{
-				OpenedAt:    utils.ConvertUnixMillisToTime(bar.StartAtUnixMillis).In(location),
-				Volume:      int64(bar.Volume),
-				OpenMicros:  candle.DollarsToMicros(bar.Open),
-				HighMicros:  candle.DollarsToMicros(bar.High),
-				LowMicros:   candle.DollarsToMicros(bar.Low),
-				CloseMicros: candle.DollarsToMicros(bar.Close),
-			})
-		}
-
-		// Format Candles
-		if !showExtendedHours {
-			candles = candle.FilterTradingHourCandles(candles)
-		}
-		candles = candle.FillMinuteCandles(candles)
-		candleSize := query.Get("candleSize")
-		switch candleSize {
-		case "3min":
-			candles, _ = candle.CompressCandles(candles, 3, "minute", location)
-			break
-		case "5min":
-			candles, _ = candle.CompressCandles(candles, 5, "minute", location)
-			break
-		case "10min":
-			candles, _ = candle.CompressCandles(candles, 10, "minute", location)
-			break
-		case "30min":
-			candles, _ = candle.CompressCandles(candles, 30, "minute", location)
-			break
-		case "1hour":
-			candles, _ = candle.CompressCandles(candles, 1, "hour", location)
-			break
-		}
-
-		// Add candles and indicators to response
-		charts["candles"] = candles
-		charts["ema"] = analyze.EMA(candle.GetClosingPrices(candles), 9)
-		charts["vwap"] = analyze.VWAP(candles)
-		volumes := candle.GetVolumes(candles)
-		charts["volume"] = volumes
-		charts["currentVolume"] = utils.Sum(volumes...)
-		utils.JSONResponse(w, charts)
-	} else {
-		candles, err := traderdb.GetStockCandles(h.db, symbol, startTime, endTime)
-		if err != nil {
-			utils.JSONError(w, err)
-		}
-		utils.JSONResponse(w, candles)
+	bars, err := h.polygonClient.GetTickerBars(polygon.TickerBarsQueryParams{
+		Ticker:       symbol,
+		TimeInterval: 1,
+		TimeUnit:     "minute",
+		StartDate:    startTime,
+		EndDate:      endTime,
+		Unadjusted:   false,
+		Sort:         "asc",
+	})
+	if err != nil {
+		utils.JSONError(w, err)
 	}
+	candles := make([]candle.Candle, 0, len(bars))
+	for _, bar := range bars {
+		candles = append(candles, candle.Candle{
+			OpenedAt:    utils.ConvertUnixMillisToTime(bar.StartAtUnixMillis).In(location),
+			Volume:      int64(bar.Volume),
+			OpenMicros:  candle.DollarsToMicros(bar.Open),
+			HighMicros:  candle.DollarsToMicros(bar.High),
+			LowMicros:   candle.DollarsToMicros(bar.Low),
+			CloseMicros: candle.DollarsToMicros(bar.Close),
+		})
+	}
+
+	// Format Candles
+	showExtendedHours, _ := strconv.ParseBool(query.Get("showExtendedHours"))
+	if !showExtendedHours {
+		candles = candle.FilterTradingHourCandles(candles)
+	}
+	candles = candle.FillMinuteCandles(candles)
+	candleSize := query.Get("candleSize")
+	switch candleSize {
+	case "3min":
+		candles, _ = candle.CompressCandles(candles, 3, "minute", location)
+		break
+	case "5min":
+		candles, _ = candle.CompressCandles(candles, 5, "minute", location)
+		break
+	case "10min":
+		candles, _ = candle.CompressCandles(candles, 10, "minute", location)
+		break
+	case "30min":
+		candles, _ = candle.CompressCandles(candles, 30, "minute", location)
+		break
+	case "1hour":
+		candles, _ = candle.CompressCandles(candles, 1, "hour", location)
+		break
+	}
+
+	// Add candles and indicators to response
+	charts["candles"] = candles
+	charts["ema"] = analyze.EMA(candle.GetClosingPrices(candles), 9)
+	charts["vwap"] = analyze.VWAP(candles)
+	volumes := candle.GetVolumes(candles)
+	charts["volume"] = volumes
+	charts["currentVolume"] = utils.Sum(volumes...)
+	charts["ttmSqueeze"] = analyze.TTMSqueeze(candles)
+	utils.JSONResponse(w, charts)
 }
 
 // TODO Use once Polygon issues are resolved
