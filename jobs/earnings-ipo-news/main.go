@@ -109,13 +109,9 @@ func getEmailParams(
 	startTime time.Time,
 	endTime time.Time,
 ) (params EmailParams, err error) {
-	tradableSymbols := make(map[string]struct{})
-	stocks, err := traderdb.GetTradableStocks(db)
+	tradableStocksBySymbol, err := traderdb.GetTradableStocksBySymbol(db)
 	if err != nil {
 		return params, err
-	}
-	for _, stock := range stocks {
-		tradableSymbols[stock.Symbol] = struct{}{}
 	}
 
 	earnings, err := getEarnings(yahooClient, startTime, endTime)
@@ -128,7 +124,7 @@ func getEmailParams(
 		_, ok := earningTickers[earningsCall.Ticker]
 		if !ok {
 			earningTickers[earningsCall.Ticker] = struct{}{}
-			if _, ok := tradableSymbols[earningsCall.Ticker]; ok {
+			if _, ok := tradableStocksBySymbol[earningsCall.Ticker]; ok {
 				filteredEarnings = append(filteredEarnings, earningsCall)
 			}
 		}

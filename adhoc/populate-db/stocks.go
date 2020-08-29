@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"tradingbot/lib/alpaca"
+	"tradingbot/lib/traderdb"
 	"tradingbot/lib/utils"
 )
 
@@ -50,49 +51,113 @@ func main() {
 		os.Exit(1)
 	}
 
+	stocksBySymbol, err := traderdb.GetTradableStocksBySymbol(conn)
+	if err != nil {
+		fmt.Println("Failed to get existing stocks by symbol:", err)
+		os.Exit(1)
+	}
+
 	assets, err := alpacaClient.GetAssets("active", "")
 	if err != nil {
 		fmt.Println("Failed to fetch Alpaca supported stocks:", err)
 		os.Exit(1)
 	}
+	assetsBySymbol := make(map[string]alpaca.Asset)
+	for _, asset := range assets {
+		if company, ok := companyByTicker[asset.Symbol]; ok {
+			asset.Name = company
+		}
+		assetsBySymbol[asset.Symbol] = asset
+	}
 
-	if err = bulkInsertStocks(conn, assets, companyByTicker); err != nil {
+	inactiveSymbols := make([]string, 0, len(assets))
+	for _, stock := range stocksBySymbol {
+		if _, ok := assetsBySymbol[stock.Symbol]; !ok {
+			inactiveSymbols = append(inactiveSymbols, stock.Symbol)
+		}
+	}
+
+	updatedAssets := make([]alpaca.Asset, 0, len(assets))
+	newAssets := make([]alpaca.Asset, 0, len(assets))
+	for symbol, asset := range assetsBySymbol {
+		stock, ok := stocksBySymbol[symbol]
+		if ok {
+			if !equalAssetAndStock(asset, stock) {
+				updatedAssets = append(updatedAssets, asset)
+			}
+		} else {
+			newAssets = append(newAssets, asset)
+		}
+	}
+
+	if err = updateStocks(conn, inactiveSymbols, updatedAssets, newAssets); err != nil {
 		fmt.Println("Failed to populate DB with stocks:", err)
 		os.Exit(1)
 	}
 }
 
-func bulkInsertStocks(conn *pgx.Conn, assets []alpaca.Asset, companyByTicker map[string]string) error {
+func equalAssetAndStock(asset alpaca.Asset, stock traderdb.Stock) bool {
+	return stock.Marginable == asset.Marginable ||
+		stock.Exchange == asset.Exchange ||
+		stock.Company == asset.Name ||
+		stock.Shortable == (asset.Shortable && asset.EasyToBorrow)
+}
+
+func updateStocks(conn *pgx.Conn, inactiveSymbols []string, updatedAssets []alpaca.Asset, newAssets []alpaca.Asset) error {
 	tx, err := conn.Begin(context.Background())
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(context.Background())
 
-	rows := make([][]interface{}, 0, len(assets))
-	for _, asset := range assets {
-		name := asset.Name
-		if company, ok := companyByTicker[asset.Symbol]; ok {
-			name = company
+	// Update inactive stocks
+	for _, inactiveSymbol := range inactiveSymbols {
+		_, err = tx.Exec(context.Background(), "UPDATE stocks SET tradable = false WHERE symbol = $1", inactiveSymbol)
+		if err != nil {
+			return err
 		}
-		rows = append(rows, []interface{}{
-			asset.Symbol,
-			name,
-			asset.Exchange,
-			asset.Tradable,
-			asset.Marginable,
-			asset.Shortable && asset.EasyToBorrow,
-		})
 	}
 
-	_, err = tx.CopyFrom(
-		context.Background(),
-		pgx.Identifier{"stocks"},
-		[]string{"symbol", "company", "exchange", "tradable", "marginable", "shortable"},
-		pgx.CopyFromRows(rows),
-	)
-	if err != nil {
-		return err
+	// Update outdated assets
+	for _, asset := range updatedAssets {
+		_, err = tx.Exec(
+			context.Background(),
+			"UPDATE stocks SET company = $1, tradable = $2, shortable = $3, marginable = $4, exchange = $5 WHERE symbol = $6",
+			asset.Name,
+			asset.Tradable,
+			asset.Shortable && asset.EasyToBorrow,
+			asset.Marginable,
+			asset.Exchange,
+			asset.Symbol,
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Insert new assets
+	if len(newAssets) != 0 {
+		rows := make([][]interface{}, 0, len(newAssets))
+		for _, asset := range newAssets {
+			rows = append(rows, []interface{}{
+				asset.Symbol,
+				asset.Name,
+				asset.Exchange,
+				asset.Tradable,
+				asset.Marginable,
+				asset.Shortable && asset.EasyToBorrow,
+			})
+		}
+
+		_, err = tx.CopyFrom(
+			context.Background(),
+			pgx.Identifier{"stocks"},
+			[]string{"symbol", "company", "exchange", "tradable", "marginable", "shortable"},
+			pgx.CopyFromRows(rows),
+		)
+		if err != nil {
+			return err
+		}
 	}
 
 	if err = tx.Commit(context.Background()); err != nil {

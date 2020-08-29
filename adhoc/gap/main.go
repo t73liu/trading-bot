@@ -37,14 +37,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	stocks, err := traderdb.GetTradableStocks(db)
+	tradableSymbols, err := traderdb.GetTradableStocksBySymbol(db)
 	if err != nil {
 		fmt.Println("Failed to query tradable stocks from DB:", err)
 		os.Exit(1)
-	}
-	tradableSymbols := make(map[string]traderdb.Stock)
-	for _, stock := range stocks {
-		tradableSymbols[stock.Symbol] = stock
 	}
 
 	httpClient := utils.NewHttpClient()

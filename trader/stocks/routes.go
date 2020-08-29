@@ -171,14 +171,10 @@ func (h *Handlers) getStockOptions(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) getGapStocks(w http.ResponseWriter, _ *http.Request) {
-	stocks, err := traderdb.GetTradableStocks(h.db)
+	stocksBySymbol, err := traderdb.GetTradableStocksBySymbol(h.db)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
-	}
-	companyBySymbol := make(map[string]string)
-	for _, stock := range stocks {
-		companyBySymbol[stock.Symbol] = stock.Company
 	}
 	snapshots := make(map[string][]Snapshot)
 	gains, err := h.polygonClient.GetMovers(true)
@@ -188,9 +184,9 @@ func (h *Handlers) getGapStocks(w http.ResponseWriter, _ *http.Request) {
 	}
 	gapUpStocks := make([]Snapshot, 0, len(gains))
 	for _, gain := range gains {
-		if company, ok := companyBySymbol[gain.Ticker]; ok {
+		if stock, ok := stocksBySymbol[gain.Ticker]; ok {
 			gapUpStocks = append(gapUpStocks, Snapshot{
-				Company:        company,
+				Company:        stock.Company,
 				Symbol:         gain.Ticker,
 				Change:         gain.Change,
 				ChangePercent:  gain.ChangePercent,
@@ -208,9 +204,9 @@ func (h *Handlers) getGapStocks(w http.ResponseWriter, _ *http.Request) {
 	}
 	gapDownStocks := make([]Snapshot, 0, len(losses))
 	for _, loss := range losses {
-		if company, ok := companyBySymbol[loss.Ticker]; ok {
+		if stock, ok := stocksBySymbol[loss.Ticker]; ok {
 			gapDownStocks = append(gapDownStocks, Snapshot{
-				Company:        company,
+				Company:        stock.Company,
 				Symbol:         loss.Ticker,
 				Change:         loss.Change,
 				ChangePercent:  loss.ChangePercent,
