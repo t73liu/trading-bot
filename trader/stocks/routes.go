@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 	"tradingbot/lib/candle"
+	"tradingbot/lib/finviz"
+	"tradingbot/lib/options"
 	"tradingbot/lib/polygon"
 	analyze "tradingbot/lib/technical-analysis"
 	"tradingbot/lib/traderdb"
@@ -21,14 +23,18 @@ type Handlers struct {
 	db            *pgxpool.Pool
 	polygonClient *polygon.Client
 	yahooClient   *yahoo.Client
+	finvizClient  *finviz.Client
+	optionsClient *options.Client
 }
 
-func NewHandlers(logger *log.Logger, db *pgxpool.Pool, polygonClient *polygon.Client, yahooClient *yahoo.Client) *Handlers {
+func NewHandlers(logger *log.Logger, db *pgxpool.Pool, polygonClient *polygon.Client, yahooClient *yahoo.Client, finvizClient *finviz.Client, optionsClient *options.Client) *Handlers {
 	return &Handlers{
 		logger:        logger,
 		db:            db,
 		polygonClient: polygonClient,
 		yahooClient:   yahooClient,
+		finvizClient:  finvizClient,
+		optionsClient: optionsClient,
 	}
 }
 
@@ -154,6 +160,16 @@ func (h *Handlers) getStockNews(w http.ResponseWriter, r *http.Request) {
 	utils.JSONResponse(w, news)
 }
 
+func (h *Handlers) getStockOptions(w http.ResponseWriter, r *http.Request) {
+	symbol := getSymbol(r)
+	stockOptions, err := h.optionsClient.GetOptions(symbol)
+	if err != nil {
+		utils.JSONError(w, err)
+		return
+	}
+	utils.JSONResponse(w, stockOptions)
+}
+
 func (h *Handlers) getGapStocks(w http.ResponseWriter, _ *http.Request) {
 	stocks, err := traderdb.GetTradableStocks(h.db)
 	if err != nil {
@@ -208,12 +224,26 @@ func (h *Handlers) getGapStocks(w http.ResponseWriter, _ *http.Request) {
 	utils.JSONResponse(w, snapshots)
 }
 
+// Optionable, 2B+ market cap, Up 1% from open, Over 2M volume, Over 1 relative Volume
+const screenerQuery = "v=111&f=cap_midover,sh_curvol_o2000,sh_opt_option,sh_relvol_o1,ta_changeopen_u1&ft=4&o=-change"
+
+func (h *Handlers) getScreenedStocks(w http.ResponseWriter, _ *http.Request) {
+	screenedStocks, err := h.finvizClient.ScreenStocksOverview(screenerQuery)
+	if err != nil {
+		utils.JSONError(w, err)
+		return
+	}
+	utils.JSONResponse(w, screenedStocks)
+}
+
 func (h *Handlers) AddRoutes(router *mux.Router) {
 	router.HandleFunc("", h.getTradableStocks).Methods("GET")
 	router.HandleFunc("/gaps", h.getGapStocks).Methods("GET")
+	router.HandleFunc("/screened", h.getScreenedStocks).Methods("GET")
 	router.HandleFunc("/{symbol}", h.getStockInfo).Methods("GET")
 	router.HandleFunc("/{symbol}/charts", h.getStockCharts).Methods("GET")
 	router.HandleFunc("/{symbol}/news", h.getStockNews).Methods("GET")
+	router.HandleFunc("/{symbol}/options", h.getStockOptions).Methods("GET")
 }
 
 func getSymbol(r *http.Request) string {
