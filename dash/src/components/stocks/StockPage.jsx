@@ -12,25 +12,39 @@ import {
   Select,
   Switch,
 } from "@material-ui/core";
+import { useDispatch, useSelector } from "react-redux";
+import { createSelector } from "reselect";
 import { useTitleContext } from "../../state/title-context";
 import CandlestickChart from "../common/CandlestickChart";
 import { fetchStockCharts, fetchStockInfo } from "../../data/stocks";
 import Articles from "./Articles";
 import StockInfo from "./StockInfo";
+import { setCandleSize, toggleShowExtendedHours } from "../../state/account";
+
+const getCandleSize = createSelector(
+  (state) => state.account,
+  (account) => account.candleSize
+);
+
+const getShowExtendedHours = createSelector(
+  (state) => state.account,
+  (account) => account.showExtendedHours
+);
 
 const StockPage = () => {
-  const [candleSize, setCandleSize] = useState("1min");
+  const dispatch = useDispatch();
+  const candleSize = useSelector(getCandleSize);
   const handleCandleSizeChange = useCallback(
     (e) => {
-      setCandleSize(e.target.value);
+      dispatch(setCandleSize(e.target.value));
     },
-    [setCandleSize]
+    [dispatch]
   );
+  const showExtendedHours = useSelector(getShowExtendedHours);
+  const handleExtendedHoursToggle = useCallback(() => {
+    dispatch(toggleShowExtendedHours());
+  }, [dispatch]);
   const [isLoading, setIsLoading] = useState(false);
-  const [showExtendedHours, setShowExtendedHours] = useState(false);
-  const toggleShowExtendedHours = useCallback(() => {
-    setShowExtendedHours((prevState) => !prevState);
-  }, [setShowExtendedHours]);
   const [info, setInfo] = useState({});
   const [charts, setCharts] = useState({});
   const [errors, setErrors] = useState(undefined);
@@ -109,7 +123,7 @@ const StockPage = () => {
                 <Switch
                   name="extended"
                   checked={showExtendedHours}
-                  onChange={toggleShowExtendedHours}
+                  onChange={handleExtendedHoursToggle}
                 />
               }
               label="Show Extended Hours"

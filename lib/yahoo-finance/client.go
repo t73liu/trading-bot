@@ -225,12 +225,14 @@ func (c *Client) GetStock(symbol string) (stock Stock, err error) {
 			stock.Price = price["raw"].(float64)
 			stock.AverageVolume = int64(volume["raw"].(float64))
 			// Company details
-			summary := quoteStore["summaryProfile"].(map[string]interface{})
-			stock.Sector = summary["sector"].(string)
-			stock.Industry = summary["industry"].(string)
-			stock.Website = CastToString(summary["website"])
-			stock.Country = CastToString(summary["country"])
-			stock.Description = CastToString(summary["longBusinessSummary"])
+			if quoteStore["summaryProfile"] != nil {
+				summary := quoteStore["summaryProfile"].(map[string]interface{})
+				stock.Sector = summary["sector"].(string)
+				stock.Industry = summary["industry"].(string)
+				stock.Website = CastToString(summary["website"])
+				stock.Country = CastToString(summary["country"])
+				stock.Description = CastToString(summary["longBusinessSummary"])
+			}
 
 			// News
 			streamStore := stores["StreamStore"].(map[string]interface{})
