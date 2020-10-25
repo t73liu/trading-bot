@@ -13,7 +13,7 @@ import {
   Switch,
 } from "@material-ui/core";
 import { useDispatch, useSelector } from "react-redux";
-import { createSelector } from "reselect";
+import { createSelector } from "@reduxjs/toolkit";
 import { useTitleContext } from "../../state/title-context";
 import CandlestickChart from "../common/CandlestickChart";
 import { fetchStockCharts, fetchStockInfo } from "../../data/stocks";
