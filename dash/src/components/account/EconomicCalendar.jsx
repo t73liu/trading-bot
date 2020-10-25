@@ -10,7 +10,6 @@ const EconomicCalendar = () => (
       width="650"
       height="467"
       frameBorder="0"
-      allowTransparency="true"
       marginWidth="0"
       marginHeight="0"
     />
