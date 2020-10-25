@@ -14,14 +14,15 @@ type Stock struct {
 	Marginable bool   `json:"marginable"`
 }
 
-const tradableStocksQuery = `
+const allStocksQuery = `
 SELECT id, symbol, company, exchange, tradable, shortable, marginable
 FROM stocks
-WHERE tradable = true
 `
 
-func GetTradableStocks(db PGConnection) (stocks []Stock, err error) {
-	rows, err := db.Query(context.Background(), tradableStocksQuery)
+const allTradableStocksQuery = allStocksQuery + " WHERE tradable = true"
+
+func getStocks(db PGConnection, query string) (stocks []Stock, err error) {
+	rows, err := db.Query(context.Background(), query)
 	if err != nil {
 		return stocks, err
 	}
@@ -55,16 +56,28 @@ func GetTradableStocks(db PGConnection) (stocks []Stock, err error) {
 	return stocks, err
 }
 
-func GetTradableStocksBySymbol(db PGConnection) (stocksBySymbol map[string]Stock, err error) {
+func GetAllStocks(db PGConnection) (stocks []Stock, err error) {
+	return getStocks(db, allStocksQuery)
+}
+
+func GetTradableStocks(db PGConnection) (stocks []Stock, err error) {
+	return getStocks(db, allTradableStocksQuery)
+}
+
+func GetTradableStocksBySymbol(db PGConnection) (map[string]Stock, error) {
 	stocks, err := GetTradableStocks(db)
 	if err != nil {
-		return stocksBySymbol, err
+		return nil, err
 	}
-	stocksBySymbol = make(map[string]Stock)
+	return GroupStocksBySymbol(stocks), nil
+}
+
+func GroupStocksBySymbol(stocks []Stock) map[string]Stock {
+	stocksBySymbol := make(map[string]Stock)
 	for _, stock := range stocks {
 		stocksBySymbol[stock.Symbol] = stock
 	}
-	return stocksBySymbol, nil
+	return stocksBySymbol
 }
 
 const tradableStockQuery = `

@@ -51,11 +51,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	stocksBySymbol, err := traderdb.GetTradableStocksBySymbol(conn)
+	allStocks, err := traderdb.GetAllStocks(conn)
 	if err != nil {
 		fmt.Println("Failed to get existing stocks by symbol:", err)
 		os.Exit(1)
 	}
+	stocksBySymbol := traderdb.GroupStocksBySymbol(allStocks)
 
 	assets, err := alpacaClient.GetAssets("active", "")
 	if err != nil {
