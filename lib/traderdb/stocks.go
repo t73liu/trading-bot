@@ -2,6 +2,7 @@ package traderdb
 
 import (
 	"context"
+	"fmt"
 )
 
 type Stock struct {
@@ -14,12 +15,12 @@ type Stock struct {
 	Marginable bool   `json:"marginable"`
 }
 
-const allStocksQuery = `
+const stocksQuery = `
 SELECT id, symbol, company, exchange, tradable, shortable, marginable
 FROM stocks
+%s
+ORDER BY symbol
 `
-
-const allTradableStocksQuery = allStocksQuery + " WHERE tradable = true"
 
 func getStocks(db PGConnection, query string) (stocks []Stock, err error) {
 	rows, err := db.Query(context.Background(), query)
@@ -57,11 +58,11 @@ func getStocks(db PGConnection, query string) (stocks []Stock, err error) {
 }
 
 func GetAllStocks(db PGConnection) (stocks []Stock, err error) {
-	return getStocks(db, allStocksQuery)
+	return getStocks(db, fmt.Sprintf(stocksQuery, ""))
 }
 
 func GetTradableStocks(db PGConnection) (stocks []Stock, err error) {
-	return getStocks(db, allTradableStocksQuery)
+	return getStocks(db, fmt.Sprintf(stocksQuery, " WHERE tradable = true"))
 }
 
 func GetTradableStocksBySymbol(db PGConnection) (map[string]Stock, error) {

@@ -26,7 +26,6 @@ const CandlestickChart = ({ data, className }) => {
   const { candles, vwap, volume, ema, ttmSqueeze } = data;
   let min = 0;
   let max = 0;
-  // eslint-disable-next-line no-unused-expressions
   candles?.forEach((c) => {
     if (!max || c.high > max) {
       max = c.high;

@@ -7,8 +7,8 @@ const EconomicCalendar = () => (
     <iframe
       title="US Economic Calendar"
       src="https://sslecal2.forexprostools.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&features=datepicker,filters&countries=5&calType=week&timeZone=8&lang=1"
-      width="650"
-      height="467"
+      width="600"
+      height="400"
       frameBorder="0"
       marginWidth="0"
       marginHeight="0"

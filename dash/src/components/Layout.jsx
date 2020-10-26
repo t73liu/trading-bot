@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import clsx from "clsx";
-import { ChevronLeft, Inbox, Menu as MenuIcon } from "@material-ui/icons";
+import { ChevronLeft, TrendingUp, Menu, PieChart } from "@material-ui/icons";
 import {
   AppBar,
   Divider,
   Drawer,
   IconButton,
+  TextField,
   List,
   ListItem,
   ListItemIcon,
@@ -14,13 +15,17 @@ import {
   Typography,
   makeStyles,
 } from "@material-ui/core";
+import { Autocomplete, createFilterOptions } from "@material-ui/lab";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
+import { createSelector } from "@reduxjs/toolkit";
+import { useSelector } from "react-redux";
 import { useTitleContext } from "../state/title-context";
 
 const drawerWidth = 240;
 
+// TODO Simplify layout styles
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
@@ -38,6 +43,13 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
+  },
+  toolbar: {
+    justifyContent: "space-between",
+  },
+  title: {
+    display: "flex",
+    alignItems: "center",
   },
   menuButton: {
     marginRight: theme.spacing(2),
@@ -91,12 +103,30 @@ const Title = () => {
   );
 };
 
+const getStocks = createSelector(
+  (state) => state.stocks,
+  (stocks) => stocks.allStocks
+);
+
+const filterOptions = createFilterOptions({
+  limit: 50,
+});
+
+const getStockLabel = (stock) => `${stock.symbol} - ${stock.company}`;
+
 const Layout = ({ children }) => {
   const classes = useStyles();
+  const history = useHistory();
+  const stocks = useSelector(getStocks);
   const [drawerVisible, setDrawerVisible] = useState(false);
 
   const handleDrawerOpen = () => setDrawerVisible(true);
   const handleDrawerClose = () => setDrawerVisible(false);
+
+  const handleStockClick = useCallback(
+    (e, option) => history.push(`/stocks/${option.symbol}`),
+    [history]
+  );
 
   return (
     <div className={classes.root}>
@@ -106,17 +136,42 @@ const Layout = ({ children }) => {
           [classes.appBarShift]: drawerVisible,
         })}
       >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            className={clsx(classes.menuButton, drawerVisible && classes.hide)}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Title />
+        <Toolbar className={classes.toolbar}>
+          <div className={classes.title}>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={handleDrawerOpen}
+              edge="start"
+              className={clsx(
+                classes.menuButton,
+                drawerVisible && classes.hide
+              )}
+            >
+              <Menu />
+            </IconButton>
+            <Title />
+          </div>
+          <div>
+            <Autocomplete
+              onChange={handleStockClick}
+              filterOptions={filterOptions}
+              options={stocks}
+              getOptionLabel={getStockLabel}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  margin="normal"
+                  variant="outlined"
+                  placeholder="Symbol"
+                  style={{
+                    backgroundColor: "white",
+                    width: 300,
+                  }}
+                />
+              )}
+            />
+          </div>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -138,7 +193,7 @@ const Layout = ({ children }) => {
           <Link to="/">
             <ListItem button>
               <ListItemIcon>
-                <Inbox />
+                <PieChart color="secondary" />
               </ListItemIcon>
               <ListItemText primary="Overview" />
             </ListItem>
@@ -146,7 +201,7 @@ const Layout = ({ children }) => {
           <Link to="/stocks">
             <ListItem button>
               <ListItemIcon>
-                <Inbox />
+                <TrendingUp color="secondary" />
               </ListItemIcon>
               <ListItemText primary="Stocks" />
             </ListItem>
