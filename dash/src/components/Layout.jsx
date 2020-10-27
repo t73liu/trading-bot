@@ -124,7 +124,11 @@ const Layout = ({ children }) => {
   const handleDrawerClose = () => setDrawerVisible(false);
 
   const handleStockClick = useCallback(
-    (e, option) => history.push(`/stocks/${option.symbol}`),
+    (e, option) => {
+      if (option) {
+        history.push(`/stocks/${option.symbol}`);
+      }
+    },
     [history]
   );
 
