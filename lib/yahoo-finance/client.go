@@ -221,7 +221,9 @@ func (c *Client) GetStock(symbol string) (stock Stock, err error) {
 			stock.Symbol = stockDetail["symbol"].(string)
 			stock.Company = stockDetail["longName"].(string)
 			stock.Exchange = stockDetail["exchangeName"].(string)
-			stock.MarketCap = int64(marketCap["raw"].(float64))
+			if marketCap["raw"] != nil {
+				stock.MarketCap = int64(marketCap["raw"].(float64))
+			}
 			stock.Price = price["raw"].(float64)
 			stock.AverageVolume = int64(volume["raw"].(float64))
 			// Company details

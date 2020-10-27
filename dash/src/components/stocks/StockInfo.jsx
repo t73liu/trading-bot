@@ -25,7 +25,9 @@ const StockInfo = ({ info, symbol, currentVolume, lastCandlePrice }) => (
         </TableRow>
         <TableRow>
           <TableCell>Market Cap</TableCell>
-          <TableCell>{formatAsCurrency(info.marketCap)}</TableCell>
+          <TableCell>
+            {info.marketCap > 0 ? formatAsCurrency(info.marketCap) : "N/A"}
+          </TableCell>
         </TableRow>
         <TableRow>
           <TableCell>Current Volume</TableCell>
