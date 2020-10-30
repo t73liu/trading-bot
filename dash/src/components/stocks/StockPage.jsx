@@ -6,30 +6,24 @@ import {
   CircularProgress,
   FormControl,
   FormControlLabel,
-  Grid,
   FormHelperText,
+  Grid,
   MenuItem,
   Select,
   Switch,
 } from "@material-ui/core";
 import { useDispatch, useSelector } from "react-redux";
-import { createSelector } from "@reduxjs/toolkit";
 import { useTitleContext } from "../../state/title-context";
 import CandlestickChart from "../common/CandlestickChart";
 import { fetchStockCharts, fetchStockInfo } from "../../data/stocks";
 import Articles from "./Articles";
 import StockInfo from "./StockInfo";
-import { setCandleSize, toggleShowExtendedHours } from "../../state/account";
-
-const getCandleSize = createSelector(
-  (state) => state.account,
-  (account) => account.candleSize
-);
-
-const getShowExtendedHours = createSelector(
-  (state) => state.account,
-  (account) => account.showExtendedHours
-);
+import {
+  getCandleSize,
+  getShowExtendedHours,
+  setCandleSize,
+  toggleShowExtendedHours,
+} from "../../state/account";
 
 const StockPage = () => {
   const dispatch = useDispatch();

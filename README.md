@@ -26,7 +26,7 @@ This directory will be referred to by the `TRADING_BOT_REPO` environment variabl
 
 ### Technologies
 
-- [Go 1.14](https://golang.org/)
+- [Go 1.15](https://golang.org/)
 - [Node 12](https://nodejs.org/en/)
 - [PostgreSQL 12](https://www.postgresql.org/)
 - [Python 3.7](https://www.python.org/)

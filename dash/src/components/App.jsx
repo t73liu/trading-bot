@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Switch } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { CssBaseline } from "@material-ui/core";
 import { useDispatch } from "react-redux";
-import Overview from "./account/Overview";
+import Market from "./market/Market";
 import Stocks from "./stocks/Stocks";
 import StockPage from "./stocks/StockPage";
 import Layout from "./Layout";
@@ -34,7 +34,7 @@ const App = () => {
                 <Watchlists />
               </Route>
               <Route exact path="/">
-                <Overview />
+                <Market />
               </Route>
               <Route>
                 <NotFound />

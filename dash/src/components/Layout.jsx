@@ -199,7 +199,7 @@ const Layout = ({ children }) => {
               <ListItemIcon>
                 <PieChart color="secondary" />
               </ListItemIcon>
-              <ListItemText primary="Overview" />
+              <ListItemText primary="Market" />
             </ListItem>
           </Link>
           <Link to="/stocks">

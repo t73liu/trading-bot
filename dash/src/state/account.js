@@ -1,4 +1,14 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSelector, createSlice } from "@reduxjs/toolkit";
+
+export const getCandleSize = createSelector(
+  (state) => state.account,
+  (account) => account.candleSize
+);
+
+export const getShowExtendedHours = createSelector(
+  (state) => state.account,
+  (account) => account.showExtendedHours
+);
 
 const accountSlice = createSlice({
   name: "account",
