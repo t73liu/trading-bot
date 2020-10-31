@@ -138,14 +138,18 @@ func (h *Handlers) getStockCharts(w http.ResponseWriter, r *http.Request) {
 		break
 	}
 
-	// Add candles and indicators to response
-	charts["candles"] = candles
-	charts["ema"] = analyze.EMA(candle.GetClosingPrices(candles), 9)
-	charts["vwap"] = analyze.VWAP(candles)
+	// Add candles to response
+	closingPrices := candle.GetClosingPrices(candles)
 	volumes := candle.GetVolumes(candles)
+	charts["candles"] = candles
 	charts["volume"] = volumes
 	charts["currentVolume"] = utils.Sum(volumes...)
+	// Add indicators to response
+	charts["ema"] = analyze.EMA(closingPrices, 9)
+	charts["vwap"] = analyze.VWAP(candles)
 	charts["ttmSqueeze"] = analyze.TTMSqueeze(candles)
+	charts["macd"] = analyze.StandardMACD(closingPrices)
+	charts["rsi"] = analyze.RSI(closingPrices, 14)
 	utils.JSONResponse(w, charts)
 }
 

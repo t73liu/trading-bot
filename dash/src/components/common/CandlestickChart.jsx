@@ -4,6 +4,7 @@ import {
   VictoryBar,
   VictoryCandlestick,
   VictoryChart,
+  VictoryLabel,
   VictoryLegend,
   VictoryLine,
   VictoryScatter,
@@ -23,7 +24,7 @@ const formatDateStr = (dateStr) => {
 const TICK_LABEL_SIZE = { tickLabels: { fontSize: 8 } };
 
 const CandlestickChart = ({ data, className }) => {
-  const { candles, vwap, volume, ema, ttmSqueeze } = data;
+  const { candles, ema, macd, rsi, ttmSqueeze, vwap, volume } = data;
   let min = 0;
   let max = 0;
   candles?.forEach((c) => {
@@ -34,6 +35,25 @@ const CandlestickChart = ({ data, className }) => {
       min = c.low;
     }
   });
+  const formatMACD = (val, i) => {
+    let fill;
+    if (val < 0) {
+      fill = "red";
+      if (i > 0 && val > macd?.[i - 1]) {
+        fill = "#FFCCCB";
+      }
+    } else {
+      fill = "green";
+      if (i > 0 && val < macd?.[i - 1]) {
+        fill = "#90EE90";
+      }
+    }
+    return {
+      openedAt: candles?.[i].openedAt,
+      y: val,
+      fill,
+    };
+  };
   return (
     <div className={className}>
       <VictoryChart scale={{ x: "time" }} domain={{ y: [min, max] }}>
@@ -94,19 +114,82 @@ const CandlestickChart = ({ data, className }) => {
           />
         )}
       </VictoryChart>
-      <VictoryChart height={150} scale={{ x: "time" }}>
-        <VictoryAxis
-          style={TICK_LABEL_SIZE}
-          tickCount={8}
-          tickFormat={formatDateStr}
-        />
-        <VictoryAxis
-          dependentAxis
-          tickFormat={humanizeNumber}
-          style={TICK_LABEL_SIZE}
-        />
-        {volume?.length > 0 && (
+      {macd?.length > 0 && (
+        <VictoryChart height={150} scale={{ x: "time" }}>
+          <VictoryLabel text="MACD" x={225} y={30} textAnchor="middle" />
+          <VictoryAxis
+            style={TICK_LABEL_SIZE}
+            tickCount={8}
+            tickFormat={formatDateStr}
+          />
+          <VictoryAxis
+            dependentAxis
+            tickCount={3}
+            tickFormat={humanizeNumber}
+            style={TICK_LABEL_SIZE}
+          />
           <VictoryBar
+            x="openedAt"
+            style={{
+              data: {
+                fill: ({ datum }) => datum.fill,
+              },
+            }}
+            data={macd?.map(formatMACD)}
+          />
+        </VictoryChart>
+      )}
+      {rsi?.length > 0 && (
+        <VictoryChart
+          height={150}
+          scale={{ x: "time" }}
+          domain={{ y: [0, 100] }}
+        >
+          <VictoryLabel text="RSI" x={225} y={30} textAnchor="middle" />
+          <VictoryAxis
+            style={TICK_LABEL_SIZE}
+            tickCount={8}
+            tickFormat={formatDateStr}
+          />
+          <VictoryAxis
+            dependentAxis
+            style={TICK_LABEL_SIZE}
+            tickFormat={humanizeNumber}
+          />
+          <VictoryLine
+            x="openedAt"
+            data={rsi?.map((y, i) => ({ openedAt: candles?.[i].openedAt, y }))}
+            style={{ data: { stroke: "blue", strokeWidth: 0.8 } }}
+          />
+          <VictoryLine
+            style={{
+              data: { stroke: "red", strokeWidth: 0.3 },
+            }}
+            y={() => 70}
+          />
+          <VictoryLine
+            style={{
+              data: { stroke: "red", strokeWidth: 0.3 },
+            }}
+            y={() => 30}
+          />
+        </VictoryChart>
+      )}
+      {volume?.length > 0 && (
+        <VictoryChart height={150} scale={{ x: "time" }}>
+          <VictoryLabel text="Volume" x={225} y={30} textAnchor="middle" />
+          <VictoryAxis
+            style={TICK_LABEL_SIZE}
+            tickCount={8}
+            tickFormat={formatDateStr}
+          />
+          <VictoryAxis
+            dependentAxis
+            tickFormat={humanizeNumber}
+            style={TICK_LABEL_SIZE}
+          />
+          <VictoryBar
+            x="openedAt"
             style={{
               data: {
                 fill: ({ datum }) => datum.fill,
@@ -115,7 +198,7 @@ const CandlestickChart = ({ data, className }) => {
             data={volume?.map((y, i) => {
               const candle = candles[i];
               return {
-                x: candle.openedAt,
+                openedAt: candle.openedAt,
                 y,
                 label: formatWithCommas(y),
                 fill: candles[i].close > candles[i].open ? "green" : "red",
@@ -123,8 +206,8 @@ const CandlestickChart = ({ data, className }) => {
             })}
             labelComponent={<VictoryTooltip />}
           />
-        )}
-      </VictoryChart>
+        </VictoryChart>
+      )}
     </div>
   );
 };
@@ -142,10 +225,12 @@ CandlestickChart.propTypes = {
         volume: PropTypes.number.isRequired,
       })
     ),
-    vwap: PropTypes.arrayOf(PropTypes.number.isRequired),
-    volume: PropTypes.arrayOf(PropTypes.number.isRequired),
     ema: PropTypes.arrayOf(PropTypes.number),
+    macd: PropTypes.arrayOf(PropTypes.number),
+    rsi: PropTypes.arrayOf(PropTypes.number),
     ttmSqueeze: PropTypes.arrayOf(PropTypes.bool),
+    volume: PropTypes.arrayOf(PropTypes.number.isRequired),
+    vwap: PropTypes.arrayOf(PropTypes.number.isRequired),
   }),
 };
 

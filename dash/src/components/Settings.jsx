@@ -66,24 +66,24 @@ const Settings = ({ visible, handleCloseSettings }) => {
                 label="Show Extended Hours"
               />
               <FormControlLabel
-                control={<Switch name="volume" checked />}
+                control={<Switch name="volume" disabled checked />}
                 label="Volume"
               />
               <hr style={{ width: "100%" }} />
               <FormControlLabel
-                control={<Switch name="ema" checked />}
+                control={<Switch name="ema" disabled checked />}
                 label="EMA"
               />
               <FormControlLabel
-                control={<Switch name="macd" disabled />}
+                control={<Switch name="macd" disabled checked />}
                 label="MACD"
               />
               <FormControlLabel
-                control={<Switch name="rsi" disabled />}
+                control={<Switch name="rsi" disabled checked />}
                 label="RSI"
               />
               <FormControlLabel
-                control={<Switch name="vwap" checked />}
+                control={<Switch name="vwap" disabled checked />}
                 label="VWAP"
               />
             </FormGroup>

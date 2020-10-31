@@ -14,7 +14,7 @@ func MACD(values []int64, fastEmaInterval, slowEmaInterval, signalInterval int) 
 		for i := slowEmaInterval - 1; i < len(values); i++ {
 			macdLine = append(macdLine, fastEMAs[i].Value-slowEMAs[i].Value)
 		}
-		signalEMAs := EMA(macdLine, 9)
+		signalEMAs := EMA(macdLine, signalInterval)
 		for i, signal := range signalEMAs {
 			if signal.Valid {
 				results = append(results, genValidMicro(macdLine[i]-signal.Value))
