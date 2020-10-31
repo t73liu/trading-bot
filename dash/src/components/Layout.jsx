@@ -1,19 +1,25 @@
 import React, { useCallback, useState } from "react";
 import clsx from "clsx";
-import { ChevronLeft, TrendingUp, Menu, PieChart } from "@material-ui/icons";
+import {
+  ChevronLeft,
+  Menu,
+  PieChart,
+  Settings as SettingsIcon,
+  TrendingUp,
+} from "@material-ui/icons";
 import {
   AppBar,
   Divider,
-  Drawer,
   IconButton,
-  TextField,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
+  makeStyles,
+  SwipeableDrawer,
+  TextField,
   Toolbar,
   Typography,
-  makeStyles,
 } from "@material-ui/core";
 import { Autocomplete, createFilterOptions } from "@material-ui/lab";
 import { Helmet } from "react-helmet-async";
@@ -22,6 +28,7 @@ import PropTypes from "prop-types";
 import { createSelector } from "@reduxjs/toolkit";
 import { useSelector } from "react-redux";
 import { useTitleContext } from "../state/title-context";
+import Settings from "./Settings";
 
 const drawerWidth = 240;
 
@@ -47,7 +54,7 @@ const useStyles = makeStyles((theme) => ({
   toolbar: {
     justifyContent: "space-between",
   },
-  title: {
+  toolbarContent: {
     display: "flex",
     alignItems: "center",
   },
@@ -118,10 +125,12 @@ const Layout = ({ children }) => {
   const classes = useStyles();
   const history = useHistory();
   const stocks = useSelector(getStocks);
-  const [drawerVisible, setDrawerVisible] = useState(false);
-
-  const handleDrawerOpen = () => setDrawerVisible(true);
-  const handleDrawerClose = () => setDrawerVisible(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const handleOpenMenu = () => setShowMenu(true);
+  const handleCloseMenu = () => setShowMenu(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const handleOpenSettings = () => setShowSettings(true);
+  const handleCloseSettings = () => setShowSettings(false);
 
   const handleStockClick = useCallback(
     (e, option) => {
@@ -137,26 +146,23 @@ const Layout = ({ children }) => {
       <AppBar
         position="fixed"
         className={clsx(classes.appBar, {
-          [classes.appBarShift]: drawerVisible,
+          [classes.appBarShift]: showMenu,
         })}
       >
         <Toolbar className={classes.toolbar}>
-          <div className={classes.title}>
+          <div className={classes.toolbarContent}>
             <IconButton
               color="inherit"
               aria-label="open drawer"
-              onClick={handleDrawerOpen}
+              onClick={handleOpenMenu}
               edge="start"
-              className={clsx(
-                classes.menuButton,
-                drawerVisible && classes.hide
-              )}
+              className={clsx(classes.menuButton, showMenu && classes.hide)}
             >
               <Menu />
             </IconButton>
             <Title />
           </div>
-          <div>
+          <div className={classes.toolbarContent}>
             <Autocomplete
               onChange={handleStockClick}
               filterOptions={filterOptions}
@@ -175,20 +181,28 @@ const Layout = ({ children }) => {
                 />
               )}
             />
+            <div>
+              <IconButton
+                onClick={handleOpenSettings}
+                style={{ color: "white" }}
+              >
+                <SettingsIcon />
+              </IconButton>
+            </div>
           </div>
         </Toolbar>
       </AppBar>
-      <Drawer
+      <SwipeableDrawer
         className={classes.drawer}
         variant="persistent"
         anchor="left"
-        open={drawerVisible}
+        open={showMenu}
         classes={{
           paper: classes.drawerPaper,
         }}
       >
         <div className={classes.drawerHeader}>
-          <IconButton onClick={handleDrawerClose}>
+          <IconButton onClick={handleCloseMenu}>
             <ChevronLeft />
           </IconButton>
         </div>
@@ -211,10 +225,14 @@ const Layout = ({ children }) => {
             </ListItem>
           </Link>
         </List>
-      </Drawer>
+      </SwipeableDrawer>
+      <Settings
+        visible={showSettings}
+        handleCloseSettings={handleCloseSettings}
+      />
       <main
         className={clsx(classes.content, {
-          [classes.contentShift]: drawerVisible,
+          [classes.contentShift]: showMenu,
         })}
       >
         <div className={classes.drawerHeader} />

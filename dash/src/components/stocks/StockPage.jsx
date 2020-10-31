@@ -1,43 +1,18 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Alert } from "@material-ui/lab";
-import {
-  Button,
-  CircularProgress,
-  FormControl,
-  FormControlLabel,
-  FormHelperText,
-  Grid,
-  MenuItem,
-  Select,
-  Switch,
-} from "@material-ui/core";
-import { useDispatch, useSelector } from "react-redux";
+import { Button, CircularProgress, Grid } from "@material-ui/core";
+import { useSelector } from "react-redux";
 import { useTitleContext } from "../../state/title-context";
 import CandlestickChart from "../common/CandlestickChart";
 import { fetchStockCharts, fetchStockInfo } from "../../data/stocks";
 import Articles from "./Articles";
 import StockInfo from "./StockInfo";
-import {
-  getCandleSize,
-  getShowExtendedHours,
-  setCandleSize,
-  toggleShowExtendedHours,
-} from "../../state/account";
+import { getCandleSize, getShowExtendedHours } from "../../state/account";
 
 const StockPage = () => {
-  const dispatch = useDispatch();
   const candleSize = useSelector(getCandleSize);
-  const handleCandleSizeChange = useCallback(
-    (e) => {
-      dispatch(setCandleSize(e.target.value));
-    },
-    [dispatch]
-  );
   const showExtendedHours = useSelector(getShowExtendedHours);
-  const handleExtendedHoursToggle = useCallback(() => {
-    dispatch(toggleShowExtendedHours());
-  }, [dispatch]);
   const [isLoading, setIsLoading] = useState(false);
   const [info, setInfo] = useState({});
   const [charts, setCharts] = useState({});
@@ -112,27 +87,6 @@ const StockPage = () => {
         </Grid>
         <Grid item xs={8}>
           <div>
-            <FormControlLabel
-              control={
-                <Switch
-                  name="extended"
-                  checked={showExtendedHours}
-                  onChange={handleExtendedHoursToggle}
-                />
-              }
-              label="Show Extended Hours"
-            />
-            <FormControl>
-              <Select value={candleSize} onChange={handleCandleSizeChange}>
-                <MenuItem value="1min">1 minute</MenuItem>
-                <MenuItem value="3min">3 minute</MenuItem>
-                <MenuItem value="5min">5 minute</MenuItem>
-                <MenuItem value="10min">10 minute</MenuItem>
-                <MenuItem value="30min">30 minute</MenuItem>
-                <MenuItem value="1hour">1 hour</MenuItem>
-              </Select>
-              <FormHelperText>Candle Size</FormHelperText>
-            </FormControl>
             <Button
               style={{ float: "right" }}
               variant="contained"
