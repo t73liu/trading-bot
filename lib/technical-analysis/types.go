@@ -11,7 +11,7 @@ type ValidMicro struct {
 	Value int64
 }
 
-func (vm ValidMicro) MarshalJSON() ([]byte, error) {
+func (vm *ValidMicro) MarshalJSON() ([]byte, error) {
 	if vm.Valid {
 		return json.Marshal(utils.RoundToTwoDecimals(candle.MicrosToDollars(vm.Value)))
 	}
@@ -23,7 +23,7 @@ type ValidFloat struct {
 	Value float64
 }
 
-func (vf ValidFloat) MarshalJSON() ([]byte, error) {
+func (vf *ValidFloat) MarshalJSON() ([]byte, error) {
 	if vf.Valid {
 		return json.Marshal(vf.Value)
 	}
@@ -35,7 +35,7 @@ type ValidBool struct {
 	Value bool
 }
 
-func (vb ValidBool) MarshalJSON() ([]byte, error) {
+func (vb *ValidBool) MarshalJSON() ([]byte, error) {
 	if vb.Valid {
 		return json.Marshal(vb.Value)
 	}

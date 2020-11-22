@@ -21,7 +21,7 @@ type Trade struct {
 	Details        string
 }
 
-func (trade Trade) String() string {
+func (trade *Trade) String() string {
 	return fmt.Sprintf(
 		"%s %d shares at %.2f - %s - %s",
 		trade.Type,

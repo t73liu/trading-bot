@@ -25,7 +25,7 @@ type Candle struct {
 	CloseMicros int64
 }
 
-func (c Candle) MarshalJSON() ([]byte, error) {
+func (c *Candle) MarshalJSON() ([]byte, error) {
 	return json.Marshal(JSONCandle{
 		OpenedAt: c.OpenedAt,
 		Volume:   c.Volume,
@@ -36,8 +36,8 @@ func (c Candle) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (c Candle) IsZero() bool {
-	return c == Candle{}
+func (c *Candle) IsZero() bool {
+	return *c == Candle{}
 }
 
 func DollarsToMicros(dollars float64) int64 {
