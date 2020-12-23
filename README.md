@@ -27,10 +27,10 @@ This directory will be referred to by the `TRADING_BOT_REPO` environment variabl
 ### Technologies
 
 - [Go 1.15](https://golang.org/)
-- [Node 12](https://nodejs.org/en/)
+- [Node 14](https://nodejs.org/en/)
 - [PostgreSQL 12](https://www.postgresql.org/)
-- [Python 3.7](https://www.python.org/)
+- [Python 3.8](https://www.python.org/)
 - [React 16.13](https://reactjs.org/)
 - [TensorFlow 2](https://www.tensorflow.org/)
-- [Terraform 0.12](https://www.terraform.io/)
+- [Terraform 0.14](https://www.terraform.io/)
 - [Yarn 1.21](https://classic.yarnpkg.com/lang/en/)
