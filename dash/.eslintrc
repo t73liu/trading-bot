@@ -15,6 +15,7 @@
         "ignorePropertyModificationsFor": ["draft"]
       }
     ],
+    "arrow-body-style": "off",
     "react/jsx-props-no-spreading": "off"
   }
 }

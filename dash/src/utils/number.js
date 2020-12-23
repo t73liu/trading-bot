@@ -11,21 +11,15 @@ const USD_CURRENCY_FORMAT = new Intl.NumberFormat("en-US", {
   currency: "USD",
 });
 
-export const formatAsCurrency = (num) => {
-  return USD_CURRENCY_FORMAT.format(num);
-};
+export const formatAsCurrency = (num) => USD_CURRENCY_FORMAT.format(num);
 
 const US_FORMAT = new Intl.NumberFormat("en-US");
 
-export const formatWithCommas = (num) => {
-  return US_FORMAT.format(num);
-};
+export const formatWithCommas = (num) => US_FORMAT.format(num);
 
 const US_PERCENT_FORMAT = new Intl.NumberFormat("en-US", { style: "percent" });
 
-export const formatAsPercent = (num) => {
-  return US_PERCENT_FORMAT.format(num);
-};
+export const formatAsPercent = (num) => US_PERCENT_FORMAT.format(num);
 
 export const numberOfDigits = (num) => {
   return Math.max(Math.floor(Math.log10(Math.abs(num))), 0) + 1;
