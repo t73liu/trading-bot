@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  quant:
+    image: tensorflow/tensorflow:2.4.0-jupyter
+    ports:
+      - 8888:8888
+    depends_on:
+      - "traderdb"
+    volumes:
+      - $TRADING_BOT_REPO/quant:/tf
+  traderdb:
+    image: postgres:12-alpine
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: test
+    volumes:
+      - $HOME/pgdata:/var/lib/postgresql/data
