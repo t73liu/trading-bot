@@ -6,9 +6,9 @@ import (
 )
 
 // Average True Range
-func ATR(candles []candle.Candle, interval int) []ValidMicro {
+func ATR(candles []candle.Candle, interval int) []utils.MicroDollar {
 	if len(candles) < interval {
-		return make([]ValidMicro, len(candles))
+		return make([]utils.MicroDollar, len(candles))
 	}
 	trueRanges := make([]int64, 0, len(candles))
 	var prev candle.Candle
@@ -16,18 +16,18 @@ func ATR(candles []candle.Candle, interval int) []ValidMicro {
 		trueRanges = append(trueRanges, calcTrueRange(c, prev))
 		prev = c
 	}
-	output := make([]ValidMicro, interval-1, len(candles))
+	output := make([]utils.MicroDollar, interval-1, len(candles))
 	var sum, atr int64
 	for i, trueRange := range trueRanges {
 		if i < interval {
 			sum += trueRange
 			if i == interval-1 {
 				atr = sum / int64(interval)
-				output = append(output, genValidMicro(atr))
+				output = append(output, utils.NewMicroDollar(atr))
 			}
 		} else {
 			atr = ((atr * int64(interval-1)) + trueRange) / int64(interval)
-			output = append(output, genValidMicro(atr))
+			output = append(output, utils.NewMicroDollar(atr))
 		}
 	}
 	return output

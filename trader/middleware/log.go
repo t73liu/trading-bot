@@ -1,10 +1,11 @@
 package middleware
 
 import (
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func LogResponseTime(logger *log.Logger) mux.MiddlewareFunc {

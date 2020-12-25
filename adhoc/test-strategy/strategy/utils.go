@@ -2,7 +2,7 @@ package strategy
 
 import (
 	"tradingbot/lib/candle"
-	analyze "tradingbot/lib/technical-analysis"
+	"tradingbot/lib/utils"
 )
 
 func groupCandlesByDate(candles []candle.Candle) ([]string, map[string][]candle.Candle) {
@@ -34,6 +34,6 @@ func genInitialPortfolio(capitalMicros, priceMicros int64) Portfolio {
 }
 
 func calcPercentChange(prevMicros int64, currentMicros int64) float64 {
-	ratio := candle.MicrosToDollars(currentMicros) / candle.MicrosToDollars(prevMicros)
-	return analyze.RoundToTwoDecimals(ratio*100 - 100)
+	ratio := utils.MicrosToDollars(currentMicros) / utils.MicrosToDollars(prevMicros)
+	return utils.RoundToTwoDecimals(ratio*100 - 100)
 }

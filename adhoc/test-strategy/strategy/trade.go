@@ -3,7 +3,7 @@ package strategy
 import (
 	"fmt"
 	"time"
-	"tradingbot/lib/candle"
+	"tradingbot/lib/utils"
 )
 
 type TradeType string
@@ -26,7 +26,7 @@ func (trade *Trade) String() string {
 		"%s %d shares at %.2f - %s - %s",
 		trade.Type,
 		trade.NumberOfShares,
-		candle.MicrosToDollars(trade.PriceMicros),
+		utils.MicrosToDollars(trade.PriceMicros),
 		trade.Timestamp,
 		trade.Details,
 	)

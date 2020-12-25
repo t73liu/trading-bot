@@ -5,7 +5,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"html/template"
 	"net/smtp"
 	"os"
@@ -15,6 +14,8 @@ import (
 	"tradingbot/lib/polygon"
 	"tradingbot/lib/traderdb"
 	"tradingbot/lib/utils"
+
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type EmailParams struct {

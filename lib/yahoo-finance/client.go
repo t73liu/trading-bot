@@ -12,26 +12,26 @@ import (
 	"tradingbot/lib/utils"
 )
 
-const baseURL = "https://finance.yahoo.com"
-
-const maxEventsPerPage = 100
-
-type EarningsCallTime string
-
 const (
+	baseURL                              = "https://finance.yahoo.com"
+	maxEventsPerPage                     = 100
 	TransferAgentSystem EarningsCallTime = "TAS"
 	TimeNotSupplied     EarningsCallTime = "TNS"
 	BeforeMarketOpen    EarningsCallTime = "BMO"
 	AfterMarketClose    EarningsCallTime = "AFC"
 )
 
+var parseError = errors.New("failed to parse API response")
+
+type EarningsCallTime string
+
 type EarningsCall struct {
 	Ticker             string
 	Company            string
 	StartTime          EarningsCallTime
-	EPSEstimate        *float64
-	EPSActual          *float64
-	EPSSurprisePercent *float64
+	EPSEstimate        utils.NullFloat64
+	EPSActual          utils.NullFloat64
+	EPSSurprisePercent utils.NullFloat64
 	QuoteType          string
 	Date               string
 }
@@ -40,8 +40,8 @@ type IPO struct {
 	Ticker    string
 	Company   string
 	Exchange  string
-	PriceFrom *float64
-	PriceTo   *float64
+	PriceFrom utils.NullFloat64
+	PriceTo   utils.NullFloat64
 	Currency  string
 	QuoteType string
 	Date      string
@@ -53,11 +53,11 @@ type Stock struct {
 	Exchange      string
 	MarketCap     int64
 	Price         float64
-	Sector        string
-	Industry      string
-	Description   string
-	Country       string
-	Website       string
+	Sector        utils.NullString
+	Industry      utils.NullString
+	Description   utils.NullString
+	Country       utils.NullString
+	Website       utils.NullString
 	AverageVolume int64
 	News          []Article
 }
@@ -88,18 +88,19 @@ func (c *Client) GetEarningsCall(date time.Time) (earnings []EarningsCall, err e
 			return earnings, err
 		}
 		for _, row := range rows {
-			record := row.(map[string]interface{})
-			earningsCall := EarningsCall{
-				Ticker:             record["ticker"].(string),
-				Company:            record["companyshortname"].(string),
-				StartTime:          EarningsCallTime(record["startdatetimetype"].(string)),
-				EPSEstimate:        getFloat64(record["epsestimate"]),
-				EPSActual:          getFloat64(record["epsactual"]),
-				EPSSurprisePercent: getFloat64(record["epssurprisepct"]),
-				QuoteType:          record["quoteType"].(string),
-				Date:               formattedDate,
+			if record, ok := row.(map[string]interface{}); ok {
+				earningsCall := EarningsCall{
+					Ticker:             record["ticker"].(string),
+					Company:            record["companyshortname"].(string),
+					StartTime:          EarningsCallTime(record["startdatetimetype"].(string)),
+					EPSEstimate:        utils.ToNullFloat64(record["epsestimate"]),
+					EPSActual:          utils.ToNullFloat64(record["epsactual"]),
+					EPSSurprisePercent: utils.ToNullFloat64(record["epssurprisepct"]),
+					QuoteType:          record["quoteType"].(string),
+					Date:               formattedDate,
+				}
+				earnings = append(earnings, earningsCall)
 			}
-			earnings = append(earnings, earningsCall)
 		}
 		if len(rows) == maxEventsPerPage {
 			offset += maxEventsPerPage
@@ -119,18 +120,19 @@ func (c *Client) GetIPOs(date time.Time) (ipos []IPO, err error) {
 			return ipos, err
 		}
 		for _, row := range rows {
-			record := row.(map[string]interface{})
-			ipo := IPO{
-				Ticker:    record["ticker"].(string),
-				Company:   record["companyshortname"].(string),
-				Exchange:  record["exchange_short_name"].(string),
-				PriceFrom: getFloat64(record["pricefrom"]),
-				PriceTo:   getFloat64(record["priceto"]),
-				Currency:  record["currencyname"].(string),
-				QuoteType: record["quoteType"].(string),
-				Date:      formattedDate,
+			if record, ok := row.(map[string]interface{}); ok {
+				ipo := IPO{
+					Ticker:    record["ticker"].(string),
+					Company:   record["companyshortname"].(string),
+					Exchange:  record["exchange_short_name"].(string),
+					PriceFrom: utils.ToNullFloat64(record["pricefrom"]),
+					PriceTo:   utils.ToNullFloat64(record["priceto"]),
+					Currency:  record["currencyname"].(string),
+					QuoteType: record["quoteType"].(string),
+					Date:      formattedDate,
+				}
+				ipos = append(ipos, ipo)
 			}
-			ipos = append(ipos, ipo)
 		}
 		if len(rows) == maxEventsPerPage {
 			offset += maxEventsPerPage
@@ -175,12 +177,30 @@ func (c *Client) getEvents(eventType string, date time.Time, offset int) ([]inte
 			if err = json.Unmarshal([]byte(str[16:length-1]), &data); err != nil {
 				return nil, err
 			}
-			context := data["context"].(map[string]interface{})
-			dispatcher := context["dispatcher"].(map[string]interface{})
-			stores := dispatcher["stores"].(map[string]interface{})
-			resultsStore := stores["ScreenerResultsStore"].(map[string]interface{})
-			results := resultsStore["results"].(map[string]interface{})
-			rows := results["rows"].([]interface{})
+			context, ok := data["context"].(map[string]interface{})
+			if !ok {
+				return nil, parseError
+			}
+			dispatcher, ok := context["dispatcher"].(map[string]interface{})
+			if !ok {
+				return nil, parseError
+			}
+			stores, ok := dispatcher["stores"].(map[string]interface{})
+			if !ok {
+				return nil, parseError
+			}
+			resultsStore, ok := stores["ScreenerResultsStore"].(map[string]interface{})
+			if !ok {
+				return nil, parseError
+			}
+			results, ok := resultsStore["results"].(map[string]interface{})
+			if !ok {
+				return nil, parseError
+			}
+			rows, ok := results["rows"].([]interface{})
+			if !ok {
+				return nil, parseError
+			}
 			return rows, nil
 		}
 	}
@@ -228,12 +248,13 @@ func (c *Client) GetStock(symbol string) (stock Stock, err error) {
 			stock.AverageVolume = int64(volume["raw"].(float64))
 			// Company details
 			if quoteStore["summaryProfile"] != nil {
-				summary := quoteStore["summaryProfile"].(map[string]interface{})
-				stock.Sector = summary["sector"].(string)
-				stock.Industry = summary["industry"].(string)
-				stock.Website = CastToString(summary["website"])
-				stock.Country = CastToString(summary["country"])
-				stock.Description = CastToString(summary["longBusinessSummary"])
+				if summary, ok := quoteStore["summaryProfile"].(map[string]interface{}); ok {
+					stock.Sector = utils.ToNullString(summary["sector"])
+					stock.Industry = utils.ToNullString(summary["industry"])
+					stock.Website = utils.ToNullString(summary["website"])
+					stock.Country = utils.ToNullString(summary["country"])
+					stock.Description = utils.ToNullString(summary["longBusinessSummary"])
+				}
 			}
 
 			// News
@@ -262,21 +283,6 @@ func (c *Client) GetStock(symbol string) (stock Stock, err error) {
 	return stock, errors.New("could not parse Yahoo Finance response")
 }
 
-func CastToString(any interface{}) string {
-	if any == nil {
-		return ""
-	}
-	return any.(string)
-}
-
 func formatISO(date time.Time) string {
 	return date.Format("2006-01-02")
-}
-
-func getFloat64(val interface{}) *float64 {
-	if val == nil {
-		return nil
-	}
-	value := val.(float64)
-	return &value
 }

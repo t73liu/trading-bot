@@ -2,7 +2,7 @@ package analyze
 
 import (
 	"testing"
-	"tradingbot/lib/candle"
+	"tradingbot/lib/utils"
 )
 
 func TestSMA(t *testing.T) {
@@ -11,7 +11,7 @@ func TestSMA(t *testing.T) {
 		testSMAFunc(
 			[]int64{10, 10, 10},
 			5,
-			make([]ValidMicro, 3),
+			make([]utils.MicroDollar, 3),
 		),
 	)
 	t.Run(
@@ -20,42 +20,42 @@ func TestSMA(t *testing.T) {
 			[]int64{10, 10, 10, 10, 15},
 			5,
 			// (10 + 10 + 10 + 10 + 15) / 5 = 11
-			[]ValidMicro{{}, {}, {}, {}, genValidMicro(11)},
+			[]utils.MicroDollar{{}, {}, {}, {}, utils.NewMicroDollar(11)},
 		),
 	)
 	t.Run(
 		"SMA enough elements for multiple calculations",
 		testSMAFunc(
 			[]int64{
-				candle.DollarsToMicros(13),
-				candle.DollarsToMicros(17),
-				candle.DollarsToMicros(14),
-				candle.DollarsToMicros(16),
-				candle.DollarsToMicros(15),
-				candle.DollarsToMicros(20),
-				candle.DollarsToMicros(123),
+				utils.DollarsToMicros(13),
+				utils.DollarsToMicros(17),
+				utils.DollarsToMicros(14),
+				utils.DollarsToMicros(16),
+				utils.DollarsToMicros(15),
+				utils.DollarsToMicros(20),
+				utils.DollarsToMicros(123),
 			},
 			5,
-			[]ValidMicro{
+			[]utils.MicroDollar{
 				{},
 				{},
 				{},
 				{},
 				// (13 + 17 + 14 + 16 + 15) / 5 = 15
-				genValidMicro(15000000),
+				utils.NewMicroDollar(15000000),
 				// (17 + 14 + 16 + 15 + 20) / 5 = 16.4
-				genValidMicro(16400000),
+				utils.NewMicroDollar(16400000),
 				// (14 + 16 + 15 + 20 + 123) / 5 = 37.6
-				genValidMicro(37600000),
+				utils.NewMicroDollar(37600000),
 			},
 		),
 	)
 }
 
-func testSMAFunc(closingPrices []int64, interval int, expected []ValidMicro) func(*testing.T) {
+func testSMAFunc(closingPrices []int64, interval int, expected []utils.MicroDollar) func(*testing.T) {
 	return func(t *testing.T) {
 		actual := SMA(closingPrices, interval)
-		if !eqValidMicroSlice(expected, actual) {
+		if !utils.EqMicroDollarSlice(expected, actual) {
 			t.Errorf("\nExpected: %v\nActual: %v", expected, actual)
 		}
 	}

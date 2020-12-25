@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"os"
 	"strings"
 	"time"
@@ -12,6 +11,8 @@ import (
 	"tradingbot/lib/polygon"
 	"tradingbot/lib/traderdb"
 	"tradingbot/lib/utils"
+
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 func main() {

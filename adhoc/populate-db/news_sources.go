@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v4"
 	"os"
 	"strings"
 	"tradingbot/lib/newsapi"
 	"tradingbot/lib/utils"
+
+	"github.com/jackc/pgx/v4"
 )
 
 func main() {

@@ -3,13 +3,14 @@ package account
 import (
 	"encoding/json"
 	"errors"
-	"github.com/gorilla/mux"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
 	"net/http"
 	"strconv"
 	"tradingbot/lib/traderdb"
 	"tradingbot/lib/utils"
+
+	"github.com/gorilla/mux"
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type Handlers struct {

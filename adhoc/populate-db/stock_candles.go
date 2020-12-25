@@ -3,14 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"os"
 	"strings"
 	"time"
 	"tradingbot/lib/alpaca"
 	"tradingbot/lib/traderdb"
 	"tradingbot/lib/utils"
+
+	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 const userId = 1

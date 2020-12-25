@@ -29,23 +29,15 @@ func (c *Candle) MarshalJSON() ([]byte, error) {
 	return json.Marshal(JSONCandle{
 		OpenedAt: c.OpenedAt,
 		Volume:   c.Volume,
-		Open:     MicrosToDollars(c.OpenMicros),
-		High:     MicrosToDollars(c.HighMicros),
-		Low:      MicrosToDollars(c.LowMicros),
-		Close:    MicrosToDollars(c.CloseMicros),
+		Open:     utils.MicrosToDollars(c.OpenMicros),
+		High:     utils.MicrosToDollars(c.HighMicros),
+		Low:      utils.MicrosToDollars(c.LowMicros),
+		Close:    utils.MicrosToDollars(c.CloseMicros),
 	})
 }
 
 func (c *Candle) IsZero() bool {
 	return *c == Candle{}
-}
-
-func DollarsToMicros(dollars float64) int64 {
-	return int64(dollars * utils.Million)
-}
-
-func MicrosToDollars(micros int64) float64 {
-	return float64(micros) / utils.Million
 }
 
 // Assuming location = "America/New_York"

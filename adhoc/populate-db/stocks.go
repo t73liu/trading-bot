@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
-	"github.com/jackc/pgx/v4"
 	"os"
 	"strings"
 	"tradingbot/lib/alpaca"
 	"tradingbot/lib/traderdb"
 	"tradingbot/lib/utils"
+
+	"github.com/jackc/pgx/v4"
 )
 
 func main() {

@@ -1,13 +1,14 @@
 package news
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
 	"net/http"
 	"tradingbot/lib/newsapi"
 	"tradingbot/lib/traderdb"
 	"tradingbot/lib/utils"
+
+	"github.com/gorilla/mux"
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type Handlers struct {

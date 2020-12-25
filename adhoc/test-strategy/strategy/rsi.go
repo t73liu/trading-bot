@@ -26,8 +26,8 @@ func RSI(candles []candle.Candle, capitalMicros int64, upperLimit, lowerLimit fl
 		rsiValues := analyze.RSI(candle.GetClosingPrices(dailyCandles), 14)
 		for i, dailyCandle := range dailyCandles {
 			if prevIndex := i - 1; prevIndex > 0 && rsiValues[prevIndex].Valid && rsiValues[i].Valid {
-				prevRSIValue := rsiValues[prevIndex].Value
-				currRSIValue := rsiValues[i].Value
+				prevRSIValue := rsiValues[prevIndex].Value()
+				currRSIValue := rsiValues[i].Value()
 				sharePrice := dailyCandle.CloseMicros
 				if shares == 0 {
 					// Buy if RSI increases above lower limit (i.e. oversold)

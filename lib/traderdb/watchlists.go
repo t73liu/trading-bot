@@ -2,6 +2,7 @@ package traderdb
 
 import (
 	"context"
+
 	"github.com/jackc/pgx/v4"
 )
 

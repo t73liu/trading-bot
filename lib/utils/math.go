@@ -8,6 +8,14 @@ func RoundToTwoDecimals(value float64) float64 {
 	return math.Round(value*100) / 100
 }
 
+func DollarsToMicros(dollars float64) int64 {
+	return int64(dollars * Million)
+}
+
+func MicrosToDollars(micros int64) float64 {
+	return float64(micros) / Million
+}
+
 func Sum(nums ...int64) (total int64) {
 	for _, num := range nums {
 		total += num

@@ -2,10 +2,11 @@ package finviz
 
 import (
 	"errors"
-	"github.com/PuerkitoBio/goquery"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 type Client struct {

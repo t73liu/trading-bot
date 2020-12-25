@@ -1,8 +1,6 @@
 package stocks
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
 	"net/http"
 	"strconv"
@@ -16,6 +14,9 @@ import (
 	"tradingbot/lib/traderdb"
 	"tradingbot/lib/utils"
 	"tradingbot/lib/yahoo-finance"
+
+	"github.com/gorilla/mux"
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type Handlers struct {
@@ -106,10 +107,10 @@ func (h *Handlers) getStockCharts(w http.ResponseWriter, r *http.Request) {
 		candles = append(candles, candle.Candle{
 			OpenedAt:    utils.ConvertUnixMillisToTime(bar.StartAtUnixMillis).In(location),
 			Volume:      int64(bar.Volume),
-			OpenMicros:  candle.DollarsToMicros(bar.Open),
-			HighMicros:  candle.DollarsToMicros(bar.High),
-			LowMicros:   candle.DollarsToMicros(bar.Low),
-			CloseMicros: candle.DollarsToMicros(bar.Close),
+			OpenMicros:  utils.DollarsToMicros(bar.Open),
+			HighMicros:  utils.DollarsToMicros(bar.High),
+			LowMicros:   utils.DollarsToMicros(bar.Low),
+			CloseMicros: utils.DollarsToMicros(bar.Close),
 		})
 	}
 

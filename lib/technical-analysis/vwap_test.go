@@ -3,6 +3,7 @@ package analyze
 import (
 	"testing"
 	"tradingbot/lib/candle"
+	"tradingbot/lib/utils"
 )
 
 func TestVWAP(t *testing.T) {
@@ -16,13 +17,13 @@ func TestVWAP(t *testing.T) {
 			[]candle.Candle{
 				{
 					Volume:      89329,
-					HighMicros:  candle.DollarsToMicros(127.36),
-					LowMicros:   candle.DollarsToMicros(126.99),
-					CloseMicros: candle.DollarsToMicros(127.28),
+					HighMicros:  utils.DollarsToMicros(127.36),
+					LowMicros:   utils.DollarsToMicros(126.99),
+					CloseMicros: utils.DollarsToMicros(127.28),
 				},
 			},
 			// (127.36 + 126.99 + 127.28) / 3 = 11
-			[]ValidMicro{genValidMicro(candle.DollarsToMicros(127.21))},
+			[]utils.MicroDollar{utils.NewMicroDollar(utils.DollarsToMicros(127.21))},
 		),
 	)
 	t.Run(
@@ -31,58 +32,58 @@ func TestVWAP(t *testing.T) {
 			[]candle.Candle{
 				{
 					Volume:      89329,
-					HighMicros:  candle.DollarsToMicros(127.36),
-					LowMicros:   candle.DollarsToMicros(126.99),
-					CloseMicros: candle.DollarsToMicros(127.28),
+					HighMicros:  utils.DollarsToMicros(127.36),
+					LowMicros:   utils.DollarsToMicros(126.99),
+					CloseMicros: utils.DollarsToMicros(127.28),
 				},
 				{
 					Volume:      16137,
-					HighMicros:  candle.DollarsToMicros(127.31),
-					LowMicros:   candle.DollarsToMicros(127.10),
-					CloseMicros: candle.DollarsToMicros(127.11),
+					HighMicros:  utils.DollarsToMicros(127.31),
+					LowMicros:   utils.DollarsToMicros(127.10),
+					CloseMicros: utils.DollarsToMicros(127.11),
 				},
 				{
 					Volume:      23945,
-					HighMicros:  candle.DollarsToMicros(127.21),
-					LowMicros:   candle.DollarsToMicros(127.11),
-					CloseMicros: candle.DollarsToMicros(127.15),
+					HighMicros:  utils.DollarsToMicros(127.21),
+					LowMicros:   utils.DollarsToMicros(127.11),
+					CloseMicros: utils.DollarsToMicros(127.15),
 				},
 				{
 					Volume:      20679,
-					HighMicros:  candle.DollarsToMicros(127.15),
-					LowMicros:   candle.DollarsToMicros(126.93),
-					CloseMicros: candle.DollarsToMicros(127.04),
+					HighMicros:  utils.DollarsToMicros(127.15),
+					LowMicros:   utils.DollarsToMicros(126.93),
+					CloseMicros: utils.DollarsToMicros(127.04),
 				},
 				{
 					Volume:      27252,
-					HighMicros:  candle.DollarsToMicros(127.08),
-					LowMicros:   candle.DollarsToMicros(126.98),
-					CloseMicros: candle.DollarsToMicros(126.98),
+					HighMicros:  utils.DollarsToMicros(127.08),
+					LowMicros:   utils.DollarsToMicros(126.98),
+					CloseMicros: utils.DollarsToMicros(126.98),
 				},
 				{
 					Volume:      20915,
-					HighMicros:  candle.DollarsToMicros(127.19),
-					LowMicros:   candle.DollarsToMicros(126.99),
-					CloseMicros: candle.DollarsToMicros(127.07),
+					HighMicros:  utils.DollarsToMicros(127.19),
+					LowMicros:   utils.DollarsToMicros(126.99),
+					CloseMicros: utils.DollarsToMicros(127.07),
 				},
 			},
-			[]ValidMicro{
+			[]utils.MicroDollar{
 				// (127.36 + 126.99 + 127.28) / 3 = 11
-				genValidMicro(candle.DollarsToMicros(127.21)),
-				genValidMicro(candle.DollarsToMicros(127.204389)),
-				genValidMicro(candle.DollarsToMicros(127.195559)),
-				genValidMicro(candle.DollarsToMicros(127.174126)),
-				genValidMicro(candle.DollarsToMicros(127.149417)),
-				genValidMicro(candle.DollarsToMicros(127.142446)),
+				utils.NewMicroDollar(utils.DollarsToMicros(127.21)),
+				utils.NewMicroDollar(utils.DollarsToMicros(127.204389)),
+				utils.NewMicroDollar(utils.DollarsToMicros(127.195559)),
+				utils.NewMicroDollar(utils.DollarsToMicros(127.174126)),
+				utils.NewMicroDollar(utils.DollarsToMicros(127.149417)),
+				utils.NewMicroDollar(utils.DollarsToMicros(127.142446)),
 			},
 		),
 	)
 }
 
-func testVWAPFunc(candles []candle.Candle, expected []ValidMicro) func(*testing.T) {
+func testVWAPFunc(candles []candle.Candle, expected []utils.MicroDollar) func(*testing.T) {
 	return func(t *testing.T) {
 		actual := VWAP(candles)
-		if !eqValidMicroSlice(expected, actual) {
+		if !utils.EqMicroDollarSlice(expected, actual) {
 			t.Errorf("\nExpected: %v\nActual: %v", expected, actual)
 		}
 	}

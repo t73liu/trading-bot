@@ -3,13 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v4"
 	"os"
 	"strings"
 	"time"
 	"tradingbot/adhoc/test-strategy/strategy"
 	"tradingbot/lib/candle"
 	"tradingbot/lib/traderdb"
+	"tradingbot/lib/utils"
+
+	"github.com/jackc/pgx/v4"
 )
 
 func main() {
@@ -53,7 +55,7 @@ func main() {
 }
 
 func applyStrategy(candles []candle.Candle, capital float64) {
-	capitalMicros := candle.DollarsToMicros(capital)
+	capitalMicros := utils.DollarsToMicros(capital)
 	//dailyPortfolios := strategy.Hold(candles, capitalMicros)
 	//dailyPortfolios := strategy.TrailingStop(candles, capitalMicros, 0.95)
 	dailyPortfolios := strategy.RSI(candles, capitalMicros, 70, 30)

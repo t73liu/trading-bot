@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/gorilla/mux"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
 	"net/http"
 	"os"
@@ -20,6 +18,9 @@ import (
 	"tradingbot/trader/middleware"
 	"tradingbot/trader/news"
 	"tradingbot/trader/stocks"
+
+	"github.com/gorilla/mux"
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 func main() {
