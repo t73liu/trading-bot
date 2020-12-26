@@ -28,6 +28,11 @@ docker exec -it traderdb createdb --username=postgres traderdb
 docker exec -it traderdb psql --username=postgres traderdb
 ```
 
+Use the corresponding Go scripts in order to populate the DB:
+- `stocks`: `${TRADING_BOT_REPO}/jobs/populate-stocks/main.go`
+- `stock_candles`: `${TRADING_BOT_REPO}/jobs/populate-db/stock_candles.go`
+- `users`: `${TRADING_BOT_REPO}/adhoc/populate-db/users.go`
+
 ### Migrations
 
 Migrations are done with the [migrate](https://github.com/golang-migrate/migrate)

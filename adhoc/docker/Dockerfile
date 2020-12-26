@@ -1,7 +1,7 @@
 # Build trader
 FROM golang:1.14-alpine AS trader-builder
 
-WORKDIR $GOPATH/src/trading-bot/trader/
+WORKDIR ${GOPATH}/src/trading-bot/trader/
 
 COPY ../../trader .
 

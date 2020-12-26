@@ -15,7 +15,7 @@ func main() {
 		logger.Fatalln("Unable to connect to database:", err)
 	}
 	defer dbPool.Close()
-	watchlists, err := traderdb.GetWatchlistsByUserId(dbPool, 1)
+	watchlists, err := traderdb.GetWatchlistsWithUserID(dbPool, 1)
 	// ...
 }
 ```

@@ -8,7 +8,7 @@ services:
     depends_on:
       - "traderdb"
     volumes:
-      - $TRADING_BOT_REPO/quant:/tf
+      - ${TRADING_BOT_REPO}/quant:/tf
   traderdb:
     image: postgres:12-alpine
     ports:
@@ -16,4 +16,4 @@ services:
     environment:
       POSTGRES_PASSWORD: test
     volumes:
-      - $HOME/pgdata:/var/lib/postgresql/data
+      - ${HOME}/pgdata:/var/lib/postgresql/data

@@ -27,9 +27,9 @@ func main() {
 		fmt.Println("ALPACA_API_KEY environment variable is required")
 		os.Exit(1)
 	}
-	apiSecretKey := strings.TrimSpace(os.Getenv("ALPACA_API_SECRET_KEY"))
+	apiSecretKey := strings.TrimSpace(os.Getenv("ALPACA_API_SECRET"))
 	if apiSecretKey == "" {
-		fmt.Println("ALPACA_API_SECRET_KEY environment variable is required")
+		fmt.Println("ALPACA_API_SECRET environment variable is required")
 		os.Exit(1)
 	}
 

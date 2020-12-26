@@ -26,7 +26,7 @@ docker pull tensorflow/tensorflow:2.4.0-jupyter
 # Run Tensorflow container
 docker run --detach \
  --name quant \
- --volume $TRADING_BOT_REPO/quant:/tf \
+ --volume ${TRADING_BOT_REPO}/quant:/tf \
  --publish 8888:8888 \
  tensorflow/tensorflow:2.4.0-jupyter
 
