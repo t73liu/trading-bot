@@ -2,7 +2,10 @@ package traderdb
 
 import (
 	"context"
+	"errors"
 	"fmt"
+
+	"github.com/jackc/pgx/v4"
 )
 
 type Stock struct {
@@ -13,6 +16,15 @@ type Stock struct {
 	Tradable   bool   `json:"tradable"`
 	Shortable  bool   `json:"shortable"`
 	Marginable bool   `json:"marginable"`
+}
+
+func (s *Stock) Equal(other Stock) bool {
+	return s.Symbol == other.Symbol &&
+		s.Company == other.Company &&
+		s.Exchange == other.Exchange &&
+		s.Tradable == other.Tradable &&
+		s.Shortable == other.Shortable &&
+		s.Marginable == other.Marginable
 }
 
 const stocksQuery = `
@@ -109,4 +121,71 @@ func GetTradableStock(db PGConnection, symbol string) (stock Stock, err error) {
 	}
 
 	return stock, nil
+}
+
+const updateUnsupportedStocksQuery = `
+UPDATE stocks
+SET tradable = false
+WHERE symbol != ALL($1)
+`
+
+func UpdateUnsupportedStocks(db PGConnection, supportedSymbols []string) error {
+	if len(supportedSymbols) == 0 {
+		return errors.New("no supported symbols")
+	}
+
+	_, err := db.Exec(
+		context.Background(),
+		updateUnsupportedStocksQuery,
+		supportedSymbols,
+	)
+	return err
+}
+
+const updateStockQuery = `
+UPDATE stocks
+SET company = $1, tradable = $2, shortable = $3, marginable = $4, exchange = $5
+WHERE symbol = $6
+`
+
+func UpdateStock(db PGConnection, stock Stock) error {
+	_, err := db.Exec(
+		context.Background(),
+		updateStockQuery,
+		stock.Company,
+		stock.Tradable,
+		stock.Shortable,
+		stock.Company,
+		stock.Exchange,
+		stock.Symbol,
+	)
+	return err
+}
+
+var columns = []string{"symbol", "company", "exchange", "tradable", "marginable", "shortable"}
+
+func InsertNewStocks(db PGConnection, stocks []Stock) error {
+	if len(stocks) == 0 {
+		return nil
+	}
+
+	rows := make([][]interface{}, 0, len(stocks))
+	for _, stock := range stocks {
+		rows = append(rows, []interface{}{
+			stock.Symbol,
+			stock.Company,
+			stock.Exchange,
+			stock.Tradable,
+			stock.Marginable,
+			stock.Shortable,
+		})
+	}
+
+	_, err := db.CopyFrom(
+		context.Background(),
+		pgx.Identifier{"stocks"},
+		columns,
+		pgx.CopyFromRows(rows),
+	)
+	return err
 }
