@@ -1,7 +1,19 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { createSelector } from "@reduxjs/toolkit";
+import { fetchWatchlistsThunk } from "../../state/account";
 
-const Watchlists = ({ watchlists }) => {
+const getWatchlists = createSelector(
+  (state) => state.account,
+  (account) => account.watchlists
+);
+
+const Watchlists = () => {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(fetchWatchlistsThunk());
+  }, [dispatch]);
+  const watchlists = useSelector(getWatchlists);
   return (
     <div>
       <h2>Watchlists</h2>
@@ -12,19 +24,6 @@ const Watchlists = ({ watchlists }) => {
       </ul>
     </div>
   );
-};
-
-Watchlists.propTypes = {
-  watchlists: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      name: PropTypes.string.isRequired,
-    })
-  ),
-};
-
-Watchlists.defaultProps = {
-  watchlists: [],
 };
 
 export default Watchlists;

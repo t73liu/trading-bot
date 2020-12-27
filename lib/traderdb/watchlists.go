@@ -7,93 +7,83 @@ import (
 )
 
 type Watchlist struct {
-	Id     int     `json:"id"`
-	Name   string  `json:"name"`
-	Stocks []Stock `json:"stocks"`
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	StockIDs []int  `json:"stockIDs"`
 }
 
 const watchlistsQuery = `
-SELECT wl.id, wl.name, s.id as stock_id, s.symbol, s.company FROM watchlists wl
+SELECT wl.id, wl.name, wls.stock_id as stock_id FROM watchlists wl
 INNER JOIN watchlist_stocks wls ON wl.id = wls.watchlist_id
-INNER JOIN stocks s ON wls.stock_id = s.id
-WHERE wl.user_id = $1
+WHERE user_id = $1
 `
 
-func GetWatchlistsByUserId(db PGConnection, userId int) (watchlists []Watchlist, err error) {
-	rows, err := db.Query(context.Background(), watchlistsQuery, userId)
+func GetWatchlistsWithUserID(db PGConnection, userID int) (watchlists []Watchlist, err error) {
+	rows, err := db.Query(context.Background(), watchlistsQuery, userID)
 	if err != nil {
 		return watchlists, err
 	}
 	defer rows.Close()
 
-	watchlistsById := make(map[int]Watchlist)
+	watchlistsByID := make(map[int]Watchlist)
 	for rows.Next() {
-		var watchlistId int
+		var watchlistID int
 		var name string
-		var stockId int
-		var symbol string
-		var company string
-		if err = rows.Scan(&watchlistId, &name, &stockId, &symbol, &company); err != nil {
+		var stockID int
+		if err = rows.Scan(&watchlistID, &name, &stockID); err != nil {
 			return watchlists, err
 		}
-		_, ok := watchlistsById[watchlistId]
-		if !ok {
-			watchlistsById[watchlistId] = Watchlist{
-				Id:     watchlistId,
-				Name:   name,
-				Stocks: make([]Stock, 0),
+		if _, ok := watchlistsByID[watchlistID]; !ok {
+			watchlistsByID[watchlistID] = Watchlist{
+				ID:   watchlistID,
+				Name: name,
 			}
 		}
-		watchlist := watchlistsById[watchlistId]
-		watchlist.Stocks = append(
-			watchlist.Stocks,
-			Stock{
-				Id:      stockId,
-				Symbol:  symbol,
-				Company: company,
-			},
-		)
-		watchlistsById[watchlistId] = watchlist
+		watchlist := watchlistsByID[watchlistID]
+		watchlist.StockIDs = append(watchlist.StockIDs, stockID)
+		watchlistsByID[watchlistID] = watchlist
 	}
 
 	if rows.Err() != nil {
 		return watchlists, rows.Err()
 	}
 
-	for _, watchlist := range watchlistsById {
+	watchlists = make([]Watchlist, 0, len(watchlistsByID))
+	for _, watchlist := range watchlistsByID {
 		watchlists = append(watchlists, watchlist)
 	}
 	return watchlists, nil
 }
 
-func GetWatchlistStocksByUserId(db PGConnection, userId int) (stocks []Stock, err error) {
-	watchlists, err := GetWatchlistsByUserId(db, userId)
+func GetWatchlistStocksWithUserID(db PGConnection, userID int) (stocks []Stock, err error) {
+	watchlists, err := GetWatchlistsWithUserID(db, userID)
 	if err != nil {
 		return stocks, err
 	}
-	stocksById := make(map[int]struct{})
+	stocksByID := make(map[int]struct{})
+	var stockIDs []int
 	for _, watchlist := range watchlists {
-		for _, stock := range watchlist.Stocks {
-			if _, ok := stocksById[stock.Id]; !ok {
-				stocksById[stock.Id] = struct{}{}
-				stocks = append(stocks, stock)
+		for _, stockID := range watchlist.StockIDs {
+			if _, ok := stocksByID[stockID]; !ok {
+				stocksByID[stockID] = struct{}{}
+				stockIDs = append(stockIDs, stockID)
 			}
 		}
 	}
-	return stocks, nil
+	return GetStocksWithIDs(db, stockIDs)
 }
 
 const watchlistExistsQuery = `
 SELECT EXISTS(SELECT 1 FROM watchlists WHERE id = $1 AND user_id = $2)
 `
 
-func HasWatchlistWithIdAndUserId(db PGConnection, watchlistId int, userId int) (bool, error) {
+func HasWatchlistWithIDAndUserID(db PGConnection, watchlistID int, userID int) (bool, error) {
 	var exists bool
 	err := db.QueryRow(
 		context.Background(),
 		watchlistExistsQuery,
-		watchlistId,
-		userId,
+		watchlistID,
+		userID,
 	).Scan(&exists)
 	if err != nil {
 		return exists, err
@@ -101,75 +91,27 @@ func HasWatchlistWithIdAndUserId(db PGConnection, watchlistId int, userId int) (
 	return exists, err
 }
 
-const watchlistStocksQuery = `
-SELECT s.id, s.symbol, s.company FROM watchlist_stocks wls
-INNER JOIN stocks s ON s.id = wls.stock_id
-WHERE wls.watchlist_id = $1
-`
-
-func GetWatchlistById(db PGConnection, watchlistId int) (watchlist Watchlist, err error) {
-	var watchlistName string
-	err = db.QueryRow(
-		context.Background(),
-		"SELECT name FROM watchlists WHERE id = $1",
-		watchlistId,
-	).Scan(&watchlistName)
-	if err != nil {
-		return watchlist, err
-	}
-
-	rows, err := db.Query(context.Background(), watchlistStocksQuery, watchlistId)
-	if err != nil {
-		return watchlist, err
-	}
-	defer rows.Close()
-
-	stocks := make([]Stock, 0)
-	for rows.Next() {
-		var stockId int
-		var symbol string
-		var company string
-		if err = rows.Scan(&stockId, &symbol, &company); err != nil {
-			return watchlist, err
-		}
-		stocks = append(stocks, Stock{
-			Id:      stockId,
-			Symbol:  symbol,
-			Company: company,
-		})
-	}
-
-	if rows.Err() != nil {
-		return watchlist, rows.Err()
-	}
-
-	watchlist.Name = watchlistName
-	watchlist.Id = watchlistId
-	watchlist.Stocks = stocks
-	return watchlist, nil
-}
-
-func CreateWatchlist(db PGConnection, userId int, watchlistName string, stockIds []int) (watchlistId int, err error) {
+func CreateWatchlist(db PGConnection, userID int, watchlistName string, stockIDs []int) (watchlistID int, err error) {
 	tx, err := db.Begin(context.Background())
 	if err != nil {
-		return watchlistId, err
+		return watchlistID, err
 	}
 	defer tx.Rollback(context.Background())
 
 	err = tx.QueryRow(
 		context.Background(),
 		"INSERT INTO watchlists (user_id, name) VALUES ($1, $2) RETURNING id",
-		userId,
+		userID,
 		watchlistName,
-	).Scan(&watchlistId)
+	).Scan(&watchlistID)
 	if err != nil {
-		return watchlistId, err
+		return watchlistID, err
 	}
 
-	if len(stockIds) > 0 {
-		rows := make([][]interface{}, 0, len(stockIds))
-		for _, stockId := range stockIds {
-			rows = append(rows, []interface{}{watchlistId, stockId})
+	if len(stockIDs) > 0 {
+		rows := make([][]interface{}, 0, len(stockIDs))
+		for _, stockID := range stockIDs {
+			rows = append(rows, []interface{}{watchlistID, stockID})
 		}
 		_, err = tx.CopyFrom(
 			context.Background(),
@@ -178,18 +120,18 @@ func CreateWatchlist(db PGConnection, userId int, watchlistName string, stockIds
 			pgx.CopyFromRows(rows),
 		)
 		if err != nil {
-			return watchlistId, err
+			return watchlistID, err
 		}
 	}
 
 	if err = tx.Commit(context.Background()); err != nil {
-		return watchlistId, err
+		return watchlistID, err
 	}
 
-	return watchlistId, err
+	return watchlistID, err
 }
 
-func UpdateWatchlistById(db PGConnection, watchlistId int, watchlistName string, stockIds []int) error {
+func UpdateWatchlistWithID(db PGConnection, watchlistID int, watchlistName string, stockIDs []int) error {
 	tx, err := db.Begin(context.Background())
 	if err != nil {
 		return err
@@ -200,7 +142,7 @@ func UpdateWatchlistById(db PGConnection, watchlistId int, watchlistName string,
 		context.Background(),
 		"UPDATE watchlists SET name = $1 WHERE id = $2",
 		watchlistName,
-		watchlistId,
+		watchlistID,
 	)
 	if err != nil {
 		return err
@@ -209,16 +151,16 @@ func UpdateWatchlistById(db PGConnection, watchlistId int, watchlistName string,
 	_, err = tx.Exec(
 		context.Background(),
 		"DELETE FROM watchlist_stocks WHERE watchlist_id = $1",
-		watchlistId,
+		watchlistID,
 	)
 	if err != nil {
 		return err
 	}
 
-	if len(stockIds) > 0 {
-		rows := make([][]interface{}, 0, len(stockIds))
-		for _, stockId := range stockIds {
-			rows = append(rows, []interface{}{watchlistId, stockId})
+	if len(stockIDs) > 0 {
+		rows := make([][]interface{}, 0, len(stockIDs))
+		for _, stockID := range stockIDs {
+			rows = append(rows, []interface{}{watchlistID, stockID})
 		}
 		_, err = tx.CopyFrom(
 			context.Background(),
@@ -238,7 +180,7 @@ func UpdateWatchlistById(db PGConnection, watchlistId int, watchlistName string,
 	return nil
 }
 
-func DeleteWatchlistById(db PGConnection, watchlistId int) error {
+func DeleteWatchlistWithID(db PGConnection, watchlistID int) error {
 	tx, err := db.Begin(context.Background())
 	if err != nil {
 		return err
@@ -248,7 +190,7 @@ func DeleteWatchlistById(db PGConnection, watchlistId int) error {
 	_, err = tx.Exec(
 		context.Background(),
 		"DELETE FROM watchlist_stocks WHERE watchlist_id = $1",
-		watchlistId,
+		watchlistID,
 	)
 	if err != nil {
 		return err
@@ -257,7 +199,7 @@ func DeleteWatchlistById(db PGConnection, watchlistId int) error {
 	_, err = tx.Exec(
 		context.Background(),
 		"DELETE FROM watchlists WHERE id = $1",
-		watchlistId,
+		watchlistID,
 	)
 	if err != nil {
 		return err

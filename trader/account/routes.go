@@ -27,13 +27,13 @@ func NewHandlers(logger *log.Logger, db *pgxpool.Pool) *Handlers {
 
 type WatchlistRequestBody struct {
 	Name     string `json:"name"`
-	StockIds []int  `json:"stockIds"`
+	StockIDs []int  `json:"stockIDs"`
 }
 
-const userId = 1
+const userID = 1
 
 func (h *Handlers) getWatchlists(w http.ResponseWriter, _ *http.Request) {
-	watchlists, err := traderdb.GetWatchlistsByUserId(h.db, userId)
+	watchlists, err := traderdb.GetWatchlistsWithUserID(h.db, userID)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
@@ -42,13 +42,13 @@ func (h *Handlers) getWatchlists(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (h *Handlers) deleteWatchlist(w http.ResponseWriter, r *http.Request) {
-	watchlistId, err := getWatchlistID(r)
+	watchlistID, err := getWatchlistID(r)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
 	}
 
-	exists, err := traderdb.HasWatchlistWithIdAndUserId(h.db, watchlistId, userId)
+	exists, err := traderdb.HasWatchlistWithIDAndUserID(h.db, watchlistID, userID)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
@@ -58,7 +58,7 @@ func (h *Handlers) deleteWatchlist(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = traderdb.DeleteWatchlistById(h.db, watchlistId)
+	err = traderdb.DeleteWatchlistWithID(h.db, watchlistID)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
@@ -67,13 +67,13 @@ func (h *Handlers) deleteWatchlist(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) updateWatchlist(w http.ResponseWriter, r *http.Request) {
-	watchlistId, err := getWatchlistID(r)
+	watchlistID, err := getWatchlistID(r)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
 	}
 
-	exists, err := traderdb.HasWatchlistWithIdAndUserId(h.db, watchlistId, userId)
+	exists, err := traderdb.HasWatchlistWithIDAndUserID(h.db, watchlistID, userID)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
@@ -90,7 +90,7 @@ func (h *Handlers) updateWatchlist(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = traderdb.UpdateWatchlistById(h.db, watchlistId, body.Name, body.StockIds)
+	err = traderdb.UpdateWatchlistWithID(h.db, watchlistID, body.Name, body.StockIDs)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
@@ -107,14 +107,15 @@ func (h *Handlers) createWatchlist(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := traderdb.CreateWatchlist(h.db, userId, body.Name, body.StockIds)
+	id, err := traderdb.CreateWatchlist(h.db, userID, body.Name, body.StockIDs)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
 	}
-
-	watchlist, err := traderdb.GetWatchlistById(h.db, id)
-	utils.JSONResponse(w, watchlist)
+	utils.JSONResponse(w, traderdb.Watchlist{
+		ID:   id,
+		Name: body.Name,
+	})
 }
 
 func (h *Handlers) AddRoutes(router *mux.Router) {

@@ -29,6 +29,7 @@ import { createSelector } from "@reduxjs/toolkit";
 import { useSelector } from "react-redux";
 import { useTitleContext } from "../state/title-context";
 import Settings from "./Settings";
+import { noop } from "../utils/function";
 
 const drawerWidth = 240;
 
@@ -196,6 +197,8 @@ const Layout = ({ children }) => {
         className={classes.drawer}
         variant="persistent"
         anchor="left"
+        onOpen={noop}
+        onClose={noop}
         open={showMenu}
         classes={{
           paper: classes.drawerPaper,

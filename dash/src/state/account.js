@@ -1,4 +1,9 @@
-import { createSelector, createSlice } from "@reduxjs/toolkit";
+import {
+  createAsyncThunk,
+  createSelector,
+  createSlice,
+} from "@reduxjs/toolkit";
+import { fetchWatchlists } from "../data/account";
 
 export const getCandleSize = createSelector(
   (state) => state.account,
@@ -10,10 +15,21 @@ export const getShowExtendedHours = createSelector(
   (account) => account.showExtendedHours
 );
 
+export const fetchWatchlistsThunk = createAsyncThunk(
+  "account/fetchWatchlists",
+  async () => {
+    const response = await fetchWatchlists();
+    if (response instanceof Error) {
+      throw response;
+    }
+    return response;
+  }
+);
+
 const accountSlice = createSlice({
   name: "account",
   initialState: {
-    watchlists: {},
+    watchlists: [],
     showExtendedHours: false,
     candleSize: "1min",
   },
@@ -41,6 +57,18 @@ const accountSlice = createSlice({
     },
     setCandleSize: (draft, { payload }) => {
       draft.candleSize = payload;
+    },
+  },
+  extraReducers: {
+    [fetchWatchlistsThunk.pending]: (draft) => {
+      draft.isLoading = true;
+    },
+    [fetchWatchlistsThunk.fulfilled]: (draft, { payload }) => {
+      draft.isLoading = false;
+      draft.watchlists = payload;
+    },
+    [fetchWatchlistsThunk.rejected]: (draft) => {
+      draft.isLoading = false;
     },
   },
 });
