@@ -14,7 +14,7 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-const userId = 1
+const userID = 1
 
 func main() {
 	databaseUrl := strings.TrimSpace(os.Getenv("DATABASE_URL"))
@@ -46,7 +46,7 @@ func main() {
 		false,
 	)
 
-	stocks, err := traderdb.GetWatchlistStocksByUserId(db, userId)
+	stocks, err := traderdb.GetWatchlistStocksWithUserID(db, userID)
 	if err != nil {
 		fmt.Println("Failed to fetch watchlist stocks:", err)
 		os.Exit(1)
@@ -86,7 +86,7 @@ func bulkInsertStockCandles(
 		if candles, ok := candlesBySymbol[stock.Symbol]; ok {
 			for _, candle := range candles {
 				rows = append(rows, []interface{}{
-					stock.Id,
+					stock.ID,
 					utils.ConvertUnixSecondsToTime(candle.StartAtUnixSec),
 					convertFloatToMicros(candle.Open),
 					convertFloatToMicros(candle.High),

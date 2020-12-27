@@ -110,7 +110,7 @@ func getEmailParams(
 	startTime time.Time,
 	endTime time.Time,
 ) (params EmailParams, err error) {
-	tradableStocksBySymbol, err := traderdb.GetTradableStocksBySymbol(db)
+	tradableStocksBySymbol, err := traderdb.GetStocksBySymbol(db)
 	if err != nil {
 		return params, err
 	}

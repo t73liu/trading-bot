@@ -52,7 +52,7 @@ func bulkInsertNewsSources(conn *pgx.Conn, sources []newsapi.Source) error {
 
 	rows := make([][]interface{}, 0, len(sources))
 	for _, source := range sources {
-		rows = append(rows, []interface{}{source.Id, source.Name, source.Description, source.Url})
+		rows = append(rows, []interface{}{source.ID, source.Name, source.Description, source.Url})
 	}
 
 	_, err = tx.CopyFrom(

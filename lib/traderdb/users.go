@@ -3,7 +3,7 @@ package traderdb
 import "context"
 
 type User struct {
-	Id             int    `json:"id"`
+	ID             int    `json:"id"`
 	Email          string `json:"email"`
 	HashedPassword string `json:"-"`
 	IsActive       bool   `json:"isActive"`
@@ -27,19 +27,19 @@ func InsertNewUser(db PGConnection, user User) error {
 	return nil
 }
 
-const selectUserByEmailQuery = `
+const selectUserWithEmailQuery = `
 SELECT id, password, is_active FROM users WHERE email = $1
 `
 
-func GetUserByEmail(db PGConnection, email string) (user User, err error) {
+func GetUserWithEmail(db PGConnection, email string) (user User, err error) {
 	var id int
 	var hashedPassword string
 	var isActive bool
-	row := db.QueryRow(context.Background(), selectUserByEmailQuery, email)
+	row := db.QueryRow(context.Background(), selectUserWithEmailQuery, email)
 	if err = row.Scan(&id, &hashedPassword, &isActive); err != nil {
 		return user, err
 	}
-	user.Id = id
+	user.ID = id
 	user.Email = email
 	user.HashedPassword = hashedPassword
 	user.IsActive = isActive

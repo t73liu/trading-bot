@@ -9,7 +9,7 @@ import (
 )
 
 type Stock struct {
-	Id         int    `json:"id"`
+	ID         int    `json:"id"`
 	Symbol     string `json:"symbol"`
 	Company    string `json:"company"`
 	Exchange   string `json:"exchange,omitempty"`
@@ -34,8 +34,8 @@ FROM stocks
 ORDER BY symbol
 `
 
-func getStocks(db PGConnection, query string) (stocks []Stock, err error) {
-	rows, err := db.Query(context.Background(), query)
+func getStocks(db PGConnection, query string, args ...interface{}) (stocks []Stock, err error) {
+	rows, err := db.Query(context.Background(), query, args...)
 	if err != nil {
 		return stocks, err
 	}
@@ -53,7 +53,7 @@ func getStocks(db PGConnection, query string) (stocks []Stock, err error) {
 			return stocks, err
 		}
 		stocks = append(stocks, Stock{
-			Id:         id,
+			ID:         id,
 			Symbol:     symbol,
 			Company:    company,
 			Exchange:   exchange,
@@ -77,12 +77,20 @@ func GetTradableStocks(db PGConnection) (stocks []Stock, err error) {
 	return getStocks(db, fmt.Sprintf(stocksQuery, " WHERE tradable = true"))
 }
 
-func GetTradableStocksBySymbol(db PGConnection) (map[string]Stock, error) {
+func GetStocksBySymbol(db PGConnection) (map[string]Stock, error) {
 	stocks, err := GetTradableStocks(db)
 	if err != nil {
 		return nil, err
 	}
 	return GroupStocksBySymbol(stocks), nil
+}
+
+func GetStocksWithIDs(db PGConnection, stockIDs []int) (stocks []Stock, err error) {
+	if len(stockIDs) == 0 {
+		return stocks, nil
+	}
+	query := fmt.Sprintf(stocksQuery, " WHERE tradable = true AND id = ANY($1) ")
+	return getStocks(db, query, stockIDs)
 }
 
 func GroupStocksBySymbol(stocks []Stock) map[string]Stock {
@@ -111,7 +119,7 @@ func GetTradableStock(db PGConnection, symbol string) (stock Stock, err error) {
 		return stock, err
 	}
 	stock = Stock{
-		Id:         id,
+		ID:         id,
 		Symbol:     symbol,
 		Exchange:   exchange,
 		Company:    company,

@@ -5,7 +5,7 @@ import (
 )
 
 type NewsSource struct {
-	Id          string
+	ID          string
 	Name        string
 	Description string
 }
@@ -16,8 +16,8 @@ INNER JOIN news_sources ns ON ns.id = uns.news_source_id
 WHERE uns.user_id = $1
 `
 
-func GetNewsSourcesByUserId(db PGConnection, userId int) (newsSources []NewsSource, err error) {
-	rows, err := db.Query(context.Background(), userNewsSourcesQuery, userId)
+func GetNewsSourcesWithUserID(db PGConnection, userID int) (newsSources []NewsSource, err error) {
+	rows, err := db.Query(context.Background(), userNewsSourcesQuery, userID)
 	if err != nil {
 		return newsSources, err
 	}
@@ -31,7 +31,7 @@ func GetNewsSourcesByUserId(db PGConnection, userId int) (newsSources []NewsSour
 			return newsSources, err
 		}
 		newsSources = append(newsSources, NewsSource{
-			Id:          id,
+			ID:          id,
 			Name:        name,
 			Description: description,
 		})
@@ -43,13 +43,13 @@ func GetNewsSourcesByUserId(db PGConnection, userId int) (newsSources []NewsSour
 	return newsSources, err
 }
 
-func GetNewsSourceIdsByUserId(db PGConnection, userId int) (newsSourceIds []string, err error) {
-	newsSources, err := GetNewsSourcesByUserId(db, userId)
+func GetNewsSourceIDsWithUserID(db PGConnection, userID int) (newsSourceIDs []string, err error) {
+	newsSources, err := GetNewsSourcesWithUserID(db, userID)
 	if err != nil {
-		return newsSourceIds, err
+		return newsSourceIDs, err
 	}
 	for _, newsSource := range newsSources {
-		newsSourceIds = append(newsSourceIds, newsSource.Id)
+		newsSourceIDs = append(newsSourceIDs, newsSource.ID)
 	}
-	return newsSourceIds, nil
+	return newsSourceIDs, nil
 }

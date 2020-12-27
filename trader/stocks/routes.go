@@ -176,7 +176,7 @@ func (h *Handlers) getStockOptions(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) getGapStocks(w http.ResponseWriter, _ *http.Request) {
-	stocksBySymbol, err := traderdb.GetTradableStocksBySymbol(h.db)
+	stocksBySymbol, err := traderdb.GetStocksBySymbol(h.db)
 	if err != nil {
 		utils.JSONError(w, err)
 		return

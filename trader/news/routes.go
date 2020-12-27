@@ -25,19 +25,19 @@ func NewHandlers(logger *log.Logger, db *pgxpool.Pool, client *newsapi.Client) *
 	}
 }
 
-const userId = 1
+const userID = 1
 
 func (h *Handlers) getTopHeadlines(w http.ResponseWriter, r *http.Request) {
 	queryValues := r.URL.Query()
-	newsSourceIds, err := traderdb.GetNewsSourceIdsByUserId(h.db, userId)
+	newsSourceIDs, err := traderdb.GetNewsSourceIDsWithUserID(h.db, userID)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
 	}
-	data, err := h.client.GetTopHeadlinesBySources(
+	data, err := h.client.GetTopHeadlinesWithSources(
 		newsapi.ArticlesQueryParams{
 			Query:   queryValues.Get("q"),
-			Sources: newsSourceIds,
+			Sources: newsSourceIDs,
 		},
 	)
 	if err != nil {
@@ -48,7 +48,7 @@ func (h *Handlers) getTopHeadlines(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) getUserNewsSources(w http.ResponseWriter, _ *http.Request) {
-	data, err := traderdb.GetNewsSourcesByUserId(h.db, userId)
+	data, err := traderdb.GetNewsSourcesWithUserID(h.db, userID)
 	if err != nil {
 		utils.JSONError(w, err)
 		return

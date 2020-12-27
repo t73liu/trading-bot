@@ -23,7 +23,7 @@ type EmailParams struct {
 	GeneralNewsByCompany map[string][]newsapi.Article
 }
 
-const userId = 1
+const userID = 1
 
 func main() {
 	recipientsFlag := flag.String("recipients", "", "Email addresses delimited by commas")
@@ -119,7 +119,7 @@ func getEmailParams(
 		return params, err
 	}
 
-	stocks, err := traderdb.GetWatchlistStocksByUserId(db, userId)
+	stocks, err := traderdb.GetWatchlistStocksWithUserID(db, userID)
 	if err != nil {
 		return params, err
 	}
@@ -130,7 +130,7 @@ func getEmailParams(
 	for _, stock := range stocks {
 		// Using domains because some news sources are missing from /sources
 		// (e.g. seekingalpha.com, yahoo.finance.com)
-		response, err := newsClient.GetAllHeadlinesBySources(newsapi.AllArticlesQueryParams{
+		response, err := newsClient.GetAllHeadlinesWithSources(newsapi.AllArticlesQueryParams{
 			Query:     utils.TrimCompanyName(stock.Company) + " OR " + stock.Symbol + " Stock",
 			StartTime: startTime,
 			Domains:   utils.NewsDomains,

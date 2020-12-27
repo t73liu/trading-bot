@@ -38,7 +38,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	tradableSymbols, err := traderdb.GetTradableStocksBySymbol(db)
+	tradableSymbols, err := traderdb.GetStocksBySymbol(db)
 	if err != nil {
 		fmt.Println("Failed to query tradable stocks from DB:", err)
 		os.Exit(1)
@@ -85,7 +85,7 @@ func main() {
 	startTime := utils.GetLastWeekday(now)
 
 	for _, stock := range tradableMovers {
-		response, err := newsClient.GetAllHeadlinesBySources(newsapi.AllArticlesQueryParams{
+		response, err := newsClient.GetAllHeadlinesWithSources(newsapi.AllArticlesQueryParams{
 			Query:     utils.TrimCompanyName(stock.Company) + " OR " + stock.Symbol + " Stock",
 			StartTime: startTime,
 			Domains:   utils.NewsDomains,

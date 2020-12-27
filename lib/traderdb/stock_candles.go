@@ -13,12 +13,12 @@ ORDER BY opened_at
 `
 
 func GetStockCandles(db PGConnection, symbol string, startTime time.Time, endTime time.Time) (candles []candle.Candle, err error) {
-	var stockId int
+	var stockID int
 	err = db.QueryRow(
 		context.Background(),
 		"SELECT id FROM stocks WHERE symbol = $1",
 		symbol,
-	).Scan(&stockId)
+	).Scan(&stockID)
 	if err != nil {
 		return candles, err
 	}
@@ -28,7 +28,7 @@ func GetStockCandles(db PGConnection, symbol string, startTime time.Time, endTim
 		return candles, err
 	}
 
-	rows, err := db.Query(context.Background(), stockCandlesQuery, stockId, startTime, endTime)
+	rows, err := db.Query(context.Background(), stockCandlesQuery, stockID, startTime, endTime)
 	if err != nil {
 		return candles, err
 	}

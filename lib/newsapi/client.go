@@ -40,7 +40,7 @@ type SourcesResponse struct {
 }
 
 type Source struct {
-	Id          string `json:"id"`
+	ID          string `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Url         string `json:"url"`
@@ -95,7 +95,7 @@ type AllArticlesQueryParams struct {
 	SortBy    SortArticlesBy
 }
 
-func (c *Client) GetTopHeadlinesBySources(params ArticlesQueryParams) (result ArticlesResponse, err error) {
+func (c *Client) GetTopHeadlinesWithSources(params ArticlesQueryParams) (result ArticlesResponse, err error) {
 	req, err := http.NewRequest("GET", newsAPIHost+"/v2/top-headlines", nil)
 	if err != nil {
 		return result, err
@@ -120,7 +120,7 @@ func (c *Client) GetTopHeadlinesBySources(params ArticlesQueryParams) (result Ar
 	return c.getArticlesResponse(req)
 }
 
-func (c *Client) GetAllHeadlinesBySources(params AllArticlesQueryParams) (result ArticlesResponse, err error) {
+func (c *Client) GetAllHeadlinesWithSources(params AllArticlesQueryParams) (result ArticlesResponse, err error) {
 	req, err := http.NewRequest("GET", newsAPIHost+"/v2/everything", nil)
 	if err != nil {
 		return result, err
