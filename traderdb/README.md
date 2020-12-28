@@ -50,3 +50,16 @@ migrate -path traderdb/migrations \
  -database "postgres://postgres:test@localhost:5432/traderdb?sslmode=disable" \
  force 4
 ```
+
+### Backup
+
+The database should be routinely backed up.
+
+```shell
+# Generates SQL commands to recreate the DB
+docker exec -it traderdb pg_dump -U postgres traderdb > backup.sql
+
+# Create and restore the DB from SQL dump
+docker exec -it createdb --template=template0 --username=postgres traderdb
+docker exec -it psql --single-transaction traderdb < backup.sql
+```
