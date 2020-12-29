@@ -178,7 +178,8 @@ func (md *MicroDollar) Dollar() float64 {
 
 func (md *MicroDollar) MarshalJSON() ([]byte, error) {
 	if md.Valid {
-		return json.Marshal(md.Dollar())
+		// Rounding introduces display issues for low values (e.g. MACD)
+		return json.Marshal(MicrosToDollars(md.Int64))
 	}
 	return json.Marshal(nil)
 }

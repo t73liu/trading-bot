@@ -5,7 +5,12 @@ import "math"
 const Million = 1000000
 
 func RoundToTwoDecimals(value float64) float64 {
-	return math.Round(value*100) / 100
+	return RoundToNDecimals(value, 2)
+}
+
+func RoundToNDecimals(value float64, decimalPlaces int) float64 {
+	offset := math.Pow10(decimalPlaces)
+	return math.Round(value*offset) / offset
 }
 
 func DollarsToMicros(dollars float64) int64 {
