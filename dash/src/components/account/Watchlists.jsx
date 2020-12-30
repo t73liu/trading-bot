@@ -1,27 +1,57 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createSelector } from "@reduxjs/toolkit";
-import { fetchWatchlistsThunk } from "../../state/account";
-
-const getWatchlists = createSelector(
-  (state) => state.account,
-  (account) => account.watchlists
-);
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  IconButton,
+  List,
+  ListItem,
+  ListItemSecondaryAction,
+  ListItemText,
+  Typography,
+} from "@material-ui/core";
+import { Delete } from "@material-ui/icons";
+import {
+  fetchWatchlistsThunk,
+  selectAllWatchlists,
+} from "../../state/watchlists";
+import { useTitleContext } from "../../state/title-context";
 
 const Watchlists = () => {
+  const { setTitle } = useTitleContext();
+  useEffect(() => setTitle("Watchlists"), [setTitle]);
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(fetchWatchlistsThunk());
   }, [dispatch]);
-  const watchlists = useSelector(getWatchlists);
+  const watchlists = useSelector(selectAllWatchlists);
   return (
     <div>
-      <h2>Watchlists</h2>
-      <ul>
-        {watchlists.map((watchlist) => (
-          <li key={watchlist.id}>{watchlist.name}</li>
-        ))}
-      </ul>
+      {watchlists?.length > 0 && (
+        <Accordion>
+          {/* Accordion doesn't accept a Fragment as a child. */}
+          {watchlists.map(({ id, name, stockIDs }) => [
+            <AccordionSummary key={id}>
+              <Typography>{name}</Typography>
+            </AccordionSummary>,
+            <AccordionDetails key={id}>
+              <List>
+                {stockIDs?.map((stockID) => (
+                  <ListItem key={stockID}>
+                    <ListItemText primary={stockID} />
+                    <ListItemSecondaryAction>
+                      <IconButton>
+                        <Delete />
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                ))}
+              </List>
+            </AccordionDetails>,
+          ])}
+        </Accordion>
+      )}
     </div>
   );
 };

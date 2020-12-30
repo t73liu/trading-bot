@@ -1,11 +1,12 @@
 import { stringify } from "query-string";
-import { getJSON } from "../utils/http";
+import { fetchJSON } from "../utils/http";
 
-export const fetchStocks = () => getJSON("/api/stocks");
+export const fetchStocks = () => fetchJSON("/api/stocks");
 
-export const fetchStockInfo = (symbol) => getJSON(`/api/stocks/${symbol}`);
+export const fetchStockInfo = (symbol) => fetchJSON(`/api/stocks/${symbol}`);
 
-export const fetchStockNews = (symbol) => getJSON(`/api/stocks/${symbol}/news`);
+export const fetchStockNews = (symbol) =>
+  fetchJSON(`/api/stocks/${symbol}/news`);
 
 export const fetchStockCharts = (symbol, candleSize, showExtendedHours) => {
   const query = stringify({
@@ -13,7 +14,7 @@ export const fetchStockCharts = (symbol, candleSize, showExtendedHours) => {
     candleSize,
     showExtendedHours,
   });
-  return getJSON(`/api/stocks/${symbol}/charts?${query}`);
+  return fetchJSON(`/api/stocks/${symbol}/charts?${query}`);
 };
 
-export const fetchGapStocks = () => getJSON("/api/stocks/gaps");
+export const fetchGapStocks = () => fetchJSON("/api/stocks/gaps");

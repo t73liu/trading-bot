@@ -5,7 +5,7 @@ import { useTitleContext } from "../../state/title-context";
 import EconomicCalendar from "./EconomicCalendar";
 import CandlestickChart from "../common/CandlestickChart";
 import { fetchStockCharts } from "../../data/stocks";
-import { getCandleSize, getShowExtendedHours } from "../../state/account";
+import { getCandleSize, getShowExtendedHours } from "../../state/settings";
 
 const Market = () => {
   const [isLoading, setIsLoading] = useState(false);

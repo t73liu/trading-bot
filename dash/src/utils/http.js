@@ -1,8 +1,9 @@
 // eslint-disable-next-line import/prefer-default-export
-export const getJSON = async (url) => {
+export const fetchJSON = async (url, options = {}) => {
   try {
     const response = await fetch(url, {
       headers: { "Content-Type": "application/json" },
+      ...options,
     });
     if (response.ok) {
       return await response.json();

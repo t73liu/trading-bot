@@ -8,7 +8,7 @@ import CandlestickChart from "../common/CandlestickChart";
 import { fetchStockCharts, fetchStockInfo } from "../../data/stocks";
 import Articles from "./Articles";
 import StockInfo from "./StockInfo";
-import { getCandleSize, getShowExtendedHours } from "../../state/account";
+import { getCandleSize, getShowExtendedHours } from "../../state/settings";
 
 const StockPage = () => {
   const candleSize = useSelector(getCandleSize);

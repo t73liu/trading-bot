@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Button } from "@material-ui/core";
 import PropTypes from "prop-types";
-import { updateWatchlist } from "../../data/account";
+import { updateWatchlist } from "../../data/watchlists";
 
 const Watchlist = ({ id, name, stocks }) => {
   const [watchlistName, setWatchlistName] = useState("");

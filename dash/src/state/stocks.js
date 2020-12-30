@@ -1,4 +1,8 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import {
+  createAsyncThunk,
+  createSlice,
+  createEntityAdapter,
+} from "@reduxjs/toolkit";
 import { fetchStocks } from "../data/stocks";
 
 export const fetchStocksThunk = createAsyncThunk(
@@ -12,20 +16,21 @@ export const fetchStocksThunk = createAsyncThunk(
   }
 );
 
+const stocksAdapter = createEntityAdapter();
+
+const initialState = stocksAdapter.getInitialState({ isLoading: false });
+
 const stocksSlice = createSlice({
   name: "stocks",
-  initialState: {
-    allStocks: [],
-    isLoading: false,
-  },
+  initialState,
   reducers: {},
   extraReducers: {
     [fetchStocksThunk.pending]: (draft) => {
       draft.isLoading = true;
     },
-    [fetchStocksThunk.fulfilled]: (draft, { payload }) => {
+    [fetchStocksThunk.fulfilled]: (draft, action) => {
+      stocksAdapter.upsertMany(draft, action);
       draft.isLoading = false;
-      draft.allStocks = payload;
     },
     [fetchStocksThunk.rejected]: (draft) => {
       draft.isLoading = false;
@@ -33,6 +38,9 @@ const stocksSlice = createSlice({
   },
 });
 
-export const { createWatchlist, deleteWatchlist } = stocksSlice.actions;
+export const {
+  selectAll: selectAllStocks,
+  selectById: selectStockByID,
+} = stocksAdapter.getSelectors((state) => state.stocks);
 
 export default stocksSlice.reducer;

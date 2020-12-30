@@ -20,7 +20,7 @@ import {
   getShowExtendedHours,
   setCandleSize,
   toggleShowExtendedHours,
-} from "../state/account";
+} from "../state/settings";
 
 const Settings = ({ visible, handleCloseSettings }) => {
   const dispatch = useDispatch();
