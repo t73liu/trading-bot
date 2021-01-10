@@ -163,7 +163,7 @@ func UpdateStock(db PGConnection, stock Stock) error {
 		stock.Company,
 		stock.Tradable,
 		stock.Shortable,
-		stock.Company,
+		stock.Marginable,
 		stock.Exchange,
 		stock.Symbol,
 	)
