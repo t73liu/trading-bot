@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"tradingbot/lib/alpaca"
+	"tradingbot/lib/iex"
 	"tradingbot/lib/traderdb"
 	"tradingbot/lib/utils"
 
@@ -28,6 +29,11 @@ func main() {
 		fmt.Println("ALPACA_API_SECRET environment variable is required")
 		os.Exit(1)
 	}
+	iexToken := strings.TrimSpace(os.Getenv("IEX_API_TOKEN"))
+	if iexToken == "" {
+		fmt.Println("IEX_API_TOKEN environment variable is required")
+		os.Exit(1)
+	}
 
 	conn, err := pgx.Connect(context.Background(), databaseUrl)
 	if err != nil {
@@ -35,20 +41,32 @@ func main() {
 		os.Exit(1)
 	}
 
+	httpClient := utils.NewHttpClient()
 	alpacaClient := alpaca.NewClient(
-		utils.NewHttpClient(),
+		httpClient,
 		apiKey,
 		apiSecretKey,
 		false,
 	)
+	iexClient := iex.NewClient(httpClient, iexToken)
 
-	if err = populateStocks(alpacaClient, conn); err != nil {
+	if err = populateStocks(alpacaClient, iexClient, conn); err != nil {
 		fmt.Println("Failed to populate stocks table:", err)
 		os.Exit(1)
 	}
 }
 
-func populateStocks(client *alpaca.Client, conn *pgx.Conn) error {
+func populateStocks(client *alpaca.Client, iexClient *iex.Client, conn *pgx.Conn) error {
+	// Get sensible company names
+	iexStocks, err := iexClient.GetReferenceSymbols()
+	if err != nil {
+		return err
+	}
+	companyBySymbol := make(map[string]string)
+	for _, iexStock := range iexStocks {
+		companyBySymbol[iexStock.Symbol] = iexStock.Name
+	}
+
 	assets, err := client.GetAssets("active", "")
 	if err != nil {
 		return err
@@ -64,9 +82,13 @@ func populateStocks(client *alpaca.Client, conn *pgx.Conn) error {
 	var updatedStocks []traderdb.Stock
 	supportedSymbols := make([]string, 0, len(assets))
 	for _, asset := range assets {
+		company, ok := companyBySymbol[asset.Symbol]
+		if !ok {
+			company = asset.Name
+		}
 		stock := traderdb.Stock{
 			Symbol:     asset.Symbol,
-			Company:    asset.Name,
+			Company:    company,
 			Exchange:   asset.Exchange,
 			Tradable:   asset.Tradable,
 			Shortable:  asset.Shortable && asset.EasyToBorrow,
