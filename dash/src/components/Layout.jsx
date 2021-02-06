@@ -2,11 +2,11 @@ import React, { useCallback, useState } from "react";
 import clsx from "clsx";
 import {
   ChevronLeft,
+  FormatListBulleted,
   Menu,
   PieChart,
   Settings as SettingsIcon,
   TrendingUp,
-  FormatListBulleted,
 } from "@material-ui/icons";
 import {
   AppBar,
@@ -18,19 +18,16 @@ import {
   ListItemText,
   makeStyles,
   SwipeableDrawer,
-  TextField,
   Toolbar,
   Typography,
 } from "@material-ui/core";
-import { Autocomplete, createFilterOptions } from "@material-ui/lab";
 import { Helmet } from "react-helmet-async";
 import { Link, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
-import { useSelector } from "react-redux";
 import { useTitleContext } from "../state/title-context";
 import Settings from "./Settings";
 import { noop } from "../utils/function";
-import { selectAllStocks } from "../state/stocks";
+import StockLookup from "./common/StockLookup";
 
 const drawerWidth = 240;
 
@@ -112,16 +109,9 @@ const Title = () => {
   );
 };
 
-const filterOptions = createFilterOptions({
-  limit: 50,
-});
-
-const getStockLabel = (stock) => `${stock.symbol} - ${stock.company}`;
-
 const Layout = ({ children }) => {
   const classes = useStyles();
   const history = useHistory();
-  const stocks = useSelector(selectAllStocks);
   const [showMenu, setShowMenu] = useState(false);
   const handleOpenMenu = () => setShowMenu(true);
   const handleCloseMenu = () => setShowMenu(false);
@@ -160,24 +150,7 @@ const Layout = ({ children }) => {
             <Title />
           </div>
           <div className={classes.toolbarContent}>
-            <Autocomplete
-              onChange={handleStockClick}
-              filterOptions={filterOptions}
-              options={stocks}
-              getOptionLabel={getStockLabel}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  margin="normal"
-                  variant="outlined"
-                  placeholder="Symbol"
-                  style={{
-                    backgroundColor: "white",
-                    width: 300,
-                  }}
-                />
-              )}
-            />
+            <StockLookup handleStockClick={handleStockClick} />
             <div>
               <IconButton
                 onClick={handleOpenSettings}
