@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   VictoryAxis,
   VictoryBar,
@@ -35,6 +35,9 @@ const CandlestickChart = ({ data, className }) => {
       min = c.low;
     }
   });
+  const domain = useMemo(() => {
+    return min === max ? null : { y: [min, max] };
+  }, [min, max]);
   const formatMACD = (val, i) => {
     let fill;
     if (val < 0) {
@@ -56,7 +59,7 @@ const CandlestickChart = ({ data, className }) => {
   };
   return (
     <div className={className}>
-      <VictoryChart scale={{ x: "time" }} domain={{ y: [min, max] }}>
+      <VictoryChart scale={{ x: "time" }} domain={domain}>
         <VictoryAxis
           style={TICK_LABEL_SIZE}
           tickCount={8}
