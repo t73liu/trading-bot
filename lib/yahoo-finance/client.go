@@ -29,9 +29,9 @@ type EarningsCall struct {
 	Ticker             string
 	Company            string
 	StartTime          EarningsCallTime
-	EPSEstimate        utils.NullFloat64
-	EPSActual          utils.NullFloat64
-	EPSSurprisePercent utils.NullFloat64
+	EPSEstimate        *utils.NullFloat64
+	EPSActual          *utils.NullFloat64
+	EPSSurprisePercent *utils.NullFloat64
 	QuoteType          string
 	Date               string
 }
@@ -40,8 +40,8 @@ type IPO struct {
 	Ticker    string
 	Company   string
 	Exchange  string
-	PriceFrom utils.NullFloat64
-	PriceTo   utils.NullFloat64
+	PriceFrom *utils.NullFloat64
+	PriceTo   *utils.NullFloat64
 	Currency  string
 	QuoteType string
 	Date      string
@@ -53,11 +53,11 @@ type Stock struct {
 	Exchange      string
 	MarketCap     int64
 	Price         float64
-	Sector        utils.NullString
-	Industry      utils.NullString
-	Description   utils.NullString
-	Country       utils.NullString
-	Website       utils.NullString
+	Sector        *utils.NullString
+	Industry      *utils.NullString
+	Description   *utils.NullString
+	Country       *utils.NullString
+	Website       *utils.NullString
 	AverageVolume int64
 	News          []Article
 }

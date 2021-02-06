@@ -1,29 +1,33 @@
 package utils
 
-func ToNullString(any interface{}) (ns NullString) {
+func ToNullString(any interface{}) *NullString {
 	value, ok := any.(string)
+	var ns NullString
 	ns.Valid = ok
 	ns.String = value
-	return ns
+	return &ns
 }
 
-func ToNullBool(any interface{}) (nb NullBool) {
+func ToNullBool(any interface{}) *NullBool {
 	value, ok := any.(bool)
+	var nb NullBool
 	nb.Valid = ok
 	nb.Bool = value
-	return nb
+	return &nb
 }
 
-func ToNullFloat64(any interface{}) (nf NullFloat64) {
+func ToNullFloat64(any interface{}) *NullFloat64 {
 	value, ok := any.(float64)
+	var nf NullFloat64
 	nf.Valid = ok
 	nf.Float64 = value
-	return nf
+	return &nf
 }
 
-func ToNullInt64(any interface{}) (ni NullInt64) {
+func ToNullInt64(any interface{}) *NullInt64 {
 	value, ok := any.(int64)
+	var ni NullInt64
 	ni.Valid = ok
 	ni.Int64 = value
-	return ni
+	return &ni
 }
