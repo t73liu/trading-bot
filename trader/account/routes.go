@@ -113,8 +113,9 @@ func (h *Handlers) createWatchlist(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	utils.JSONResponse(w, traderdb.Watchlist{
-		ID:   id,
-		Name: body.Name,
+		ID:       id,
+		Name:     body.Name,
+		StockIDs: body.StockIDs,
 	})
 }
 

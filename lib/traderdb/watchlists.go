@@ -2,6 +2,7 @@ package traderdb
 
 import (
 	"context"
+	"tradingbot/lib/utils"
 
 	"github.com/jackc/pgx/v4"
 )
@@ -14,8 +15,9 @@ type Watchlist struct {
 
 const watchlistsQuery = `
 SELECT wl.id, wl.name, wls.stock_id as stock_id FROM watchlists wl
-INNER JOIN watchlist_stocks wls ON wl.id = wls.watchlist_id
+LEFT JOIN watchlist_stocks wls ON wl.id = wls.watchlist_id
 WHERE user_id = $1
+ORDER BY wl.id
 `
 
 func GetWatchlistsWithUserID(db PGConnection, userID int) (watchlists []Watchlist, err error) {
@@ -29,18 +31,21 @@ func GetWatchlistsWithUserID(db PGConnection, userID int) (watchlists []Watchlis
 	for rows.Next() {
 		var watchlistID int
 		var name string
-		var stockID int
+		var stockID utils.NullInt64
 		if err = rows.Scan(&watchlistID, &name, &stockID); err != nil {
 			return watchlists, err
 		}
 		if _, ok := watchlistsByID[watchlistID]; !ok {
 			watchlistsByID[watchlistID] = Watchlist{
-				ID:   watchlistID,
-				Name: name,
+				ID:       watchlistID,
+				Name:     name,
+				StockIDs: make([]int, 0),
 			}
 		}
 		watchlist := watchlistsByID[watchlistID]
-		watchlist.StockIDs = append(watchlist.StockIDs, stockID)
+		if stockID.Valid {
+			watchlist.StockIDs = append(watchlist.StockIDs, int(stockID.Int64))
+		}
 		watchlistsByID[watchlistID] = watchlist
 	}
 

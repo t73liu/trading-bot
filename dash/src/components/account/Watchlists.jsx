@@ -1,22 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Button } from "@material-ui/core";
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  IconButton,
-  List,
-  ListItem,
-  ListItemSecondaryAction,
-  ListItemText,
-  Typography,
-} from "@material-ui/core";
-import { Delete } from "@material-ui/icons";
-import {
+  createWatchlistThunk,
   fetchWatchlistsThunk,
   selectAllWatchlists,
 } from "../../state/watchlists";
 import { useTitleContext } from "../../state/title-context";
+import Watchlist from "./Watchlist";
 
 const Watchlists = () => {
   const { setTitle } = useTitleContext();
@@ -26,32 +17,17 @@ const Watchlists = () => {
     dispatch(fetchWatchlistsThunk());
   }, [dispatch]);
   const watchlists = useSelector(selectAllWatchlists);
+  const handleCreateWatchlist = useCallback(() => {
+    dispatch(createWatchlistThunk());
+  }, [dispatch]);
   return (
     <div>
-      {watchlists?.length > 0 && (
-        <Accordion>
-          {/* Accordion doesn't accept a Fragment as a child. */}
-          {watchlists.map(({ id, name, stockIDs }) => [
-            <AccordionSummary key={id}>
-              <Typography>{name}</Typography>
-            </AccordionSummary>,
-            <AccordionDetails key={id}>
-              <List>
-                {stockIDs?.map((stockID) => (
-                  <ListItem key={stockID}>
-                    <ListItemText primary={stockID} />
-                    <ListItemSecondaryAction>
-                      <IconButton>
-                        <Delete />
-                      </IconButton>
-                    </ListItemSecondaryAction>
-                  </ListItem>
-                ))}
-              </List>
-            </AccordionDetails>,
-          ])}
-        </Accordion>
-      )}
+      {watchlists?.map(({ id, name, stockIDs }) => (
+        <Watchlist key={id} id={id} name={name} stockIDs={stockIDs} />
+      ))}
+      <Button variant="contained" onClick={handleCreateWatchlist}>
+        New
+      </Button>
     </div>
   );
 };

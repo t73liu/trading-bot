@@ -1,2 +1,3 @@
-// eslint-disable-next-line import/prefer-default-export
 export const noop = () => {};
+
+export const stopEvent = (e) => e.stopPropagation();

@@ -1,3 +1,5 @@
+const NO_CONTENT = 204;
+
 // eslint-disable-next-line import/prefer-default-export
 export const fetchJSON = async (url, options = {}) => {
   try {
@@ -6,6 +8,7 @@ export const fetchJSON = async (url, options = {}) => {
       ...options,
     });
     if (response.ok) {
+      if (response.status === NO_CONTENT) return undefined;
       return await response.json();
     }
     const contentType = response.headers.get("Content-Type");
