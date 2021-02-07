@@ -4,11 +4,13 @@ This directory contains machine learning models and trading strategies.
 
 ## Trading Ideas
 
+- [ ] Gap up/down
+- [ ] Elliot Wave
 - [ ] Momentum
 - [ ] Mean reversion
 - [ ] Value investing
 - [ ] Earnings
-- [ ] IPOs
+- [ ] IPOs/SPACs
 - [ ] News sentiment
 - [ ] Scalping
 - [ ] Volatility trading
