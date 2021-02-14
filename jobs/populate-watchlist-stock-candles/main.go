@@ -7,14 +7,12 @@ import (
 	"strings"
 	"time"
 	"tradingbot/lib/alpaca"
+	"tradingbot/lib/candle"
 	"tradingbot/lib/traderdb"
 	"tradingbot/lib/utils"
 
-	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
-
-const userID = 1
 
 func main() {
 	databaseUrl := strings.TrimSpace(os.Getenv("DATABASE_URL"))
@@ -46,7 +44,7 @@ func main() {
 		false,
 	)
 
-	stocks, err := traderdb.GetWatchlistStocksWithUserID(db, userID)
+	stocks, err := traderdb.GetAllWatchlistStocks(db)
 	if err != nil {
 		fmt.Println("Failed to fetch watchlist stocks:", err)
 		os.Exit(1)
@@ -57,8 +55,9 @@ func main() {
 		stockSymbols = append(stockSymbols, stock.Symbol)
 	}
 	now := time.Now()
-	candlesBySymbol, err := alpacaClient.GetCandles(alpaca.CandleQueryParams{
+	candlesBySymbol, err := alpacaClient.GetCandlesBySymbol(alpaca.CandleQueryParams{
 		Symbols:    stockSymbols,
+		Limit:      1000,
 		CandleSize: alpaca.OneMin,
 		StartTime:  now.AddDate(-1, 0, 0),
 		EndTime:    now,
@@ -81,37 +80,22 @@ func bulkInsertStockCandles(
 	}
 	defer tx.Rollback(context.Background())
 
-	rows := make([][]interface{}, 0, len(stocks))
+	var candles []candle.Candle
 	for _, stock := range stocks {
-		if candles, ok := candlesBySymbol[stock.Symbol]; ok {
-			for _, candle := range candles {
-				rows = append(rows, []interface{}{
-					stock.ID,
-					utils.ConvertUnixSecondsToTime(candle.StartAtUnixSec),
-					convertFloatToMicros(candle.Open),
-					convertFloatToMicros(candle.High),
-					convertFloatToMicros(candle.Low),
-					convertFloatToMicros(candle.Close),
-					candle.Volume,
-				})
-			}
+		for _, c := range candlesBySymbol[stock.Symbol] {
+			candles = append(candles, candle.Candle{
+				StockID:     int64(stock.ID),
+				OpenedAt:    utils.ConvertUnixSecondsToTime(c.StartAtUnixSec),
+				Volume:      int64(c.Volume),
+				OpenMicros:  utils.DollarsToMicros(float64(c.Open)),
+				HighMicros:  utils.DollarsToMicros(float64(c.High)),
+				LowMicros:   utils.DollarsToMicros(float64(c.Low)),
+				CloseMicros: utils.DollarsToMicros(float64(c.Close)),
+			})
 		}
 	}
-	_, err = tx.CopyFrom(
-		context.Background(),
-		pgx.Identifier{"stock_candles"},
-		[]string{
-			"stock_id",
-			"opened_at",
-			"open_micros",
-			"high_micros",
-			"low_micros",
-			"close_micros",
-			"volume",
-		},
-		pgx.CopyFromRows(rows),
-	)
-	if err != nil {
+
+	if err = traderdb.UpsertStockCandles(tx, &candles); err != nil {
 		return err
 	}
 
@@ -120,8 +104,4 @@ func bulkInsertStockCandles(
 	}
 
 	return nil
-}
-
-func convertFloatToMicros(number float32) int64 {
-	return int64(number * 1000000)
 }

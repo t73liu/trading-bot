@@ -60,24 +60,6 @@ func GetWatchlistsWithUserID(db PGConnection, userID int) (watchlists []Watchlis
 	return watchlists, nil
 }
 
-func GetWatchlistStocksWithUserID(db PGConnection, userID int) (stocks []Stock, err error) {
-	watchlists, err := GetWatchlistsWithUserID(db, userID)
-	if err != nil {
-		return stocks, err
-	}
-	stocksByID := make(map[int]struct{})
-	var stockIDs []int
-	for _, watchlist := range watchlists {
-		for _, stockID := range watchlist.StockIDs {
-			if _, ok := stocksByID[stockID]; !ok {
-				stocksByID[stockID] = struct{}{}
-				stockIDs = append(stockIDs, stockID)
-			}
-		}
-	}
-	return GetStocksWithIDs(db, stockIDs)
-}
-
 const watchlistExistsQuery = `
 SELECT EXISTS(SELECT 1 FROM watchlists WHERE id = $1 AND user_id = $2)
 `
@@ -215,4 +197,38 @@ func DeleteWatchlistWithID(db PGConnection, watchlistID int) error {
 	}
 
 	return nil
+}
+
+func GetAllWatchlistStocks(db PGConnection) ([]Stock, error) {
+	rows, err := db.Query(context.Background(), "SELECT DISTINCT stock_id FROM watchlist_stocks")
+	if err != nil {
+		return nil, err
+	}
+	var stockIDs []int
+	var stockID int
+	for rows.Next() {
+		if err = rows.Scan(&stockID); err != nil {
+			return nil, err
+		}
+		stockIDs = append(stockIDs, stockID)
+	}
+	return GetStocksWithIDs(db, stockIDs)
+}
+
+func GetWatchlistStocksWithUserID(db PGConnection, userID int) (stocks []Stock, err error) {
+	watchlists, err := GetWatchlistsWithUserID(db, userID)
+	if err != nil {
+		return stocks, err
+	}
+	stocksByID := make(map[int]struct{})
+	var stockIDs []int
+	for _, watchlist := range watchlists {
+		for _, stockID := range watchlist.StockIDs {
+			if _, ok := stocksByID[stockID]; !ok {
+				stocksByID[stockID] = struct{}{}
+				stockIDs = append(stockIDs, stockID)
+			}
+		}
+	}
+	return GetStocksWithIDs(db, stockIDs)
 }

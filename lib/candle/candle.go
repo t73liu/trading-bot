@@ -17,6 +17,7 @@ type JSONCandle struct {
 }
 
 type Candle struct {
+	StockID     int64
 	OpenedAt    time.Time
 	Volume      int64
 	OpenMicros  int64

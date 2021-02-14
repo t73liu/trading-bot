@@ -8,4 +8,6 @@ This directory contains periodically scheduled jobs.
     - `ALPACA_API_KEY`: Use the paper trading API key during development
     - `ALPACA_API_SECRET`: Use the paper trading API secret during development
     - `IEX_API_TOKEN`: Used to fetch proper company names (costs 100 message per call)
+- `populate-watchlist-stock-candles`: Fetch the last 1000 one-minute bars for
+  all watched stocks
 - `watchlist-news`: Send daily email for watchlist stocks since last trading day

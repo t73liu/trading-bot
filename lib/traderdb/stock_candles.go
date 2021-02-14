@@ -2,8 +2,11 @@ package traderdb
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 	"tradingbot/lib/candle"
+	"tradingbot/lib/utils"
 )
 
 const stockCandlesQuery = `
@@ -13,7 +16,7 @@ ORDER BY opened_at
 `
 
 func GetStockCandles(db PGConnection, symbol string, startTime time.Time, endTime time.Time) (candles []candle.Candle, err error) {
-	var stockID int
+	var stockID int64
 	err = db.QueryRow(
 		context.Background(),
 		"SELECT id FROM stocks WHERE symbol = $1",
@@ -48,6 +51,7 @@ func GetStockCandles(db PGConnection, symbol string, startTime time.Time, endTim
 		}
 		openedAt = openedAt.In(location)
 		candles = append(candles, candle.Candle{
+			StockID:     stockID,
 			OpenedAt:    openedAt,
 			OpenMicros:  openMicros,
 			HighMicros:  highMicros,
@@ -62,4 +66,69 @@ func GetStockCandles(db PGConnection, symbol string, startTime time.Time, endTim
 	}
 
 	return candles, nil
+}
+
+const upsertStockCandlesQuery = `
+INSERT INTO stock_candles
+(
+  stock_id,
+  opened_at,
+  open_micros,
+  high_micros,
+  low_micros,
+  close_micros,
+  volume
+)
+VALUES %s
+ON CONFLICT (stock_id, opened_at)
+DO UPDATE SET
+  open_micros = EXCLUDED.open_micros,
+  high_micros = EXCLUDED.high_micros,
+  low_micros = EXCLUDED.low_micros,
+  close_micros = EXCLUDED.close_micros,
+  volume = EXCLUDED.volume
+`
+
+// Batched because PostgreSQL has a  limit of 65000 parameters
+func UpsertStockCandles(db PGConnection, candles *[]candle.Candle) error {
+	if candles == nil || len(*candles) == 0 {
+		return nil
+	}
+	numberOfParams := 7
+	batchedCandles := batchCandles(candles, 5000)
+	for _, batch := range *batchedCandles {
+		var values []interface{}
+		var insertStr string
+		for i, c := range batch {
+			values = append(
+				values,
+				c.StockID,
+				c.OpenedAt,
+				c.OpenMicros,
+				c.HighMicros,
+				c.LowMicros,
+				c.CloseMicros,
+				c.Volume,
+			)
+			insertStr += utils.CreatePositionalParams(i*numberOfParams+1, numberOfParams)
+		}
+		query := fmt.Sprintf(upsertStockCandlesQuery, strings.TrimSuffix(insertStr, ","))
+		if _, err := db.Exec(context.Background(), query, values...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func batchCandles(candles *[]candle.Candle, batchSize int) *[][]candle.Candle {
+	batches := len(*candles) / batchSize
+	if len(*candles)%batchSize != 0 {
+		batches++
+	}
+	batchedCandles := make([][]candle.Candle, batches)
+
+	for i, c := range *candles {
+		batchedCandles[i/batchSize] = append(batchedCandles[i/batchSize], c)
+	}
+	return &batchedCandles
 }

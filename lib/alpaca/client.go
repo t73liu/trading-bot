@@ -75,7 +75,8 @@ type CandleQueryParams struct {
 	EndTime    time.Time
 }
 
-func (c *Client) GetCandles(params CandleQueryParams) (candles map[string][]Candle, err error) {
+// NOTE The number of candles returned is controlled by params.Limit
+func (c *Client) GetCandlesBySymbol(params CandleQueryParams) (candles map[string][]Candle, err error) {
 	if len(params.Symbols) == 0 || len(params.Symbols) > 200 {
 		return candles, errors.New("symbols must be between 1 to 200")
 	}
