@@ -5,6 +5,7 @@ This directory contains machine learning models and trading strategies.
 ## Trading Ideas
 
 - [x] [Daily gap fill](DailyGapFill.ipynb)
+- [ ] Seasonality
 - [ ] Elliot Wave
 - [ ] Momentum
 - [ ] Mean reversion
@@ -23,14 +24,14 @@ Tensorflow can be installed locally or be used via Docker.
 
 ```shell
 # Pull Tensorflow image
-docker pull tensorflow/tensorflow:2.4.1-jupyter
+docker pull tensorflow/tensorflow:latest-jupyter
 
 # Run Tensorflow container
 docker run --detach \
  --name quant \
  --volume ${TRADING_BOT_REPO}/quant:/tf/notebooks \
  --publish 8888:8888 \
- tensorflow/tensorflow:2.4.1-jupyter
+ tensorflow/tensorflow:latest-jupyter
 
 # Access logs for Jupyter URL
 docker logs quant
