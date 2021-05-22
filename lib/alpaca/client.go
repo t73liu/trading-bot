@@ -3,18 +3,17 @@ package alpaca
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 )
 
 const liveAPIPath = "https://api.alpaca.markets/v2"
 const paperAPIPath = "https://paper-api.alpaca.markets/v2"
 
-// Data API endpoints still use v1
 // https://alpaca.markets/docs/api-documentation/api-v2/market-data/
-const marketDataApiPath = "https://data.alpaca.markets/v1"
+const marketDataApiPath = "https://data.alpaca.markets/v2"
 
 type Client struct {
 	client       http.Client
@@ -23,9 +22,9 @@ type Client struct {
 	basePath     string
 }
 
-// Alpaca data is currently limited to 5 US exchanges compared to Polygon which
-// consolidates from all exchanges in the US
-// https://alpaca.markets/docs/api-documentation/api-v2/market-data/#which-api-should-i-use
+// Alpaca's free plan only provides data from IEX whereas the paid plan provides
+// data from all US exchanges
+// https://alpaca.markets/docs/api-documentation/api-v2/market-data/alpaca-data-api-v2/#subscription-plans
 func NewClient(httpClient *http.Client, apiKey string, apiSecretKey string, isLive bool) *Client {
 	basePath := paperAPIPath
 	if isLive {
@@ -68,37 +67,39 @@ func (c *Client) GetAssets(status, assetClass string) (assets []Asset, err error
 }
 
 type CandleQueryParams struct {
-	Symbols    []string
 	Limit      int
 	CandleSize CandleSize
 	StartTime  time.Time
 	EndTime    time.Time
+	PageToken  string
 }
 
-// NOTE The number of candles returned is controlled by params.Limit
-func (c *Client) GetCandlesBySymbol(params CandleQueryParams) (candles map[string][]Candle, err error) {
-	if len(params.Symbols) == 0 || len(params.Symbols) > 200 {
-		return candles, errors.New("symbols must be between 1 to 200")
-	}
-	if params.Limit > 1000 {
-		return candles, errors.New("limit must be between 1 to 1000")
+type CandlesResponse struct {
+	Candles       []Candle `json:"bars"`
+	Symbol        string   `json:"symbol"`
+	NextPageToken string   `json:"next_page_token"`
+}
+
+func (c *Client) GetSymbolCandles(symbol string, params CandleQueryParams) (candlesResponse CandlesResponse, err error) {
+	if params.Limit > 10000 {
+		return candlesResponse, errors.New("limit must be between 1 to 10000")
 	}
 	switch params.CandleSize {
-	case OneMin, FiveMin, FifteenMin, OneDay:
+	case OneMin, OneHour, OneDay:
 		break
 	default:
-		return candles, errors.New("candleSize must be supported CandleSize")
+		return candlesResponse, errors.New("candleSize must be supported CandleSize")
 	}
 
-	url := marketDataApiPath + "/bars/" + string(params.CandleSize)
+	url := fmt.Sprintf("%s/stocks/%s/bars", marketDataApiPath, symbol)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return candles, err
+		return candlesResponse, err
 	}
 
 	c.setHeaders(req)
 	queryParams := req.URL.Query()
-	queryParams.Add("symbols", strings.Join(params.Symbols, ","))
+	queryParams.Add("timeframe", string(params.CandleSize))
 	if params.Limit > 0 {
 		queryParams.Add("limit", strconv.Itoa(params.Limit))
 	}
@@ -108,19 +109,22 @@ func (c *Client) GetCandlesBySymbol(params CandleQueryParams) (candles map[strin
 	if !params.EndTime.IsZero() {
 		queryParams.Add("end", formatTime(params.EndTime))
 	}
+	if params.PageToken != "" {
+		queryParams.Add("page_token", params.PageToken)
+	}
 	req.URL.RawQuery = queryParams.Encode()
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return candles, err
+		return candlesResponse, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return candles, errors.New("Response failed with status code: " + resp.Status)
+		return candlesResponse, errors.New("Response failed with status code: " + resp.Status)
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&candles); err != nil {
-		return candles, err
+	if err := json.NewDecoder(resp.Body).Decode(&candlesResponse); err != nil {
+		return candlesResponse, err
 	}
-	return candles, nil
+	return candlesResponse, nil
 }
 
 type TradeResponse struct {
@@ -185,5 +189,5 @@ func (c *Client) setHeaders(request *http.Request) {
 }
 
 func formatTime(date time.Time) string {
-	return date.Format("2006-01-02T15:04:05-07:00")
+	return date.UTC().Format("2006-01-02T15:04:05Z")
 }

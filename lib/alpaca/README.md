@@ -1,6 +1,6 @@
 ## Alpaca API
 
-Go client for [Alpaca](https://alpaca.markets/).
+Go client for [Alpaca v2](https://alpaca.markets/).
 
 ## Usage
 

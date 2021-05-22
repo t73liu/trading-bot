@@ -8,7 +8,6 @@ import (
 	"time"
 	"tradingbot/lib/finviz"
 	"tradingbot/lib/newsapi"
-	"tradingbot/lib/polygon"
 	"tradingbot/lib/traderdb"
 	"tradingbot/lib/utils"
 
@@ -45,20 +44,6 @@ func main() {
 	}
 
 	httpClient := utils.NewHttpClient()
-	polygonClient := polygon.NewClient(httpClient, alpacaAPIKey)
-	movers, err := polygonClient.GetMovers(true)
-	if err != nil {
-		fmt.Println("Failed to fetch movers:", err)
-		os.Exit(1)
-	}
-	tradableMovers := make([]traderdb.Stock, 0, len(movers))
-	for _, mover := range movers {
-		if stock, ok := tradableSymbols[mover.Ticker]; ok {
-			tradableMovers = append(tradableMovers, stock)
-			fmt.Printf("%+v\n", mover)
-		}
-	}
-
 	finvizClient := finviz.NewClient(httpClient)
 	gapStocks, err := finvizClient.ScreenStocksOverview("v=111&f=ta_gap_u7&ft=4&o=-gap")
 	if err != nil {
@@ -84,7 +69,7 @@ func main() {
 
 	startTime := utils.GetLastWeekday(now)
 
-	for _, stock := range tradableMovers {
+	for _, stock := range tradableGapStocks {
 		response, err := newsClient.GetAllHeadlinesWithSources(newsapi.AllArticlesQueryParams{
 			Query:     utils.TrimCompanyName(stock.Company) + " OR " + stock.Symbol + " Stock",
 			StartTime: startTime,

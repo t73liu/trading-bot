@@ -3,12 +3,10 @@
 ### Features (WIP)
 
 - [x] Fetch news from [News API](https://newsapi.org/)
-- [ ] Fetch stock data from [Polygon](https://polygon.io/)
 - [ ] Live and paper stock trading with [Alpaca](https://alpaca.markets/)
 - [ ] Live crypto trading with [Binance](https://www.binance.com/en)
 
 **Note:** Functionality requires setting up API keys with corresponding services.
-Polygon API key is provided by Alpaca.
 
 ### Getting Started
 

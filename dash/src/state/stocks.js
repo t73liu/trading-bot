@@ -38,9 +38,7 @@ const stocksSlice = createSlice({
   },
 });
 
-export const {
-  selectAll: selectAllStocks,
-  selectById: selectStockByID,
-} = stocksAdapter.getSelectors((state) => state.stocks);
+export const { selectAll: selectAllStocks, selectById: selectStockByID } =
+  stocksAdapter.getSelectors((state) => state.stocks);
 
 export default stocksSlice.reducer;

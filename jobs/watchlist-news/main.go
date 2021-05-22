@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 	"tradingbot/lib/newsapi"
-	"tradingbot/lib/polygon"
 	"tradingbot/lib/traderdb"
 	"tradingbot/lib/utils"
 
@@ -19,7 +18,6 @@ import (
 )
 
 type EmailParams struct {
-	NewsByTicker         map[string][]polygon.Article
 	GeneralNewsByCompany map[string][]newsapi.Article
 }
 
@@ -69,7 +67,6 @@ func main() {
 
 	now := time.Now()
 	httpClient := utils.NewHttpClient()
-	polygonClient := polygon.NewClient(httpClient, alpacaAPIKey)
 	newsClient := newsapi.NewClient(httpClient, newsAPIKey)
 
 	pool, err := pgxpool.Connect(context.Background(), databaseUrl)
@@ -78,7 +75,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	emailParams, err := getEmailParams(pool, polygonClient, newsClient, now)
+	emailParams, err := getEmailParams(pool, newsClient, now)
 	if err != nil {
 		fmt.Println("Failed to fetch news items:", err)
 		os.Exit(1)
@@ -110,7 +107,6 @@ func main() {
 
 func getEmailParams(
 	db *pgxpool.Pool,
-	_ *polygon.Client,
 	newsClient *newsapi.Client,
 	now time.Time,
 ) (params EmailParams, err error) {
@@ -145,22 +141,8 @@ func getEmailParams(
 		generalNewsByCompany[stock.Symbol] = response.Articles
 	}
 
-	// TODO Enable after https://github.com/polygon-io/issues/issues/25
-	//newsByTicker := make(map[string][]polygon.Article)
-	//for _, stock := range stocks {
-	//	articles, err := polygonClient.GetTickerNews(stock.Symbol, 10, 1)
-	//	if err != nil {
-	//		return params, err
-	//	}
-	//	for index := range articles {
-	//		articles[index].Timestamp = articles[index].Timestamp.In(location)
-	//	}
-	//	newsByTicker[stock.Symbol] = articles
-	//}
-
 	params = EmailParams{
 		GeneralNewsByCompany: generalNewsByCompany,
-		//NewsByTicker:         newsByTicker,
 	}
 	return params, nil
 }

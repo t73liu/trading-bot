@@ -130,9 +130,8 @@ const watchlistsSlice = createSlice({
   },
 });
 
-export const {
-  selectAll: selectAllWatchlists,
-} = watchlistsAdapter.getSelectors((state) => state.watchlists);
+export const { selectAll: selectAllWatchlists } =
+  watchlistsAdapter.getSelectors((state) => state.watchlists);
 
 export const { watchStock, unwatchStock } = watchlistsSlice.actions;
 

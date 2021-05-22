@@ -50,18 +50,21 @@ func main() {
 		os.Exit(1)
 	}
 
-	stockSymbols := make([]string, 0, len(stocks))
+	candlesBySymbol := make(map[string][]alpaca.Candle)
 	for _, stock := range stocks {
-		stockSymbols = append(stockSymbols, stock.Symbol)
+		now := time.Now()
+		candlesResponse, err := alpacaClient.GetSymbolCandles(stock.Symbol, alpaca.CandleQueryParams{
+			Limit:      10000,
+			CandleSize: alpaca.OneMin,
+			StartTime:  now.AddDate(-1, 0, 0),
+			EndTime:    now,
+		})
+		if err != nil {
+			fmt.Println(fmt.Sprintf("Failed to fetch %s candles:", stock.Symbol), err)
+			os.Exit(1)
+		}
+		candlesBySymbol[stock.Symbol] = candlesResponse.Candles
 	}
-	now := time.Now()
-	candlesBySymbol, err := alpacaClient.GetCandlesBySymbol(alpaca.CandleQueryParams{
-		Symbols:    stockSymbols,
-		Limit:      1000,
-		CandleSize: alpaca.OneMin,
-		StartTime:  now.AddDate(-1, 0, 0),
-		EndTime:    now,
-	})
 
 	if err = bulkInsertStockCandles(db, candlesBySymbol, stocks); err != nil {
 		fmt.Println("Failed to bulk insert stock candles:", err)
@@ -85,7 +88,7 @@ func bulkInsertStockCandles(
 		for _, c := range candlesBySymbol[stock.Symbol] {
 			candles = append(candles, candle.Candle{
 				StockID:     int64(stock.ID),
-				OpenedAt:    utils.ConvertUnixSecondsToTime(c.StartAtUnixSec),
+				OpenedAt:    c.StartAt,
 				Volume:      int64(c.Volume),
 				OpenMicros:  utils.DollarsToMicros(float64(c.Open)),
 				HighMicros:  utils.DollarsToMicros(float64(c.High)),
