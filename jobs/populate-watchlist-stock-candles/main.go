@@ -25,8 +25,8 @@ func main() {
 		fmt.Println("ALPACA_API_KEY environment variable is required")
 		os.Exit(1)
 	}
-	apiSecretKey := strings.TrimSpace(os.Getenv("ALPACA_API_SECRET"))
-	if apiSecretKey == "" {
+	apiSecret := strings.TrimSpace(os.Getenv("ALPACA_API_SECRET"))
+	if apiSecret == "" {
 		fmt.Println("ALPACA_API_SECRET environment variable is required")
 		os.Exit(1)
 	}
@@ -37,12 +37,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	alpacaClient := alpaca.NewClient(
-		utils.NewHttpClient(),
-		apiKey,
-		apiSecretKey,
-		false,
-	)
+	alpacaClient, err := alpaca.NewClient(alpaca.ClientConfig{
+		HttpClient: utils.NewHttpClient(),
+		ApiKey:     apiKey,
+		ApiSecret:  apiSecret,
+		IsLive:     false,
+		IsPaid:     false,
+	})
+	if err != nil {
+		fmt.Println("Failed to initialize Alpaca client:", err)
+		os.Exit(1)
+	}
 
 	stocks, err := traderdb.GetAllWatchlistStocks(db)
 	if err != nil {

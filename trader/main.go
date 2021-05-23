@@ -75,7 +75,16 @@ func initApp(logger *log.Logger, client *http.Client, db *pgxpool.Pool) http.Han
 	newsHandlers := news.NewHandlers(logger, db, newsClient)
 	newsHandlers.AddRoutes(router.PathPrefix("/api/news").Subrouter())
 
-	alpacaClient := alpaca.NewClient(client, os.Getenv("ALPACA_API_KEY"), os.Getenv("ALPACA_API_SECRET"), false)
+	alpacaClient, err := alpaca.NewClient(alpaca.ClientConfig{
+		HttpClient: client,
+		ApiKey:     os.Getenv("ALPACA_API_KEY"),
+		ApiSecret:  os.Getenv("ALPACA_API_SECRET"),
+		IsLive:     false,
+		IsPaid:     false,
+	})
+	if err != nil {
+		logger.Fatalln("failed to initialize Alpaca client", err)
+	}
 	yahooClient := yahoo.NewClient(client)
 	finvizClient := finviz.NewClient(client)
 	optionsClient := options.NewClient(client)

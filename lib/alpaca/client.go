@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/gorilla/websocket"
 	"net/http"
 	"strconv"
 	"time"
@@ -16,26 +17,49 @@ const paperAPIPath = "https://paper-api.alpaca.markets/v2"
 const marketDataApiPath = "https://data.alpaca.markets/v2"
 
 type Client struct {
-	client       http.Client
-	apiKey       string
-	apiSecretKey string
-	basePath     string
+	config   ClientConfig
+	basePath string
+	wsConn   *websocket.Conn
+}
+
+type ClientConfig struct {
+	HttpClient *http.Client
+	ApiKey     string
+	ApiSecret  string
+	IsLive     bool
+	IsPaid     bool
 }
 
 // Alpaca's free plan only provides data from IEX whereas the paid plan provides
 // data from all US exchanges
 // https://alpaca.markets/docs/api-documentation/api-v2/market-data/alpaca-data-api-v2/#subscription-plans
-func NewClient(httpClient *http.Client, apiKey string, apiSecretKey string, isLive bool) *Client {
+func NewClient(config ClientConfig) (*Client, error) {
+	if config.HttpClient == nil {
+		return nil, errors.New("HttpClient must be provided")
+	}
+	if config.ApiKey == "" {
+		return nil, errors.New("valid ApiKey must be provided")
+	}
+	if config.ApiSecret == "" {
+		return nil, errors.New("valid ApiSecret must be provided")
+	}
 	basePath := paperAPIPath
-	if isLive {
+	if config.IsLive {
 		basePath = liveAPIPath
 	}
-	return &Client{
-		client:       *httpClient,
-		apiKey:       apiKey,
-		apiSecretKey: apiSecretKey,
-		basePath:     basePath,
+	client := &Client{
+		config:   config,
+		basePath: basePath,
+		wsConn:   nil,
 	}
+	return client, nil
+}
+
+func (c *Client) Close() error {
+	if c.wsConn != nil {
+		return c.wsConn.Close()
+	}
+	return nil
 }
 
 func (c *Client) GetAssets(status, assetClass string) (assets []Asset, err error) {
@@ -53,7 +77,7 @@ func (c *Client) GetAssets(status, assetClass string) (assets []Asset, err error
 	}
 	req.URL.RawQuery = queryParams.Encode()
 
-	resp, err := c.client.Do(req)
+	resp, err := c.config.HttpClient.Do(req)
 	if err != nil {
 		return assets, err
 	}
@@ -114,7 +138,7 @@ func (c *Client) GetSymbolCandles(symbol string, params CandleQueryParams) (cand
 	}
 	req.URL.RawQuery = queryParams.Encode()
 
-	resp, err := c.client.Do(req)
+	resp, err := c.config.HttpClient.Do(req)
 	if err != nil {
 		return candlesResponse, err
 	}
@@ -141,7 +165,7 @@ func (c *Client) GetLastTrade(symbol string) (trade LastTrade, err error) {
 	}
 
 	c.setHeaders(req)
-	resp, err := c.client.Do(req)
+	resp, err := c.config.HttpClient.Do(req)
 	if err != nil {
 		return trade, err
 	}
@@ -169,7 +193,7 @@ func (c *Client) GetLastQuote(symbol string) (quote LastQuote, err error) {
 	}
 
 	c.setHeaders(req)
-	resp, err := c.client.Do(req)
+	resp, err := c.config.HttpClient.Do(req)
 	if err != nil {
 		return quote, err
 	}
@@ -184,8 +208,8 @@ func (c *Client) GetLastQuote(symbol string) (quote LastQuote, err error) {
 }
 
 func (c *Client) setHeaders(request *http.Request) {
-	request.Header.Set("APCA-API-KEY-ID", c.apiKey)
-	request.Header.Set("APCA-API-SECRET-KEY", c.apiSecretKey)
+	request.Header.Set("APCA-API-KEY-ID", c.config.ApiKey)
+	request.Header.Set("APCA-API-SECRET-KEY", c.config.ApiSecret)
 }
 
 func formatTime(date time.Time) string {
