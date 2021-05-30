@@ -110,7 +110,7 @@ func getServerMessage(conn *websocket.Conn) (msg ServerMessage, err error) {
 	}
 	msg = messages[0]
 	if msg.Type == Error {
-		return msg, errors.New(fmt.Sprintf("%d - %s", msg.ErrorCode, msg.Message))
+		return msg, fmt.Errorf("%d - %s", msg.ErrorCode, msg.Message)
 	}
 	return msg, nil
 }

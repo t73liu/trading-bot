@@ -119,14 +119,14 @@ func populateStocks(client *alpaca.Client, iexClient *iex.Client, conn *pgx.Conn
 		return err
 	}
 
-	fmt.Println(fmt.Sprintf("Updating %d existing stocks", len(updatedStocks)))
+	fmt.Printf("Updating %d existing stocks", len(updatedStocks))
 	for _, updatedStock := range updatedStocks {
 		if err = traderdb.UpdateStock(tx, updatedStock); err != nil {
 			return err
 		}
 	}
 
-	fmt.Println(fmt.Sprintf("Adding %d new stocks", len(newStocks)))
+	fmt.Printf("Adding %d new stocks", len(newStocks))
 	if err = traderdb.InsertNewStocks(tx, newStocks); err != nil {
 		return err
 	}

@@ -118,19 +118,14 @@ func (h *Handlers) getStockCharts(w http.ResponseWriter, r *http.Request) {
 	switch candleSize {
 	case "3min":
 		candles, _ = candle.CompressCandles(candles, 3, "minute", location)
-		break
 	case "5min":
 		candles, _ = candle.CompressCandles(candles, 5, "minute", location)
-		break
 	case "10min":
 		candles, _ = candle.CompressCandles(candles, 10, "minute", location)
-		break
 	case "30min":
 		candles, _ = candle.CompressCandles(candles, 30, "minute", location)
-		break
 	case "1hour":
 		candles, _ = candle.CompressCandles(candles, 1, "hour", location)
-		break
 	}
 
 	// Add candles to response

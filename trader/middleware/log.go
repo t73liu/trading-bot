@@ -16,7 +16,7 @@ func LogResponseTime(logger *log.Logger) mux.MiddlewareFunc {
 			defer func() {
 				logger.Printf(
 					"Completed (%dms): %s - %s\n",
-					time.Now().Sub(startTime).Milliseconds(),
+					time.Since(startTime).Milliseconds(),
 					r.Method,
 					r.URL.Path,
 				)

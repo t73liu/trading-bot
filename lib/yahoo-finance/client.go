@@ -21,7 +21,7 @@ const (
 	AfterMarketClose    EarningsCallTime = "AFC"
 )
 
-var parseError = errors.New("failed to parse API response")
+var errParse = errors.New("failed to parse API response")
 
 type EarningsCallTime string
 
@@ -179,27 +179,27 @@ func (c *Client) getEvents(eventType string, date time.Time, offset int) ([]inte
 			}
 			context, ok := data["context"].(map[string]interface{})
 			if !ok {
-				return nil, parseError
+				return nil, errParse
 			}
 			dispatcher, ok := context["dispatcher"].(map[string]interface{})
 			if !ok {
-				return nil, parseError
+				return nil, errParse
 			}
 			stores, ok := dispatcher["stores"].(map[string]interface{})
 			if !ok {
-				return nil, parseError
+				return nil, errParse
 			}
 			resultsStore, ok := stores["ScreenerResultsStore"].(map[string]interface{})
 			if !ok {
-				return nil, parseError
+				return nil, errParse
 			}
 			results, ok := resultsStore["results"].(map[string]interface{})
 			if !ok {
-				return nil, parseError
+				return nil, errParse
 			}
 			rows, ok := results["rows"].([]interface{})
 			if !ok {
-				return nil, parseError
+				return nil, errParse
 			}
 			return rows, nil
 		}
