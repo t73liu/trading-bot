@@ -1,8 +1,9 @@
 package strategy
 
 import (
-	"fmt"
-	"tradingbot/lib/utils"
+	"log"
+
+	"github.com/t73liu/tradingbot/lib/utils"
 )
 
 type Portfolio struct {
@@ -18,7 +19,7 @@ type Portfolio struct {
 }
 
 func PrintPortfolio(portfolio Portfolio) {
-	fmt.Printf(
+	log.Printf(
 		"Date: %s, Cash: %.2f, Shares: %d, Share Price: %.2f, Value: %.2f,"+
 			" Daily Change: %.2f, Daily Percent Change: %.2f%%, All Time: %.2f%%\n",
 		portfolio.Date,
@@ -31,6 +32,6 @@ func PrintPortfolio(portfolio Portfolio) {
 		portfolio.AllTimePerformance,
 	)
 	for _, trade := range portfolio.Trades {
-		fmt.Println("  Trade:", trade)
+		log.Println("  Trade:", trade)
 	}
 }

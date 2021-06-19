@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"time"
-	"tradingbot/lib/utils"
+
+	"github.com/t73liu/tradingbot/lib/utils"
 )
 
 type JSONCandle struct {

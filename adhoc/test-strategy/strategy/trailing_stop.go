@@ -1,7 +1,7 @@
 package strategy
 
 import (
-	"tradingbot/lib/candle"
+	"github.com/t73liu/tradingbot/lib/candle"
 )
 
 // Sell when trailing loss percent is reached and buy back at beginning of the next day

@@ -1,8 +1,8 @@
 package strategy
 
 import (
-	"tradingbot/lib/candle"
-	"tradingbot/lib/utils"
+	"github.com/t73liu/tradingbot/lib/candle"
+	"github.com/t73liu/tradingbot/lib/utils"
 )
 
 func groupCandlesByDate(candles []candle.Candle) ([]string, map[string][]candle.Candle) {

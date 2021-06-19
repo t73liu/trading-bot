@@ -2,8 +2,9 @@ package analyze
 
 import (
 	"testing"
-	"tradingbot/lib/candle"
-	"tradingbot/lib/utils"
+
+	"github.com/t73liu/tradingbot/lib/candle"
+	"github.com/t73liu/tradingbot/lib/utils"
 )
 
 func TestTTMSqueeze(t *testing.T) {

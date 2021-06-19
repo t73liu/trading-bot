@@ -2,43 +2,41 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"strings"
+	"flag"
+	"log"
 	"time"
-	"tradingbot/adhoc/test-strategy/strategy"
-	"tradingbot/lib/candle"
-	"tradingbot/lib/traderdb"
-	"tradingbot/lib/utils"
+
+	"github.com/t73liu/tradingbot/adhoc/test-strategy/strategy"
+	"github.com/t73liu/tradingbot/lib/candle"
+	"github.com/t73liu/tradingbot/lib/traderdb"
+	"github.com/t73liu/tradingbot/lib/utils"
 
 	"github.com/jackc/pgx/v4"
 )
 
 func main() {
-	databaseUrl := strings.TrimSpace(os.Getenv("DATABASE_URL"))
-	if databaseUrl == "" {
-		fmt.Println("DATABASE_URL environment variable is required")
-		os.Exit(1)
+	dbURL := flag.String("db.url", "", "URL to connect to traderdb")
+	flag.Parse()
+
+	if *dbURL == "" {
+		log.Fatalln("-db.url flag must be provided")
 	}
 
-	conn, err := pgx.Connect(context.Background(), databaseUrl)
+	conn, err := pgx.Connect(context.Background(), *dbURL)
 	if err != nil {
-		fmt.Println("Failed to connect to DB:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to connect to DB:", err)
 	}
 
 	location, err := time.LoadLocation("America/New_York")
 	if err != nil {
-		fmt.Println("Failed to loading America/New_York timezone:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to loading America/New_York timezone:", err)
 	}
 
 	startTime := time.Date(2020, 1, 1, 0, 0, 0, 0, location)
 	endTime := time.Date(2020, 8, 1, 0, 0, 0, 0, location)
 	candles, err := traderdb.GetStockCandles(conn, "SHOP", startTime, endTime)
 	if err != nil {
-		fmt.Println("Failed to fetch stock candles from DB:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to fetch stock candles from DB:", err)
 	}
 
 	formattedCandles, err := candle.CompressCandles(
@@ -48,8 +46,7 @@ func main() {
 		location,
 	)
 	if err != nil {
-		fmt.Println("Failed to format stock candles:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to format stock candles:", err)
 	}
 	applyStrategy(formattedCandles, 10000)
 }

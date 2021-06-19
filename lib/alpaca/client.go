@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 const liveAPIPath = "https://api.alpaca.markets/v2"
@@ -23,36 +24,26 @@ type Client struct {
 }
 
 type ClientConfig struct {
-	HttpClient *http.Client
-	ApiKey     string
-	ApiSecret  string
-	IsLive     bool
-	IsPaid     bool
+	HttpClient    *http.Client
+	ApiKey        string
+	ApiSecret     string
+	IsLiveTrading bool
+	IsPaidData    bool
 }
 
 // Alpaca's free plan only provides data from IEX whereas the paid plan provides
 // data from all US exchanges
 // https://alpaca.markets/docs/api-documentation/api-v2/market-data/alpaca-data-api-v2/#subscription-plans
-func NewClient(config ClientConfig) (*Client, error) {
-	if config.HttpClient == nil {
-		return nil, errors.New("HttpClient must be provided")
-	}
-	if config.ApiKey == "" {
-		return nil, errors.New("valid ApiKey must be provided")
-	}
-	if config.ApiSecret == "" {
-		return nil, errors.New("valid ApiSecret must be provided")
-	}
+func NewClient(config ClientConfig) *Client {
 	basePath := paperAPIPath
-	if config.IsLive {
+	if config.IsLiveTrading {
 		basePath = liveAPIPath
 	}
 	client := &Client{
 		config:   config,
 		basePath: basePath,
-		wsConn:   nil,
 	}
-	return client, nil
+	return client
 }
 
 func (c *Client) Close() error {

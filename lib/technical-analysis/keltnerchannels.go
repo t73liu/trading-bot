@@ -1,6 +1,6 @@
 package analyze
 
-import "tradingbot/lib/candle"
+import "github.com/t73liu/tradingbot/lib/candle"
 
 // Keltner Channels
 func KeltnerChannels(candles []candle.Candle, emaInterval int, atrInterval int) []MicroDollarRange {

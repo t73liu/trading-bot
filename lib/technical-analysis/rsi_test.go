@@ -2,7 +2,8 @@ package analyze
 
 import (
 	"testing"
-	"tradingbot/lib/utils"
+
+	"github.com/t73liu/tradingbot/lib/utils"
 )
 
 func TestRSI(t *testing.T) {

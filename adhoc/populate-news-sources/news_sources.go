@@ -2,44 +2,41 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"strings"
-	"tradingbot/lib/newsapi"
-	"tradingbot/lib/utils"
+	"flag"
+	"log"
+
+	"github.com/t73liu/tradingbot/lib/newsapi"
+	"github.com/t73liu/tradingbot/lib/utils"
 
 	"github.com/jackc/pgx/v4"
 )
 
 func main() {
-	databaseUrl := strings.TrimSpace(os.Getenv("DATABASE_URL"))
-	if databaseUrl == "" {
-		fmt.Println("DATABASE_URL environment variable is required")
-		os.Exit(1)
+	dbURL := flag.String("db.url", "", "URL to connect to traderdb")
+	newsApiKey := flag.String("news.key", "", "News API Key")
+	flag.Parse()
+
+	if *dbURL == "" {
+		log.Fatalln("-db.url flag must be provided")
 	}
-	apiKey := strings.TrimSpace(os.Getenv("NEWS_API_KEY"))
-	if apiKey == "" {
-		fmt.Println("NEWS_API_KEY environment variable is required")
-		os.Exit(1)
+	if *newsApiKey == "" {
+		log.Fatalln("-news.key flag must be provided")
 	}
 
-	conn, err := pgx.Connect(context.Background(), databaseUrl)
+	conn, err := pgx.Connect(context.Background(), *dbURL)
 	if err != nil {
-		fmt.Println("Failed to connect to DB:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to connect to DB:", err)
 	}
 
-	client := newsapi.NewClient(utils.NewHttpClient(), apiKey)
+	client := newsapi.NewClient(utils.NewHttpClient(), *newsApiKey)
 
 	sources, err := client.GetSources("", "en", "")
 	if err != nil {
-		fmt.Println("Failed to fetch news sources:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to fetch news sources:", err)
 	}
 
 	if err = bulkInsertNewsSources(conn, sources); err != nil {
-		fmt.Println("Failed to populate DB with news sources:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to populate DB with news sources:", err)
 	}
 }
 

@@ -1,6 +1,6 @@
 package analyze
 
-import "tradingbot/lib/utils"
+import "github.com/t73liu/tradingbot/lib/utils"
 
 // Simple Moving Average
 func SMA(values []int64, interval int) (results []utils.MicroDollar) {

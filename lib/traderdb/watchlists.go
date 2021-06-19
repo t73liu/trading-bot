@@ -2,7 +2,8 @@ package traderdb
 
 import (
 	"context"
-	"tradingbot/lib/utils"
+
+	"github.com/t73liu/tradingbot/lib/utils"
 
 	"github.com/jackc/pgx/v4"
 )

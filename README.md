@@ -30,5 +30,5 @@ This directory will be referred to by the `TRADING_BOT_REPO` environment variabl
 - [Python 3.8](https://www.python.org/)
 - [React 16.13](https://reactjs.org/)
 - [TensorFlow 2](https://www.tensorflow.org/)
-- [Terraform 0.15](https://www.terraform.io/)
+- [Terraform 1](https://www.terraform.io/)
 - [Yarn 1.22](https://classic.yarnpkg.com/lang/en/)

@@ -1,7 +1,7 @@
 package strategy
 
 import (
-	"tradingbot/lib/candle"
+	"github.com/t73liu/tradingbot/lib/candle"
 )
 
 func Hold(candles []candle.Candle, capitalMicros int64) []Portfolio {

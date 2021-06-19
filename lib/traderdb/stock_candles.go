@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	"tradingbot/lib/candle"
-	"tradingbot/lib/utils"
+
+	"github.com/t73liu/tradingbot/lib/candle"
+	"github.com/t73liu/tradingbot/lib/utils"
 )
 
 const stockCandlesQuery = `

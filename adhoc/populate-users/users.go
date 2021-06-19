@@ -3,54 +3,45 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
-	"os"
-	"strings"
-	"tradingbot/lib/traderdb"
-	"tradingbot/lib/utils"
+	"log"
+
+	"github.com/t73liu/tradingbot/lib/traderdb"
+	"github.com/t73liu/tradingbot/lib/utils"
 
 	"github.com/jackc/pgx/v4"
 )
 
 func main() {
-	databaseUrl := strings.TrimSpace(os.Getenv("DATABASE_URL"))
-	if databaseUrl == "" {
-		fmt.Println("DATABASE_URL environment variable is required")
-		os.Exit(1)
-	}
-
-	emailFlag := flag.String("email", "", "New user email")
-	passwordFlag := flag.String("password", "", "New user password")
+	dbURL := flag.String("db.url", "", "URL to connect to traderdb")
+	email := flag.String("email", "", "New user email")
+	password := flag.String("password", "", "New user password")
 	flag.Parse()
 
-	if *emailFlag == "" {
-		fmt.Println("email must be specified")
-		os.Exit(1)
+	if *dbURL == "" {
+		log.Fatalln("-db.url flag must be provided")
+	}
+	if *email == "" {
+		log.Fatalln("-email flag must be specified")
+	}
+	if *password == "" {
+		log.Fatalln("-password flag must be specified")
 	}
 
-	if *passwordFlag == "" {
-		fmt.Println("password must be specified")
-		os.Exit(1)
-	}
-
-	conn, err := pgx.Connect(context.Background(), databaseUrl)
+	conn, err := pgx.Connect(context.Background(), *dbURL)
 	if err != nil {
-		fmt.Println("Failed to connect to DB:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to connect to DB:", err)
 	}
 
-	hashedPassword, err := utils.HashPassword(*passwordFlag)
+	hashedPassword, err := utils.HashPassword(*password)
 	if err != nil {
-		fmt.Println("Failed to hash password:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to hash password:", err)
 	}
 
 	if err = traderdb.InsertNewUser(conn, traderdb.User{
-		Email:          *emailFlag,
+		Email:          *email,
 		HashedPassword: hashedPassword,
 		IsActive:       true,
 	}); err != nil {
-		fmt.Println("Failed to insert new user:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to insert new user:", err)
 	}
 }

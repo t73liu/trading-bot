@@ -6,13 +6,14 @@ import (
 	"flag"
 	"fmt"
 	"html/template"
+	"log"
 	"net/smtp"
-	"os"
 	"strings"
 	"time"
-	"tradingbot/lib/traderdb"
-	"tradingbot/lib/utils"
-	"tradingbot/lib/yahoo-finance"
+
+	"github.com/t73liu/tradingbot/lib/traderdb"
+	"github.com/t73liu/tradingbot/lib/utils"
+	"github.com/t73liu/tradingbot/lib/yahoo-finance"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -23,39 +24,36 @@ type EmailParams struct {
 }
 
 func main() {
-	recipientsFlag := flag.String(
+	recipients := flag.String(
 		"recipients",
 		"",
 		"Email addresses delimited by commas",
 	)
+	dbURL := flag.String("db.url", "", "URL to connect to traderdb")
+	senderEmail := flag.String("sender.email", "", "Sender gmail address")
+	senderPassword := flag.String(
+		"sender.password",
+		"",
+		"Sender's gmail password",
+	)
 	flag.Parse()
 
-	recipients := strings.TrimSpace(*recipientsFlag)
-	if recipients == "" {
-		fmt.Println("At least one recipient must be specified")
-		os.Exit(1)
+	if *recipients == "" {
+		log.Fatalln("-recipients flag must be provided")
 	}
-
-	databaseUrl := strings.TrimSpace(os.Getenv("DATABASE_URL"))
-	if databaseUrl == "" {
-		fmt.Println("DATABASE_URL environment variable is required")
-		os.Exit(1)
+	if *dbURL == "" {
+		log.Fatalln("-db.url flag must be provided")
 	}
-	email := strings.TrimSpace(os.Getenv("GMAIL_USERNAME"))
-	if email == "" {
-		fmt.Println("GMAIL_USERNAME environment variable is required")
-		os.Exit(1)
+	if *senderEmail == "" {
+		log.Fatalln("-sender.email flag must be provided")
 	}
-	password := strings.TrimSpace(os.Getenv("GMAIL_PASSWORD"))
-	if password == "" {
-		fmt.Println("GMAIL_PASSWORD environment variable is required")
-		os.Exit(1)
+	if *senderPassword == "" {
+		log.Fatalln("-sender.password flag must be provided")
 	}
 
 	emailTemplate, err := template.ParseFiles("email-template.html")
 	if err != nil {
-		fmt.Println("Failed to parse email template:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to parse email template:", err)
 	}
 
 	now := time.Now()
@@ -64,16 +62,14 @@ func main() {
 	httpClient := utils.NewHttpClient()
 	yahooClient := yahoo.NewClient(httpClient)
 
-	pool, err := pgxpool.Connect(context.Background(), databaseUrl)
+	pool, err := pgxpool.Connect(context.Background(), *dbURL)
 	if err != nil {
-		fmt.Println("Failed to connect to DB:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to connect to DB:", err)
 	}
 
 	emailParams, err := getEmailParams(pool, yahooClient, startTime, endTime)
 	if err != nil {
-		fmt.Println("Failed to fetch news items:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to fetch news items:", err)
 	}
 
 	var body bytes.Buffer
@@ -86,21 +82,19 @@ func main() {
 	body.WriteString(subject + headers)
 	err = emailTemplate.Execute(&body, emailParams)
 	if err != nil {
-		fmt.Println("Failed to populate email template:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to populate email template:", err)
 	}
 
-	auth := smtp.PlainAuth("", email, password, "smtp.gmail.com")
+	auth := smtp.PlainAuth("", *senderEmail, *senderPassword, "smtp.gmail.com")
 	err = smtp.SendMail(
 		"smtp.gmail.com:587",
 		auth,
-		email,
-		strings.Split(recipients, ","),
+		*senderEmail,
+		strings.Split(*recipients, ","),
 		body.Bytes(),
 	)
 	if err != nil {
-		fmt.Println("Failed to send email:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to send email:", err)
 	}
 }
 

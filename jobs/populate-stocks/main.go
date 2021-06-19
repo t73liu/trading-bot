@@ -2,62 +2,54 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"strings"
-	"tradingbot/lib/alpaca"
-	"tradingbot/lib/iex"
-	"tradingbot/lib/traderdb"
-	"tradingbot/lib/utils"
+	"flag"
+	"log"
+
+	"github.com/t73liu/tradingbot/lib/alpaca"
+	"github.com/t73liu/tradingbot/lib/iex"
+	"github.com/t73liu/tradingbot/lib/traderdb"
+	"github.com/t73liu/tradingbot/lib/utils"
 
 	"github.com/jackc/pgx/v4"
 )
 
 func main() {
-	databaseUrl := strings.TrimSpace(os.Getenv("DATABASE_URL"))
-	if databaseUrl == "" {
-		fmt.Println("DATABASE_URL environment variable is required")
-		os.Exit(1)
+	dbURL := flag.String("db.url", "", "URL to connect to traderdb")
+	alpacaApiKey := flag.String("alpaca.key", "", "Alpaca API Key")
+	alpacaApiSecret := flag.String("alpaca.secret", "", "Alpaca API Secret")
+	iexApiToken := flag.String("iex.token", "", "IEX API Token")
+	flag.Parse()
+
+	if *dbURL == "" {
+		log.Fatalln("-db.url flag must be provided")
 	}
-	apiKey := strings.TrimSpace(os.Getenv("ALPACA_API_KEY"))
-	if apiKey == "" {
-		fmt.Println("ALPACA_API_KEY environment variable is required")
-		os.Exit(1)
+	if *alpacaApiKey == "" {
+		log.Fatalln("-alpaca.key flag must be provided")
 	}
-	apiSecret := strings.TrimSpace(os.Getenv("ALPACA_API_SECRET"))
-	if apiSecret == "" {
-		fmt.Println("ALPACA_API_SECRET environment variable is required")
-		os.Exit(1)
+	if *alpacaApiSecret == "" {
+		log.Fatalln("-alpaca.secret flag must be provided")
 	}
-	iexToken := strings.TrimSpace(os.Getenv("IEX_API_TOKEN"))
-	if iexToken == "" {
-		fmt.Println("IEX_API_TOKEN environment variable is required")
-		os.Exit(1)
+	if *iexApiToken == "" {
+		log.Fatalln("-iex.token flag must be provided")
 	}
 
-	conn, err := pgx.Connect(context.Background(), databaseUrl)
+	conn, err := pgx.Connect(context.Background(), *dbURL)
 	if err != nil {
-		fmt.Println("Failed to connect to DB:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to connect to DB:", err)
 	}
 
 	httpClient := utils.NewHttpClient()
-	alpacaClient, err := alpaca.NewClient(alpaca.ClientConfig{
-		HttpClient: httpClient,
-		ApiKey:     apiKey,
-		ApiSecret:  apiSecret,
-		IsLive:     false,
-		IsPaid:     false,
+	alpacaClient := alpaca.NewClient(alpaca.ClientConfig{
+		HttpClient:    httpClient,
+		ApiKey:        *alpacaApiKey,
+		ApiSecret:     *alpacaApiSecret,
+		IsLiveTrading: false,
+		IsPaidData:    false,
 	})
-	if err != nil {
-		fmt.Println("Failed to initialize Alpaca client:", err)
-		os.Exit(1)
-	}
-	iexClient := iex.NewClient(httpClient, iexToken)
+	iexClient := iex.NewClient(httpClient, *iexApiToken)
 
 	if err = populateStocks(alpacaClient, iexClient, conn); err != nil {
-		fmt.Println("Failed to populate stocks table:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to populate stocks table:", err)
 	}
 }
 
@@ -119,14 +111,14 @@ func populateStocks(client *alpaca.Client, iexClient *iex.Client, conn *pgx.Conn
 		return err
 	}
 
-	fmt.Printf("Updating %d existing stocks", len(updatedStocks))
+	log.Printf("Updating %d existing stocks", len(updatedStocks))
 	for _, updatedStock := range updatedStocks {
 		if err = traderdb.UpdateStock(tx, updatedStock); err != nil {
 			return err
 		}
 	}
 
-	fmt.Printf("Adding %d new stocks", len(newStocks))
+	log.Printf("Adding %d new stocks", len(newStocks))
 	if err = traderdb.InsertNewStocks(tx, newStocks); err != nil {
 		return err
 	}

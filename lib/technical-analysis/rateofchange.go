@@ -1,7 +1,7 @@
 package analyze
 
 import (
-	"tradingbot/lib/utils"
+	"github.com/t73liu/tradingbot/lib/utils"
 )
 
 func SmoothedRateOfChange(values []int64, averageInterval, rateOfChangeInterval int) (results []utils.NullFloat64) {

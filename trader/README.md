@@ -22,16 +22,16 @@ mv ${TRADING_BOT_REPO}/dash/build ${TRADING_BOT_REPO}/trader/assets
 
 ### Development
 
-`trader` can be configured with the following environment variables:
+`trader` can be configured with the following flags:
 
-- `DATABASE_URL` (e.g. `postgres://postgres:test@localhost:5432/traderdb?sslmode=disable`)
-- `ALPACA_API_KEY`: Use the paper trading API key during development
-- `ALPACA_API_SECRET`: Use the paper trading API secret during development
-- `NEWS_API_KEY` (optional)
+- `-db.url` (e.g. `postgres://postgres:test@localhost:5432/traderdb?sslmode=disable`)
+- `-alpaca.key`: Use the paper trading API key during development
+- `-alpaca.secret`: Use the paper trading API secret during development
+- `-news.key`
 
 ```sh
 cd ${TRADING_BOT_REPO}/trader
-go run main.go
+go run .
 ```
 
 ### Rate Limits

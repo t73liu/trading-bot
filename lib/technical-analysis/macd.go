@@ -1,6 +1,6 @@
 package analyze
 
-import "tradingbot/lib/utils"
+import "github.com/t73liu/tradingbot/lib/utils"
 
 func StandardMACD(values []int64) []utils.MicroDollar {
 	return MACD(values, 12, 26, 9)

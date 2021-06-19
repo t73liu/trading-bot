@@ -2,8 +2,9 @@ package strategy
 
 import (
 	"fmt"
-	"tradingbot/lib/candle"
-	analyze "tradingbot/lib/technical-analysis"
+
+	"github.com/t73liu/tradingbot/lib/candle"
+	analyze "github.com/t73liu/tradingbot/lib/technical-analysis"
 )
 
 // Buy when RSI crosses above lower limit and sell when RSI crosses below upper limit

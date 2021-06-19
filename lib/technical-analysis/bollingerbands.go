@@ -2,7 +2,8 @@ package analyze
 
 import (
 	"math"
-	"tradingbot/lib/utils"
+
+	"github.com/t73liu/tradingbot/lib/utils"
 )
 
 func BollingerBands(prices []int64, smaInterval int) []MicroDollarRange {

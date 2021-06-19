@@ -1,8 +1,8 @@
 package analyze
 
 import (
-	"tradingbot/lib/candle"
-	"tradingbot/lib/utils"
+	"github.com/t73liu/tradingbot/lib/candle"
+	"github.com/t73liu/tradingbot/lib/utils"
 )
 
 // TTM Squeeze returns true when Bollinger Bands are between Keltner Channels

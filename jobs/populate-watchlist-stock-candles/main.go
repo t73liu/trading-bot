@@ -2,57 +2,51 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
-	"os"
-	"strings"
+	"log"
 	"time"
-	"tradingbot/lib/alpaca"
-	"tradingbot/lib/candle"
-	"tradingbot/lib/traderdb"
-	"tradingbot/lib/utils"
+
+	"github.com/t73liu/tradingbot/lib/alpaca"
+	"github.com/t73liu/tradingbot/lib/candle"
+	"github.com/t73liu/tradingbot/lib/traderdb"
+	"github.com/t73liu/tradingbot/lib/utils"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 func main() {
-	databaseUrl := strings.TrimSpace(os.Getenv("DATABASE_URL"))
-	if databaseUrl == "" {
-		fmt.Println("DATABASE_URL environment variable is required")
-		os.Exit(1)
+	dbURL := flag.String("db.url", "", "URL to connect to traderdb")
+	alpacaApiKey := flag.String("alpaca.key", "", "Alpaca API Key")
+	alpacaApiSecret := flag.String("alpaca.secret", "", "Alpaca API Secret")
+	flag.Parse()
+
+	if *dbURL == "" {
+		log.Fatalln("-db.url flag must be provided")
 	}
-	apiKey := strings.TrimSpace(os.Getenv("ALPACA_API_KEY"))
-	if apiKey == "" {
-		fmt.Println("ALPACA_API_KEY environment variable is required")
-		os.Exit(1)
+	if *alpacaApiKey == "" {
+		log.Fatalln("-alpaca.key flag must be provided")
 	}
-	apiSecret := strings.TrimSpace(os.Getenv("ALPACA_API_SECRET"))
-	if apiSecret == "" {
-		fmt.Println("ALPACA_API_SECRET environment variable is required")
-		os.Exit(1)
+	if *alpacaApiSecret == "" {
+		log.Fatalln("-alpaca.secret flag must be provided")
 	}
 
-	db, err := pgxpool.Connect(context.Background(), databaseUrl)
+	db, err := pgxpool.Connect(context.Background(), *dbURL)
 	if err != nil {
-		fmt.Println("Failed to connect to DB:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to connect to DB:", err)
 	}
 
-	alpacaClient, err := alpaca.NewClient(alpaca.ClientConfig{
-		HttpClient: utils.NewHttpClient(),
-		ApiKey:     apiKey,
-		ApiSecret:  apiSecret,
-		IsLive:     false,
-		IsPaid:     false,
+	alpacaClient := alpaca.NewClient(alpaca.ClientConfig{
+		HttpClient:    utils.NewHttpClient(),
+		ApiKey:        *alpacaApiKey,
+		ApiSecret:     *alpacaApiSecret,
+		IsLiveTrading: false,
+		IsPaidData:    false,
 	})
-	if err != nil {
-		fmt.Println("Failed to initialize Alpaca client:", err)
-		os.Exit(1)
-	}
 
 	stocks, err := traderdb.GetAllWatchlistStocks(db)
 	if err != nil {
-		fmt.Println("Failed to fetch watchlist stocks:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to fetch watchlist stocks:", err)
 	}
 
 	candlesBySymbol := make(map[string][]alpaca.Candle)
@@ -65,15 +59,13 @@ func main() {
 			EndTime:    now,
 		})
 		if err != nil {
-			fmt.Println(fmt.Sprintf("Failed to fetch %s candles:", stock.Symbol), err)
-			os.Exit(1)
+			log.Fatalln(fmt.Sprintf("Failed to fetch %s candles:", stock.Symbol), err)
 		}
 		candlesBySymbol[stock.Symbol] = candlesResponse.Candles
 	}
 
 	if err = bulkInsertStockCandles(db, candlesBySymbol, stocks); err != nil {
-		fmt.Println("Failed to bulk insert stock candles:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to bulk insert stock candles:", err)
 	}
 }
 

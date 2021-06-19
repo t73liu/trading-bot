@@ -3,8 +3,9 @@ package alpaca
 import (
 	"errors"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"net/url"
+
+	"github.com/gorilla/websocket"
 )
 
 type MessageType string
@@ -51,7 +52,7 @@ func (c *Client) OpenRealtimeConn() error {
 	}
 
 	source := "iex"
-	if c.config.IsPaid {
+	if c.config.IsPaidData {
 		source = "sip"
 	}
 	u := url.URL{Scheme: "wss", Host: "stream.data.alpaca.markets", Path: "/v2/" + source}

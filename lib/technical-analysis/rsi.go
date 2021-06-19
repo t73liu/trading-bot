@@ -1,7 +1,7 @@
 package analyze
 
 import (
-	"tradingbot/lib/utils"
+	"github.com/t73liu/tradingbot/lib/utils"
 )
 
 func getGains(values []int64) []int64 {

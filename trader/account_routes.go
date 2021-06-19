@@ -1,39 +1,24 @@
-package account
+package main
 
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
 	"strconv"
-	"tradingbot/lib/traderdb"
-	"tradingbot/lib/utils"
+
+	"github.com/t73liu/tradingbot/lib/traderdb"
+	"github.com/t73liu/tradingbot/lib/utils"
 
 	"github.com/gorilla/mux"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
-
-type Handlers struct {
-	logger *log.Logger
-	db     *pgxpool.Pool
-}
-
-func NewHandlers(logger *log.Logger, db *pgxpool.Pool) *Handlers {
-	return &Handlers{
-		logger: logger,
-		db:     db,
-	}
-}
 
 type WatchlistRequestBody struct {
 	Name     string `json:"name"`
 	StockIDs []int  `json:"stockIDs"`
 }
 
-const userID = 1
-
-func (h *Handlers) getWatchlists(w http.ResponseWriter, _ *http.Request) {
-	watchlists, err := traderdb.GetWatchlistsWithUserID(h.db, userID)
+func (t *trader) getWatchlists(w http.ResponseWriter, _ *http.Request) {
+	watchlists, err := traderdb.GetWatchlistsWithUserID(t.db, userID)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
@@ -41,14 +26,14 @@ func (h *Handlers) getWatchlists(w http.ResponseWriter, _ *http.Request) {
 	utils.JSONResponse(w, watchlists)
 }
 
-func (h *Handlers) deleteWatchlist(w http.ResponseWriter, r *http.Request) {
+func (t *trader) deleteWatchlist(w http.ResponseWriter, r *http.Request) {
 	watchlistID, err := getWatchlistID(r)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
 	}
 
-	exists, err := traderdb.HasWatchlistWithIDAndUserID(h.db, watchlistID, userID)
+	exists, err := traderdb.HasWatchlistWithIDAndUserID(t.db, watchlistID, userID)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
@@ -58,7 +43,7 @@ func (h *Handlers) deleteWatchlist(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = traderdb.DeleteWatchlistWithID(h.db, watchlistID)
+	err = traderdb.DeleteWatchlistWithID(t.db, watchlistID)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
@@ -66,14 +51,14 @@ func (h *Handlers) deleteWatchlist(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (h *Handlers) updateWatchlist(w http.ResponseWriter, r *http.Request) {
+func (t *trader) updateWatchlist(w http.ResponseWriter, r *http.Request) {
 	watchlistID, err := getWatchlistID(r)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
 	}
 
-	exists, err := traderdb.HasWatchlistWithIDAndUserID(h.db, watchlistID, userID)
+	exists, err := traderdb.HasWatchlistWithIDAndUserID(t.db, watchlistID, userID)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
@@ -90,7 +75,7 @@ func (h *Handlers) updateWatchlist(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = traderdb.UpdateWatchlistWithID(h.db, watchlistID, body.Name, body.StockIDs)
+	err = traderdb.UpdateWatchlistWithID(t.db, watchlistID, body.Name, body.StockIDs)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
@@ -99,7 +84,7 @@ func (h *Handlers) updateWatchlist(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (h *Handlers) createWatchlist(w http.ResponseWriter, r *http.Request) {
+func (t *trader) createWatchlist(w http.ResponseWriter, r *http.Request) {
 	var body WatchlistRequestBody
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
@@ -107,7 +92,7 @@ func (h *Handlers) createWatchlist(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := traderdb.CreateWatchlist(h.db, userID, body.Name, body.StockIDs)
+	id, err := traderdb.CreateWatchlist(t.db, userID, body.Name, body.StockIDs)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
@@ -119,11 +104,11 @@ func (h *Handlers) createWatchlist(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h *Handlers) AddRoutes(router *mux.Router) {
-	router.HandleFunc("/watchlists", h.getWatchlists).Methods("GET")
-	router.HandleFunc("/watchlists", h.createWatchlist).Methods("POST")
-	router.HandleFunc("/watchlists/{id}", h.updateWatchlist).Methods("PUT")
-	router.HandleFunc("/watchlists/{id}", h.deleteWatchlist).Methods("DELETE")
+func (t *trader) AddAccountRoutes(router *mux.Router) {
+	router.HandleFunc("/watchlists", t.getWatchlists).Methods("GET")
+	router.HandleFunc("/watchlists", t.createWatchlist).Methods("POST")
+	router.HandleFunc("/watchlists/{id}", t.updateWatchlist).Methods("PUT")
+	router.HandleFunc("/watchlists/{id}", t.deleteWatchlist).Methods("DELETE")
 }
 
 func getWatchlistID(r *http.Request) (int, error) {

@@ -1,46 +1,48 @@
-package stocks
+package main
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
-	"tradingbot/lib/alpaca"
-	"tradingbot/lib/candle"
-	"tradingbot/lib/finviz"
-	"tradingbot/lib/options"
-	analyze "tradingbot/lib/technical-analysis"
-	"tradingbot/lib/traderdb"
-	"tradingbot/lib/utils"
-	"tradingbot/lib/yahoo-finance"
+
+	"github.com/t73liu/tradingbot/lib/alpaca"
+	"github.com/t73liu/tradingbot/lib/candle"
+	analyze "github.com/t73liu/tradingbot/lib/technical-analysis"
+	"github.com/t73liu/tradingbot/lib/traderdb"
+	"github.com/t73liu/tradingbot/lib/utils"
 
 	"github.com/gorilla/mux"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-type Handlers struct {
-	logger        *log.Logger
-	db            *pgxpool.Pool
-	alpacaClient  *alpaca.Client
-	yahooClient   *yahoo.Client
-	finvizClient  *finviz.Client
-	optionsClient *options.Client
+type Detail struct {
+	Price         float64           `json:"price"`
+	Company       string            `json:"company"`
+	Website       *utils.NullString `json:"website"`
+	Description   *utils.NullString `json:"description"`
+	Sector        *utils.NullString `json:"sector"`
+	Industry      *utils.NullString `json:"industry"`
+	Country       *utils.NullString `json:"country"`
+	AverageVolume int64             `json:"averageVolume"`
+	MarketCap     int64             `json:"marketCap"`
+	SimilarStocks []string          `json:"similarStocks"`
+	Shortable     bool              `json:"shortable"`
+	Marginable    bool              `json:"marginable"`
+	News          interface{}       `json:"news"`
 }
 
-func NewHandlers(logger *log.Logger, db *pgxpool.Pool, alpacaClient *alpaca.Client, yahooClient *yahoo.Client, finvizClient *finviz.Client, optionsClient *options.Client) *Handlers {
-	return &Handlers{
-		logger:        logger,
-		db:            db,
-		alpacaClient:  alpacaClient,
-		yahooClient:   yahooClient,
-		finvizClient:  finvizClient,
-		optionsClient: optionsClient,
-	}
+type Snapshot struct {
+	Symbol         string    `json:"symbol"`
+	Company        string    `json:"company"`
+	Change         float64   `json:"change"`
+	ChangePercent  float64   `json:"changePercent"`
+	PreviousVolume int64     `json:"previousVolume"`
+	PreviousClose  float64   `json:"previousClose"`
+	UpdatedAt      time.Time `json:"updatedAt"`
 }
 
-func (h *Handlers) getTradableStocks(w http.ResponseWriter, _ *http.Request) {
-	stocks, err := traderdb.GetTradableStocks(h.db)
+func (t *trader) getTradableStocks(w http.ResponseWriter, _ *http.Request) {
+	stocks, err := traderdb.GetTradableStocks(t.db)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
@@ -48,14 +50,14 @@ func (h *Handlers) getTradableStocks(w http.ResponseWriter, _ *http.Request) {
 	utils.JSONResponse(w, stocks)
 }
 
-func (h *Handlers) getStockInfo(w http.ResponseWriter, r *http.Request) {
+func (t *trader) getStockInfo(w http.ResponseWriter, r *http.Request) {
 	symbol := getSymbol(r)
-	stock, err := traderdb.GetTradableStock(h.db, symbol)
+	stock, err := traderdb.GetTradableStock(t.db, symbol)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
 	}
-	details, err := h.yahooClient.GetStock(symbol)
+	details, err := t.yahooClient.GetStock(symbol)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
@@ -76,7 +78,7 @@ func (h *Handlers) getStockInfo(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h *Handlers) getStockCharts(w http.ResponseWriter, r *http.Request) {
+func (t *trader) getStockCharts(w http.ResponseWriter, r *http.Request) {
 	symbol := getSymbol(r)
 	location := utils.GetNYSELocation()
 	endTime := time.Now().In(location)
@@ -87,7 +89,7 @@ func (h *Handlers) getStockCharts(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 
 	charts := make(map[string]interface{})
-	candlesResponse, err := h.alpacaClient.GetSymbolCandles(symbol, alpaca.CandleQueryParams{
+	candlesResponse, err := t.alpacaClient.GetSymbolCandles(symbol, alpaca.CandleQueryParams{
 		Limit:      10000,
 		CandleSize: alpaca.OneMin,
 		StartTime:  startTime,
@@ -143,9 +145,9 @@ func (h *Handlers) getStockCharts(w http.ResponseWriter, r *http.Request) {
 	utils.JSONResponse(w, charts)
 }
 
-func (h *Handlers) getStockOptions(w http.ResponseWriter, r *http.Request) {
+func (t *trader) getStockOptions(w http.ResponseWriter, r *http.Request) {
 	symbol := getSymbol(r)
-	stockOptions, err := h.optionsClient.GetOptions(symbol)
+	stockOptions, err := t.optionsClient.GetOptions(symbol)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
@@ -156,8 +158,8 @@ func (h *Handlers) getStockOptions(w http.ResponseWriter, r *http.Request) {
 // Optionable, 2B+ market cap, Up 1% from open, Over 2M volume, Over 1 relative Volume
 const screenerQuery = "v=111&f=cap_midover,sh_curvol_o2000,sh_opt_option,sh_relvol_o1,ta_changeopen_u1&ft=4&o=-change"
 
-func (h *Handlers) getScreenedStocks(w http.ResponseWriter, _ *http.Request) {
-	screenedStocks, err := h.finvizClient.ScreenStocksOverview(screenerQuery)
+func (t *trader) getScreenedStocks(w http.ResponseWriter, _ *http.Request) {
+	screenedStocks, err := t.finvizClient.ScreenStocksOverview(screenerQuery)
 	if err != nil {
 		utils.JSONError(w, err)
 		return
@@ -165,12 +167,12 @@ func (h *Handlers) getScreenedStocks(w http.ResponseWriter, _ *http.Request) {
 	utils.JSONResponse(w, screenedStocks)
 }
 
-func (h *Handlers) AddRoutes(router *mux.Router) {
-	router.HandleFunc("", h.getTradableStocks).Methods("GET")
-	router.HandleFunc("/screened", h.getScreenedStocks).Methods("GET")
-	router.HandleFunc("/{symbol}", h.getStockInfo).Methods("GET")
-	router.HandleFunc("/{symbol}/charts", h.getStockCharts).Methods("GET")
-	router.HandleFunc("/{symbol}/options", h.getStockOptions).Methods("GET")
+func (t *trader) AddStockRoutes(router *mux.Router) {
+	router.HandleFunc("", t.getTradableStocks).Methods("GET")
+	router.HandleFunc("/screened", t.getScreenedStocks).Methods("GET")
+	router.HandleFunc("/{symbol}", t.getStockInfo).Methods("GET")
+	router.HandleFunc("/{symbol}/charts", t.getStockCharts).Methods("GET")
+	router.HandleFunc("/{symbol}/options", t.getStockOptions).Methods("GET")
 }
 
 func getSymbol(r *http.Request) string {

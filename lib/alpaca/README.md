@@ -7,11 +7,19 @@ Go client for [Alpaca v2](https://alpaca.markets/).
 ```golang
 package main
 
-import "github.com/t73liu/trading-bot/lib/alpaca"
+import (
+	"github.com/t73liu/trading-bot/lib/alpaca"
+)
 
 func main() {
-  httpClient := &http.Client{Timeout: 15 * time.Second}
-  alpacaClient := alpaca.Client(httpClient, "API_KEY")
-  alpacaClient.GetAssets("active", "us_equities")
+	httpClient := &http.Client{Timeout: 15 * time.Second}
+	alpacaClient := alpaca.NewClient(alpaca.ClientConfig{
+		HttpClient:    &httpClient,
+		ApiKey:        "API_KEY",
+		ApiSecret:     "API_SECRET",
+		IsLiveTrading: false,
+		IsPaidData:    false,
+	})
+	assets, err := alpacaClient.GetAssets("active", "us_equities")
 }
 ```

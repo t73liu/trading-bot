@@ -2,69 +2,64 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"strings"
+	"flag"
+	"log"
 	"time"
-	"tradingbot/lib/finviz"
-	"tradingbot/lib/newsapi"
-	"tradingbot/lib/traderdb"
-	"tradingbot/lib/utils"
+
+	"github.com/t73liu/tradingbot/lib/finviz"
+	"github.com/t73liu/tradingbot/lib/newsapi"
+	"github.com/t73liu/tradingbot/lib/traderdb"
+	"github.com/t73liu/tradingbot/lib/utils"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 func main() {
-	databaseUrl := strings.TrimSpace(os.Getenv("DATABASE_URL"))
-	if databaseUrl == "" {
-		fmt.Println("DATABASE_URL environment variable is required")
-		os.Exit(1)
+	dbURL := flag.String("db.url", "", "URL to connect to traderdb")
+	newsApiKey := flag.String("news.key", "", "News API Key")
+	alpacaApiKey := flag.String("alpaca.key", "", "Alpaca API Key")
+	flag.Parse()
+
+	if *dbURL == "" {
+		log.Fatalln("-db.url flag must be provided")
 	}
-	newsAPIKey := strings.TrimSpace(os.Getenv("NEWS_API_KEY"))
-	if newsAPIKey == "" {
-		fmt.Println("NEWS_API_KEY environment variable is required")
-		os.Exit(1)
+	if *newsApiKey == "" {
+		log.Fatalln("-news.key flag must be provided")
 	}
-	alpacaAPIKey := strings.TrimSpace(os.Getenv("ALPACA_API_KEY"))
-	if alpacaAPIKey == "" {
-		fmt.Println("ALPACA_API_KEY environment variable is required")
-		os.Exit(1)
+	if *alpacaApiKey == "" {
+		log.Fatalln("-alpaca.key flag must be provided")
 	}
 
-	db, err := pgxpool.Connect(context.Background(), databaseUrl)
+	db, err := pgxpool.Connect(context.Background(), *dbURL)
 	if err != nil {
-		fmt.Println("Failed to connect to DB:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to connect to DB:", err)
 	}
 
 	tradableSymbols, err := traderdb.GetStocksBySymbol(db)
 	if err != nil {
-		fmt.Println("Failed to query tradable stocks from DB:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to query tradable stocks from DB:", err)
 	}
 
 	httpClient := utils.NewHttpClient()
 	finvizClient := finviz.NewClient(httpClient)
 	gapStocks, err := finvizClient.ScreenStocksOverview("v=111&f=ta_gap_u7&ft=4&o=-gap")
 	if err != nil {
-		fmt.Println("Failed to screen for gap stocks:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to screen for gap stocks:", err)
 	}
 	tradableGapStocks := make([]finviz.StockOverview, 0, len(gapStocks))
 	for _, gapStock := range gapStocks {
 		if _, ok := tradableSymbols[gapStock.Symbol]; ok {
 			tradableGapStocks = append(tradableGapStocks, gapStock)
-			fmt.Printf("%+v\n", gapStock)
+			log.Printf("%+v\n", gapStock)
 		}
 	}
 
 	now := time.Now()
-	newsClient := newsapi.NewClient(httpClient, newsAPIKey)
+	newsClient := newsapi.NewClient(httpClient, *newsApiKey)
 
 	location, err := time.LoadLocation("America/New_York")
 	if err != nil {
-		fmt.Println("Failed to load location America/New_York:", err)
-		os.Exit(1)
+		log.Fatalln("Failed to load location America/New_York:", err)
 	}
 
 	startTime := utils.GetLastWeekday(now)
@@ -77,13 +72,12 @@ func main() {
 			PageSize:  10,
 		})
 		if err != nil {
-			fmt.Println("Failed to fetch news for stocks:", err)
-			os.Exit(1)
+			log.Fatalln("Failed to fetch news for stocks:", err)
 		}
 		for _, article := range response.Articles {
-			fmt.Println(article.Title)
-			fmt.Println("URL:", article.Url)
-			fmt.Println("Published At:", article.PublishedAt.In(location))
+			log.Println(article.Title)
+			log.Println("URL:", article.Url)
+			log.Println("Published At:", article.PublishedAt.In(location))
 		}
 	}
 }

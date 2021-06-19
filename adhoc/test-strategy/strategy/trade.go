@@ -3,7 +3,8 @@ package strategy
 import (
 	"fmt"
 	"time"
-	"tradingbot/lib/utils"
+
+	"github.com/t73liu/tradingbot/lib/utils"
 )
 
 type TradeType string

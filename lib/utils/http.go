@@ -2,15 +2,16 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"net"
 	"net/http"
 	"time"
 )
 
-// Use sensible defaults for timeouts for HTTP server
-func NewHttpServer(port string, handler *http.Handler) *http.Server {
+// NewHttpServer creates a http.Server with sensible timeouts
+func NewHttpServer(port int, handler *http.Handler) *http.Server {
 	return &http.Server{
-		Addr:              port,
+		Addr:              fmt.Sprintf(":%d", port),
 		ReadHeaderTimeout: 10 * time.Second,
 		ReadTimeout:       30 * time.Second,
 		WriteTimeout:      2 * time.Minute,
@@ -19,7 +20,7 @@ func NewHttpServer(port string, handler *http.Handler) *http.Server {
 	}
 }
 
-// Use sensible defaults for timeouts for HTTP client
+// NewHttpClient creates a http.Client with sensible timeouts
 func NewHttpClient() *http.Client {
 	return &http.Client{
 		Timeout: 15 * time.Second,
@@ -37,7 +38,7 @@ func NewHttpClient() *http.Client {
 	}
 }
 
-// Equivalent to http.Error but returns JSON instead of text/plain
+// JSONError similar to http.Error but returns application/json instead of text/plain
 func JSONError(w http.ResponseWriter, err error) {
 	SetJSONHeader(w)
 	w.Header().Set("X-Content-Type-Options", "nosniff")

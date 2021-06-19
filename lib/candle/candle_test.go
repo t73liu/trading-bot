@@ -3,7 +3,8 @@ package candle
 import (
 	"testing"
 	"time"
-	"tradingbot/lib/utils"
+
+	"github.com/t73liu/tradingbot/lib/utils"
 )
 
 func TestCompressCandles(t *testing.T) {
