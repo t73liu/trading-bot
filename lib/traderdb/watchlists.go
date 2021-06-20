@@ -205,6 +205,8 @@ func GetAllWatchlistStocks(db PGConnection) ([]Stock, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
+
 	var stockIDs []int
 	var stockID int
 	for rows.Next() {

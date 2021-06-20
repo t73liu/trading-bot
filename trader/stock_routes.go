@@ -15,7 +15,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type Detail struct {
+type detail struct {
 	Price         float64           `json:"price"`
 	Company       string            `json:"company"`
 	Website       *utils.NullString `json:"website"`
@@ -31,7 +31,7 @@ type Detail struct {
 	News          interface{}       `json:"news"`
 }
 
-type Snapshot struct {
+type snapshot struct {
 	Symbol         string    `json:"symbol"`
 	Company        string    `json:"company"`
 	Change         float64   `json:"change"`
@@ -44,7 +44,7 @@ type Snapshot struct {
 func (t *trader) getTradableStocks(w http.ResponseWriter, _ *http.Request) {
 	stocks, err := traderdb.GetTradableStocks(t.db)
 	if err != nil {
-		utils.JSONError(w, err)
+		utils.InternalServerError(w, err)
 		return
 	}
 	utils.JSONResponse(w, stocks)
@@ -54,15 +54,15 @@ func (t *trader) getStockInfo(w http.ResponseWriter, r *http.Request) {
 	symbol := getSymbol(r)
 	stock, err := traderdb.GetTradableStock(t.db, symbol)
 	if err != nil {
-		utils.JSONError(w, err)
+		utils.InternalServerError(w, err)
 		return
 	}
 	details, err := t.yahooClient.GetStock(symbol)
 	if err != nil {
-		utils.JSONError(w, err)
+		utils.InternalServerError(w, err)
 		return
 	}
-	utils.JSONResponse(w, Detail{
+	utils.JSONResponse(w, detail{
 		Price:         details.Price,
 		Company:       details.Company,
 		Website:       details.Website,
@@ -96,7 +96,7 @@ func (t *trader) getStockCharts(w http.ResponseWriter, r *http.Request) {
 		EndTime:    endTime,
 	})
 	if err != nil {
-		utils.JSONError(w, err)
+		utils.InternalServerError(w, err)
 	}
 	candles := make([]candle.Candle, 0, len(candlesResponse.Candles))
 	for _, bar := range candlesResponse.Candles {
@@ -149,7 +149,7 @@ func (t *trader) getStockOptions(w http.ResponseWriter, r *http.Request) {
 	symbol := getSymbol(r)
 	stockOptions, err := t.optionsClient.GetOptions(symbol)
 	if err != nil {
-		utils.JSONError(w, err)
+		utils.InternalServerError(w, err)
 		return
 	}
 	utils.JSONResponse(w, stockOptions)
@@ -161,13 +161,13 @@ const screenerQuery = "v=111&f=cap_midover,sh_curvol_o2000,sh_opt_option,sh_relv
 func (t *trader) getScreenedStocks(w http.ResponseWriter, _ *http.Request) {
 	screenedStocks, err := t.finvizClient.ScreenStocksOverview(screenerQuery)
 	if err != nil {
-		utils.JSONError(w, err)
+		utils.InternalServerError(w, err)
 		return
 	}
 	utils.JSONResponse(w, screenedStocks)
 }
 
-func (t *trader) AddStockRoutes(router *mux.Router) {
+func (t *trader) addStockRoutes(router *mux.Router) {
 	router.HandleFunc("", t.getTradableStocks).Methods("GET")
 	router.HandleFunc("/screened", t.getScreenedStocks).Methods("GET")
 	router.HandleFunc("/{symbol}", t.getStockInfo).Methods("GET")

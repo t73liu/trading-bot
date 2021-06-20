@@ -45,3 +45,22 @@ func GetUserWithEmail(db PGConnection, email string) (user User, err error) {
 	user.IsActive = isActive
 	return user, nil
 }
+
+const selectUserWithIDQuery = `
+SELECT email, password, is_active FROM users WHERE id = $1
+`
+
+func GetUserWithID(db PGConnection, id int) (user User, err error) {
+	var email string
+	var hashedPassword string
+	var isActive bool
+	row := db.QueryRow(context.Background(), selectUserWithIDQuery, email)
+	if err = row.Scan(&email, &hashedPassword, &isActive); err != nil {
+		return user, err
+	}
+	user.ID = id
+	user.Email = email
+	user.HashedPassword = hashedPassword
+	user.IsActive = isActive
+	return user, nil
+}

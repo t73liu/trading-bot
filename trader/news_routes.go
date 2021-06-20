@@ -12,9 +12,10 @@ import (
 
 func (t *trader) getTopHeadlines(w http.ResponseWriter, r *http.Request) {
 	queryValues := r.URL.Query()
+	userID := getContextUserID(r)
 	newsSourceIDs, err := traderdb.GetNewsSourceIDsWithUserID(t.db, userID)
 	if err != nil {
-		utils.JSONError(w, err)
+		utils.InternalServerError(w, err)
 		return
 	}
 	data, err := t.newsClient.GetTopHeadlinesWithSources(
@@ -24,22 +25,23 @@ func (t *trader) getTopHeadlines(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		utils.JSONError(w, err)
+		utils.InternalServerError(w, err)
 		return
 	}
 	utils.JSONResponse(w, data)
 }
 
-func (t *trader) getUserNewsSources(w http.ResponseWriter, _ *http.Request) {
+func (t *trader) getUserNewsSources(w http.ResponseWriter, r *http.Request) {
+	userID := getContextUserID(r)
 	data, err := traderdb.GetNewsSourcesWithUserID(t.db, userID)
 	if err != nil {
-		utils.JSONError(w, err)
+		utils.InternalServerError(w, err)
 		return
 	}
 	utils.JSONResponse(w, data)
 }
 
-func (t *trader) AddNewsRoutes(router *mux.Router) {
+func (t *trader) addNewsRoutes(router *mux.Router) {
 	router.HandleFunc("/headlines", t.getTopHeadlines).Methods("GET")
 	router.HandleFunc("/sources/active", t.getUserNewsSources).Methods("GET")
 }
