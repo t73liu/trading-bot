@@ -8,8 +8,9 @@ import Stocks from "./stocks/Stocks";
 import StockPage from "./stocks/StockPage";
 import Layout from "./Layout";
 import NotFound from "./NotFound";
-import { TitleProvider } from "../state/title-context";
 import Watchlists from "./account/Watchlists";
+import Login from "./account/Login";
+import { TitleProvider } from "../state/title-context";
 import { fetchStocksThunk } from "../state/stocks";
 
 const App = () => {
@@ -32,6 +33,9 @@ const App = () => {
               </Route>
               <Route exact path="/watchlists">
                 <Watchlists />
+              </Route>
+              <Route exact path="/login">
+                <Login />
               </Route>
               <Route exact path="/">
                 <Market />

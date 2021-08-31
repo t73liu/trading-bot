@@ -150,6 +150,7 @@ func newTrader(conf *config) *trader {
 
 	t.sessionStore = sessions.NewCookieStore([]byte(conf.sessionKey))
 	t.sessionStore.MaxAge(int(12 * time.Hour / time.Second))
+	t.sessionStore.Options.SameSite = http.SameSiteStrictMode
 
 	// Initialize 3rd party API clients
 	client := utils.NewHttpClient()

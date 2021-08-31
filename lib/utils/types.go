@@ -13,7 +13,7 @@ func (ns *NullString) Value() string {
 	return ns.String
 }
 
-func (ns *NullString) MarshalJSON() ([]byte, error) {
+func (ns NullString) MarshalJSON() ([]byte, error) {
 	if ns.Valid {
 		return json.Marshal(ns.String)
 	}
@@ -26,7 +26,7 @@ func (ns *NullString) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	ns.Valid = value != nil
-	if value != nil {
+	if ns.Valid {
 		ns.String = *value
 	}
 	return nil
@@ -36,7 +36,7 @@ type NullBool struct {
 	sql.NullBool
 }
 
-func (nb *NullBool) MarshalJSON() ([]byte, error) {
+func (nb NullBool) MarshalJSON() ([]byte, error) {
 	if nb.Valid {
 		return json.Marshal(nb.Bool)
 	}
@@ -49,7 +49,7 @@ func (nb *NullBool) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	nb.Valid = value != nil
-	if value != nil {
+	if nb.Valid {
 		nb.Bool = *value
 	}
 	return nil
@@ -81,7 +81,7 @@ type NullFloat64 struct {
 	sql.NullFloat64
 }
 
-func (nf *NullFloat64) MarshalJSON() ([]byte, error) {
+func (nf NullFloat64) MarshalJSON() ([]byte, error) {
 	if nf.Valid {
 		return json.Marshal(nf.Float64)
 	}
@@ -94,7 +94,7 @@ func (nf *NullFloat64) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	nf.Valid = value != nil
-	if value != nil {
+	if nf.Valid {
 		nf.Float64 = *value
 	}
 	return nil
@@ -126,7 +126,7 @@ type NullInt64 struct {
 	sql.NullInt64
 }
 
-func (ni *NullInt64) MarshalJSON() ([]byte, error) {
+func (ni NullInt64) MarshalJSON() ([]byte, error) {
 	if ni.Valid {
 		return json.Marshal(ni.Int64)
 	}
@@ -176,7 +176,7 @@ func (md *MicroDollar) Dollar() float64 {
 	return RoundToTwoDecimals(MicrosToDollars(md.Int64))
 }
 
-func (md *MicroDollar) MarshalJSON() ([]byte, error) {
+func (md MicroDollar) MarshalJSON() ([]byte, error) {
 	if md.Valid {
 		// Rounding introduces display issues for low values (e.g. MACD)
 		return json.Marshal(MicrosToDollars(md.Int64))
