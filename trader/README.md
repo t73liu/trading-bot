@@ -4,7 +4,7 @@
 
 - Serving UI static assets in production
 - Handling UI API calls
-- Updating DB with latest stock/crypto info
+- Updating DB with the latest stock/crypto trades
 
 ### Prerequisites
 

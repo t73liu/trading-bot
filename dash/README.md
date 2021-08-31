@@ -5,7 +5,7 @@ This is a dashboard for visualizing trades and account balances.
 ## Prerequisites
 
 `trader` and `traderdb` must be setup prior to running `dash`. Instructions can
-be found on the respective READMEs.
+be found in the respective READMEs.
 
 ## Development
 
