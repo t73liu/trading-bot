@@ -1,4 +1,4 @@
-## Technical Analysis
+# Technical Analysis
 
 Go module containing common technical analysis indicators.
 

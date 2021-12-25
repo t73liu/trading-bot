@@ -1,4 +1,4 @@
-## News API
+# News API
 
 Go client for [News API](https://newsapi.org/).
 

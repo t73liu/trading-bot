@@ -1,7 +1,8 @@
 CREATE TABLE IF NOT EXISTS watchlists (
   id SERIAL PRIMARY KEY,
+  external_id TEXT UNIQUE NOT NULL,
   user_id INTEGER REFERENCES users(id) NOT NULL,
-  name text NOT NULL
+  name TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS watchlist_stocks (

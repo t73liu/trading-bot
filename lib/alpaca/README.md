@@ -1,4 +1,4 @@
-## Alpaca API
+# Alpaca API
 
 Go client for [Alpaca v2](https://alpaca.markets/).
 

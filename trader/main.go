@@ -34,7 +34,7 @@ type config struct {
 
 type trader struct {
 	conf          *config
-	handler       *http.Handler
+	handler       http.Handler
 	sessionStore  *sessions.CookieStore
 	logger        *zap.SugaredLogger
 	db            *pgxpool.Pool
@@ -175,12 +175,13 @@ func newTrader(conf *config) *trader {
 	t.addAuthRoutes(router)
 
 	apiRouter := router.PathPrefix("/api").Subrouter()
-	apiRouter.Use(t.requireAuthentication)
+	// apiRouter.Use(t.requireAuthentication)
 	t.addNewsRoutes(apiRouter.PathPrefix("/news").Subrouter())
 	t.addStockRoutes(apiRouter.PathPrefix("/stocks").Subrouter())
 	t.addAccountRoutes(apiRouter.PathPrefix("/account").Subrouter())
 
 	router.PathPrefix("/").Handler(http.HandlerFunc(t.spaHandler))
+	t.handler = router
 	return t
 }
 

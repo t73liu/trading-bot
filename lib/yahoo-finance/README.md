@@ -1,4 +1,4 @@
-## Yahoo Finance
+# Yahoo Finance
 
 Scrape Yahoo Finance to fetch upcoming events and stock details:
 

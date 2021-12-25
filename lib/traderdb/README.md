@@ -1,4 +1,4 @@
-## Trader DB
+# Trader DB
 
 Go module containing common `traderdb` queries and models.
 

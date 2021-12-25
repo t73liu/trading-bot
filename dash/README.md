@@ -1,4 +1,4 @@
-## Dash
+# Dash
 
 This is a dashboard for visualizing trades and account balances.
 
@@ -9,11 +9,11 @@ be found in the respective READMEs.
 
 ## Development
 
-The UI is built with React and CLI instructions can be found in [CRA.md](CRA.md).
+The UI was bootstrapped with [create-react-app] and can be shared via ngrok:
 
-The UI can be shared via ngrok:
-
-```sh
+```bash
 # Open http://localhost:4040 for ngrok UI and inspect traffic
 ngrok http --host-header=rewrite 3000
 ```
+
+[create-react-app]: https://create-react-app.dev/

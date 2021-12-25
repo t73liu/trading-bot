@@ -1,4 +1,4 @@
-## Binance API
+# Binance API
 
 Go client for [Binance](https://www.binance.com/en).
 

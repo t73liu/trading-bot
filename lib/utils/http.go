@@ -12,14 +12,14 @@ import (
 type ContextKey string
 
 // NewHttpServer creates a http.Server with sensible timeouts
-func NewHttpServer(port int, handler *http.Handler) *http.Server {
+func NewHttpServer(port int, handler http.Handler) *http.Server {
 	return &http.Server{
 		Addr:              fmt.Sprintf(":%d", port),
 		ReadHeaderTimeout: 10 * time.Second,
 		ReadTimeout:       30 * time.Second,
 		WriteTimeout:      time.Minute,
 		IdleTimeout:       time.Minute,
-		Handler:           *handler,
+		Handler:           handler,
 	}
 }
 

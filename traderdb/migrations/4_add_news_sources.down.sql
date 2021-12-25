@@ -1,2 +1,0 @@
-DROP TABLE IF EXISTS news_sources CASCADE;
-DROP TABLE IF EXISTS user_news_sources CASCADE;

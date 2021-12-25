@@ -1,4 +1,4 @@
-## FinViz API
+# FinViz API
 
 Scrape FinViz overview table by providing query string.
 

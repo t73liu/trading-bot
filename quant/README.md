@@ -1,4 +1,4 @@
-## Quant
+# Quant
 
 This directory contains machine learning models and trading strategies.
 
@@ -22,7 +22,7 @@ This directory contains machine learning models and trading strategies.
 
 Tensorflow can be installed locally or be used via Docker.
 
-```shell
+```bash
 # Pull Tensorflow image
 docker pull tensorflow/tensorflow:latest-jupyter
 
@@ -39,6 +39,6 @@ docker logs quant
 # Access shell
 docker exec -it quant sh
 
-## Install required dependencies
+# Install required dependencies
 docker exec -it pip install -r requirements.txt
 ```

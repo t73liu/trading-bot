@@ -1,6 +1,6 @@
-## Trading Bot
+# Trading Bot
 
-### Features (WIP)
+## Features (WIP)
 
 - [x] Fetch news from [News API](https://newsapi.org/)
 - [ ] Live and paper stock trading with [Alpaca](https://alpaca.markets/)
@@ -8,7 +8,7 @@
 
 **Note:** Functionality requires setting up API keys with corresponding services.
 
-### Getting Started
+## Getting Started
 
 This repository is divided into the following sections:
 
@@ -22,13 +22,13 @@ This repository is divided into the following sections:
 
 This directory will be referred to by the `TRADING_BOT_REPO` environment variable.
 
-### Technologies
+## Technologies
 
-- [Go 1.16](https://golang.org/)
-- [Node 14](https://nodejs.org/en/)
+- [Go 1.17](https://go.dev/)
+- [Node 16](https://nodejs.org/en/)
 - [PostgreSQL 12](https://www.postgresql.org/)
 - [Python 3.8](https://www.python.org/)
-- [React 16.13](https://reactjs.org/)
+- [React 17](https://reactjs.org/)
 - [TensorFlow 2](https://www.tensorflow.org/)
 - [Terraform 1](https://www.terraform.io/)
-- [Yarn 1.22](https://classic.yarnpkg.com/lang/en/)
+- [Yarn 1](https://classic.yarnpkg.com/lang/en/)
