@@ -22,10 +22,16 @@
     "react",
     "react-hooks",
     "import",
+    "simple-import-sort",
     "@typescript-eslint",
     "prettier"
   ],
-  "rules": {},
+  "rules": {
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error",
+    "sort-imports": "off",
+    "import/order": "off"
+  },
   "settings": {
     "import/resolver": {
       "typescript": {}
