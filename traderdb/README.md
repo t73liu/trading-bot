@@ -11,7 +11,7 @@ PostgreSQL database.
 
 ```bash
 # Pull the PostgreSQL docker image
-docker pull postgres:12-alpine
+docker pull postgres:14-alpine
 
 # Run the PostgreSQL docker (Windows: Run with PowerShell without backslashes).
 docker run --detach \
@@ -19,7 +19,7 @@ docker run --detach \
  --env POSTGRES_PASSWORD=test \
  --volume $HOME/pgdata/:/var/lib/postgresql/data \
  --publish 5432:5432 \
- postgres:12-alpine
+ postgres:14-alpine
  
 # Create PostgreSQL DB
 docker exec -it traderdb createdb --username=postgres traderdb
@@ -27,6 +27,8 @@ docker exec -it traderdb createdb --username=postgres traderdb
 # Access PSQL CLI
 docker exec -it traderdb psql --username=postgres traderdb
 ```
+
+CREATE DATABASE traderdb;
 
 Use the corresponding Go scripts in order to populate the DB:
 - `stocks`: `${TRADING_BOT_REPO}/jobs/populate-stocks/main.go`

@@ -1,31 +1,33 @@
 # Build trader
-FROM golang:1.14-alpine AS trader-builder
+FROM golang:1.18-alpine AS trader-builder
 
-WORKDIR ${GOPATH}/src/trading-bot/trader/
+WORKDIR ${TRADING_BOT_REPO}/trader/
 
-COPY ../../trader .
+COPY . .
 
 RUN go mod download
-RUN go mod verify
 
 # Creates a static build: https://golang.org/cmd/link/
 # Deprecate after: https://github.com/golang/go/issues/26492
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
   -ldflags='-s -w -extldflags "-static"' -a \
-  -o /trader .
+  -o /go/bin/trader
 
 # Build dash
 FROM node:lts-alpine AS dash-builder
 
-COPY ../../dash .
+WORKDIR ${TRADING_BOT_REPO}/dash/
 
-RUN yarn install
-RUN yarn run build
+COPY . .
+
+RUN npm install -g pnpm
+RUN pnpm install
+RUN pnpm run build
 
 # Build image
-FROM gcr.io/distroless/static-debian10:nonroot
+FROM gcr.io/distroless/static-debian11
 
-COPY --from=dash-builder build /static
-COPY --from=trader-builder /trader /
+COPY --from=dash-builder dist /static
+COPY --from=trader-builder /go/bin/trader /
 
 ENTRYPOINT ["/trader"]

@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  traderdb:
+    image: postgres:14-alpine
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: traderdb
+    volumes:
+      - ${HOME}/pgdata:/var/lib/postgresql/data
+  quant:
+    image: tensorflow/tensorflow:latest-jupyter
+    restart: always
+    ports:
+      - 8888:8888
+    depends_on:
+      - "traderdb"
+    volumes:
+      - ${TRADING_BOT_REPO}/quant:/tf

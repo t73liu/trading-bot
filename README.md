@@ -24,11 +24,11 @@ This directory will be referred to by the `TRADING_BOT_REPO` environment variabl
 
 ## Technologies
 
-- [Go 1.17](https://go.dev/)
-- [Node 16](https://nodejs.org/en/)
-- [PostgreSQL 12](https://www.postgresql.org/)
+- [Docker](https://docs.docker.com/get-docker/)
+- [Go 1.18](https://go.dev/)
+- [Node 16](https://nodejs.org/)
+- [PostgreSQL 14](https://www.postgresql.org/)
 - [Python 3.8](https://www.python.org/)
-- [React 17](https://reactjs.org/)
+- [React 18](https://reactjs.org/)
 - [TensorFlow 2](https://www.tensorflow.org/)
-- [Terraform 1](https://www.terraform.io/)
-- [Yarn 1](https://classic.yarnpkg.com/lang/en/)
+- [pnpm](https://pnpm.io/)
