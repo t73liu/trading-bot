@@ -24,7 +24,7 @@ mv ${TRADING_BOT_REPO}/dash/build ${TRADING_BOT_REPO}/trader/assets
 
 `trader` can be configured with the following flags:
 
-- `-db.url` (e.g. `postgres://postgres:test@localhost:5432/traderdb?sslmode=disable`)
+- `-db.url` (e.g. `postgres://trader:test@localhost:5432/traderdb?sslmode=disable`)
 - `-alpaca.key`: Use the paper trading API key during development
 - `-alpaca.secret`: Use the paper trading API secret during development
 - `-news.key`

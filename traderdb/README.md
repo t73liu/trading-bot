@@ -20,12 +20,11 @@ docker run --detach \
  --volume $HOME/pgdata/:/var/lib/postgresql/data \
  --publish 5432:5432 \
  postgres:14-alpine
- 
-# Create PostgreSQL DB
-docker exec -it traderdb createdb --username=postgres traderdb
 
 # Access PSQL CLI
-docker exec -it traderdb psql --username=postgres traderdb
+docker exec -it traderdb psql --username=postgres
+# CREATE ROLE trader WITH LOGIN PASSWORD 'test';
+# CREATE DATABASE traderdb; 
 ```
 
 CREATE DATABASE traderdb;
@@ -46,12 +45,12 @@ go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@lat
 # Example migrating local DB with user = "postgres" and password = "test"
 cd ${TRADING_BOT_REPO}
 migrate -path traderdb/migrations \
- -database "postgres://postgres:test@localhost:5432/traderdb?sslmode=disable" \
+ -database "postgres://trader:test@localhost:5432/traderdb?sslmode=disable" \
  up 1
 
 # Fix failed migration manually and force correct migration version number (e.g. 4)
 migrate -path traderdb/migrations \
- -database "postgres://postgres:test@localhost:5432/traderdb?sslmode=disable" \
+ -database "postgres://trader:test@localhost:5432/traderdb?sslmode=disable" \
  force 4
 ```
 
