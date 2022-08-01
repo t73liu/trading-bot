@@ -14,6 +14,7 @@ services:
   quant:
     image: tensorflow/tensorflow:latest-jupyter
     restart: always
+    dns: 8.8.8.8
     ports:
       - 8888:8888
     depends_on:

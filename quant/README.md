@@ -42,3 +42,7 @@ docker exec -it quant sh
 # Install required dependencies
 docker exec -it pip install -r requirements.txt
 ```
+
+## Data
+
+- https://www.macrotrends.net/stocks/charts/QQQ/invesco-qqq/stock-price-history
