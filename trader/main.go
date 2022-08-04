@@ -17,7 +17,7 @@ import (
 	"github.com/t73liu/tradingbot/lib/utils"
 	"github.com/t73liu/tradingbot/lib/yahoo-finance"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"go.uber.org/zap"
@@ -162,25 +162,32 @@ func newTrader(conf *config) *trader {
 	t.optionsClient = options.NewClient(client)
 
 	// Setup HTTP router
-	router := mux.NewRouter()
+	router := chi.NewRouter()
 	router.Use(
 		utils.PanicRecovery,
 		t.logRequests,
 		utils.SecureHeaders,
 	)
-	router.PathPrefix("/assets/").Handler(http.StripPrefix(
+	router.Handle("/assets/*", http.StripPrefix(
 		"/assets/",
 		http.FileServer(http.Dir("assets/")),
 	))
 	t.addAuthRoutes(router)
 
-	apiRouter := router.PathPrefix("/api").Subrouter()
-	// apiRouter.Use(t.requireAuthentication)
-	t.addNewsRoutes(apiRouter.PathPrefix("/news").Subrouter())
-	t.addStockRoutes(apiRouter.PathPrefix("/stocks").Subrouter())
-	t.addAccountRoutes(apiRouter.PathPrefix("/account").Subrouter())
+	router.Route("/api", func(apiRouter chi.Router) {
+		// apiRouter.Use(t.requireAuthentication)
+		apiRouter.Route("/news", func(newsRouter chi.Router) {
+			t.addNewsRoutes(newsRouter)
+		})
+		apiRouter.Route("/stocks", func(stocksRouter chi.Router) {
+			t.addStockRoutes(stocksRouter)
+		})
+		apiRouter.Route("/account", func(accountRouter chi.Router) {
+			t.addAccountRoutes(accountRouter)
+		})
+	})
 
-	router.PathPrefix("/").Handler(http.HandlerFunc(t.spaHandler))
+	router.Handle("/", http.HandlerFunc(t.spaHandler))
 	t.handler = router
 	return t
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/t73liu/tradingbot/lib/traderdb"
 	"github.com/t73liu/tradingbot/lib/utils"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 )
 
 func (t *trader) getTopHeadlines(w http.ResponseWriter, r *http.Request) {
@@ -41,7 +41,7 @@ func (t *trader) getUserNewsSources(w http.ResponseWriter, r *http.Request) {
 	utils.JSONResponse(w, data)
 }
 
-func (t *trader) addNewsRoutes(router *mux.Router) {
-	router.HandleFunc("/headlines", t.getTopHeadlines).Methods("GET")
-	router.HandleFunc("/sources/active", t.getUserNewsSources).Methods("GET")
+func (t *trader) addNewsRoutes(router chi.Router) {
+	router.Get("/headlines", t.getTopHeadlines)
+	router.Get("/sources/active", t.getUserNewsSources)
 }

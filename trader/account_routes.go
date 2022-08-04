@@ -9,7 +9,7 @@ import (
 	"github.com/t73liu/tradingbot/lib/traderdb"
 	"github.com/t73liu/tradingbot/lib/utils"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 )
 
 type watchlistRequestBody struct {
@@ -108,14 +108,13 @@ func (t *trader) createWatchlist(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (t *trader) addAccountRoutes(router *mux.Router) {
-	router.HandleFunc("/watchlists", t.getWatchlists).Methods("GET")
-	router.HandleFunc("/watchlists", t.createWatchlist).Methods("POST")
-	router.HandleFunc("/watchlists/{id}", t.updateWatchlist).Methods("PUT")
-	router.HandleFunc("/watchlists/{id}", t.deleteWatchlist).Methods("DELETE")
+func (t *trader) addAccountRoutes(router chi.Router) {
+	router.Get("/watchlists", t.getWatchlists)
+	router.Post("/watchlists", t.createWatchlist)
+	router.Put("/watchlists/{id}", t.updateWatchlist)
+	router.Delete("/watchlists/{id}", t.deleteWatchlist)
 }
 
 func getWatchlistID(r *http.Request) (int, error) {
-	vars := mux.Vars(r)
-	return strconv.Atoi(vars["id"])
+	return strconv.Atoi(chi.URLParam(r, "id"))
 }

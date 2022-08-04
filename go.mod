@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.0
-	github.com/gorilla/mux v1.8.0
+	github.com/go-chi/chi/v5 v5.0.7
 	github.com/gorilla/sessions v1.2.1
 	github.com/gorilla/websocket v1.5.0
 	github.com/jackc/pgconn v1.12.1

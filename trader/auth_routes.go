@@ -7,7 +7,7 @@ import (
 	"github.com/t73liu/tradingbot/lib/traderdb"
 	"github.com/t73liu/tradingbot/lib/utils"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/sessions"
 )
 
@@ -51,9 +51,9 @@ func (t *trader) logout(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (t *trader) addAuthRoutes(router *mux.Router) {
-	router.HandleFunc("/login", t.login).Methods("POST")
-	router.HandleFunc("/logout", t.logout).Methods("POST")
+func (t *trader) addAuthRoutes(router chi.Router) {
+	router.Post("/login", t.login)
+	router.Post("/logout", t.logout)
 }
 
 func (t *trader) getSessionUserID(r *http.Request) (int, bool) {

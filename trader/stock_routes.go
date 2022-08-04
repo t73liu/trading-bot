@@ -12,7 +12,7 @@ import (
 	"github.com/t73liu/tradingbot/lib/traderdb"
 	"github.com/t73liu/tradingbot/lib/utils"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 )
 
 type detail struct {
@@ -167,15 +167,14 @@ func (t *trader) getScreenedStocks(w http.ResponseWriter, _ *http.Request) {
 	utils.JSONResponse(w, screenedStocks)
 }
 
-func (t *trader) addStockRoutes(router *mux.Router) {
-	router.HandleFunc("", t.getTradableStocks).Methods("GET")
-	router.HandleFunc("/screened", t.getScreenedStocks).Methods("GET")
-	router.HandleFunc("/{symbol}", t.getStockInfo).Methods("GET")
-	router.HandleFunc("/{symbol}/charts", t.getStockCharts).Methods("GET")
-	router.HandleFunc("/{symbol}/options", t.getStockOptions).Methods("GET")
+func (t *trader) addStockRoutes(router chi.Router) {
+	router.Get("/", t.getTradableStocks)
+	router.Get("/screened", t.getScreenedStocks)
+	router.Get("/{symbol}", t.getStockInfo)
+	router.Get("/{symbol}/charts", t.getStockCharts)
+	router.Get("/{symbol}/options", t.getStockOptions)
 }
 
 func getSymbol(r *http.Request) string {
-	vars := mux.Vars(r)
-	return strings.ToUpper(vars["symbol"])
+	return strings.ToUpper(chi.URLParam(r, "symbol"))
 }
